@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d265ef77-c22a-4a3c-8824-cd6e41e3abc5" name="Default Changelist" comment="" />
+    <list default="true" id="d265ef77-c22a-4a3c-8824-cd6e41e3abc5" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assocentity.go" beforeDir="false" afterPath="$PROJECT_DIR$/assocentity.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assocentity_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/assocentity_test.go" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -9,15 +14,15 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/assocentity$TestMeasure_in_github_com_ndabAP_assocentity.out" NAME="TestMeasure in github.com/ndabAP/assocentity Coverage Results" MODIFIED="1544860079134" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="GoCoverage" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/assocentity$TestMeasure_in_github_com_ndabAP_assocentity.out" NAME="TestMeasure in github.com/ndabAP/assocentity Coverage Results" MODIFIED="1545721067590" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="GoCoverage" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/assocentity.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="32">
-              <caret line="47" column="9" selection-start-line="47" selection-start-column="9" selection-end-line="47" selection-end-column="9" />
+            <state relative-caret-position="2683">
+              <caret line="109" column="33" lean-forward="true" selection-start-line="109" selection-start-column="33" selection-end-line="109" selection-end-column="33" />
               <folding>
                 <element signature="e#21#47#0" expanded="true" />
               </folding>
@@ -28,8 +33,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/assocentity_test.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="224">
-              <caret line="9" column="32" selection-start-line="9" selection-start-column="32" selection-end-line="9" selection-end-column="32" />
+            <state relative-caret-position="1280">
+              <caret line="42" lean-forward="true" selection-start-line="42" selection-end-line="42" />
             </state>
           </provider>
         </entry>
@@ -53,6 +58,9 @@
     </dirStrings>
   </component>
   <component name="GOROOT" path="/usr/local/go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="GoLibraries">
     <option name="indexEntireGoPath" value="false" />
   </component>
@@ -63,8 +71,8 @@
         <option value="$PROJECT_DIR$/pkg/models/adjective.go" />
         <option value="$PROJECT_DIR$/pkg/models/word.go" />
         <option value="$PROJECT_DIR$/pkg/models/association.go" />
-        <option value="$PROJECT_DIR$/assocentity_test.go" />
         <option value="$PROJECT_DIR$/assocentity.go" />
+        <option value="$PROJECT_DIR$/assocentity_test.go" />
       </list>
     </option>
   </component>
@@ -73,12 +81,12 @@
     <option name="width" value="1056" />
     <option name="height" value="3840" />
   </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -89,89 +97,23 @@
             <path>
               <item name="assocentity" type="b2602c69:ProjectViewProjectNode" />
               <item name="assocentity" type="462c0819:PsiDirectoryNode" />
+              <item name="dicts" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="assocentity" type="b2602c69:ProjectViewProjectNode" />
+              <item name="assocentity" type="462c0819:PsiDirectoryNode" />
               <item name="pkg" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="assocentity" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-            </path>
-            <path>
-              <item name="assocentity" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Go Modules &lt;github.com/ndabAP/assocentity&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
-            </path>
-            <path>
-              <item name="assocentity" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Go Modules &lt;github.com/ndabAP/assocentity&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
-              <item name="gonum@v0.0.0-20181214184630-004553317c78" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="assocentity" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Go Modules &lt;github.com/ndabAP/assocentity&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
-              <item name="gonum@v0.0.0-20181214184630-004553317c78" type="462c0819:PsiDirectoryNode" />
-              <item name="graph" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="assocentity" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Go Modules &lt;github.com/ndabAP/assocentity&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
-              <item name="gonum@v0.0.0-20181214184630-004553317c78" type="462c0819:PsiDirectoryNode" />
-              <item name="graph" type="462c0819:PsiDirectoryNode" />
-              <item name="encoding" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="assocentity" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Go Modules &lt;github.com/ndabAP/assocentity&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
-              <item name="gonum@v0.0.0-20181214184630-004553317c78" type="462c0819:PsiDirectoryNode" />
-              <item name="graph" type="462c0819:PsiDirectoryNode" />
-              <item name="encoding" type="462c0819:PsiDirectoryNode" />
-              <item name="dot" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="assocentity" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Go Modules &lt;github.com/ndabAP/assocentity&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
-              <item name="gonum@v0.0.0-20181214184630-004553317c78" type="462c0819:PsiDirectoryNode" />
-              <item name="graph" type="462c0819:PsiDirectoryNode" />
-              <item name="graphs" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="assocentity" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Go Modules &lt;github.com/ndabAP/assocentity&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
-              <item name="gonum@v0.0.0-20181214184630-004553317c78" type="462c0819:PsiDirectoryNode" />
-              <item name="graph" type="462c0819:PsiDirectoryNode" />
-              <item name="simple" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="assocentity" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Go SDK 1.11.2" type="20ee2d1f:SyntheticLibraryElementNode" />
-            </path>
-            <path>
-              <item name="assocentity" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Go SDK 1.11.2" type="20ee2d1f:SyntheticLibraryElementNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="assocentity" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Go SDK 1.11.2" type="20ee2d1f:SyntheticLibraryElementNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="strings" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="DefaultGoTemplateProperty" value="Go File" />
+    <property name="GO_FMT" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="go.gopath.indexing.explicitly.defined" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
@@ -228,6 +170,27 @@
     <history-entry file="TestMeasure_in_github_com_ndabAP_assocentity - 2018.12.15 at 08h 47m 59s.xml">
       <configuration name="TestMeasure in github.com/ndabAP/assocentity" configurationId="GoTestRunConfiguration" />
     </history-entry>
+    <history-entry file="TestMeasure_in_github_com_ndabAP_assocentity - 2018.12.25 at 07h 57m 47s.xml">
+      <configuration name="TestMeasure in github.com/ndabAP/assocentity" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestMeasure_in_github_com_ndabAP_assocentity - 2018.12.25 at 07h 57m 51s.xml">
+      <configuration name="TestMeasure in github.com/ndabAP/assocentity" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestMeasure_in_github_com_ndabAP_assocentity - 2018.12.25 at 07h 57m 59s.xml">
+      <configuration name="TestMeasure in github.com/ndabAP/assocentity" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestMeasure_in_github_com_ndabAP_assocentity - 2018.12.25 at 07h 58m 05s.xml">
+      <configuration name="TestMeasure in github.com/ndabAP/assocentity" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestMeasure_in_github_com_ndabAP_assocentity - 2018.12.25 at 07h 58m 15s.xml">
+      <configuration name="TestMeasure in github.com/ndabAP/assocentity" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestMeasure_in_github_com_ndabAP_assocentity - 2018.12.25 at 07h 58m 26s.xml">
+      <configuration name="TestMeasure in github.com/ndabAP/assocentity" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestMeasure_in_github_com_ndabAP_assocentity - 2018.12.25 at 07h 58m 27s.xml">
+      <configuration name="TestMeasure in github.com/ndabAP/assocentity" configurationId="GoTestRunConfiguration" />
+    </history-entry>
   </component>
   <component name="ToolWindowManager">
     <frame x="3889" y="0" width="2111" height="3840" extended-state="6" />
@@ -236,17 +199,17 @@
       <window_info id="Favorites" order="1" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32984716" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.32984716" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32975584" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39978534" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="8" />
       <window_info anchor="bottom" id="Version Control" order="9" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="10" visible="true" weight="0.32984716" />
+      <window_info anchor="bottom" id="Terminal" order="10" weight="0.33002415" />
       <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
-      <window_info anchor="bottom" content_ui="combo" id="Project" order="12" weight="0.24939662" />
+      <window_info active="true" anchor="bottom" content_ui="combo" id="Project" order="12" visible="true" weight="0.24926214" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -262,13 +225,6 @@
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/dicts/adjectives" />
-    <entry file="file://$PROJECT_DIR$/dicts/stop-words">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-4396">
-          <caret line="39" column="2" lean-forward="true" selection-start-line="39" selection-start-column="2" selection-end-line="39" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/go.sum">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1440">
@@ -363,13 +319,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file:///usr/local/go/src/bytes/bytes.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="815">
-          <caret line="832" column="5" selection-start-line="832" selection-start-column="5" selection-end-line="832" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../../golang/pkg/mod/gonum.org/v1/gonum@v0.0.0-20181214184630-004553317c78/graph/encoding/dot/encode.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="997">
@@ -408,20 +357,48 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/assocentity.go">
+    <entry file="file://$PROJECT_DIR$/dicts/stop-words">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="32">
-          <caret line="47" column="9" selection-start-line="47" selection-start-column="9" selection-end-line="47" selection-end-column="9" />
-          <folding>
-            <element signature="e#21#47#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="1248">
+          <caret line="39" column="2" lean-forward="true" selection-start-line="39" selection-start-column="2" selection-end-line="39" selection-end-column="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/go/src/builtin/builtin.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="823">
+          <caret line="87" column="5" selection-start-line="87" selection-start-column="5" selection-end-line="87" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/go/src/bytes/bytes_decl.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="736">
+          <caret line="23" column="5" selection-start-line="23" selection-start-column="5" selection-end-line="23" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/go/src/bytes/bytes.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="823">
+          <caret line="266" column="5" selection-start-line="266" selection-start-column="5" selection-end-line="266" selection-end-column="5" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/assocentity_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="224">
-          <caret line="9" column="32" selection-start-line="9" selection-start-column="32" selection-end-line="9" selection-end-column="32" />
+        <state relative-caret-position="1280">
+          <caret line="42" lean-forward="true" selection-start-line="42" selection-end-line="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/assocentity.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2683">
+          <caret line="109" column="33" lean-forward="true" selection-start-line="109" selection-start-column="33" selection-end-line="109" selection-end-column="33" />
+          <folding>
+            <element signature="e#21#47#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

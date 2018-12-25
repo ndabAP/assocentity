@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	text      = []byte("Hello, my name is John Max. I'm the best human and I'm John.")
+	text      = []byte("Hello, my name is John Max. I'm the best human and I'm John. The real John Max, oh yes!")
 	blacklist = []string{"while", "is", "yes", ",", ".", "!", "?", ":", ";"}
 	whitelist = []string{"nice"}
 	entity    = "John Max"
@@ -31,8 +31,8 @@ func TestTraversableLatin(t *testing.T) {
 
 	traversable := TraversableLatin(text, f)
 
-	if len(traversable) != 12 {
-		t.Errorf("Traversable latin incorrect, got %d., want: %d.", len(traversable), 12)
+	if len(traversable) != 17 {
+		t.Errorf("Traversable latin incorrect, got %d., want: %d.", len(traversable), 17)
 	}
 }
 

@@ -3,6 +3,7 @@ package assocentity
 import (
 	"bytes"
 	"fmt"
+	"strings"
 )
 
 type Filter struct {
@@ -56,19 +57,22 @@ func TraversableLatin(text []byte, f *Filter) [][]byte {
 }
 
 func Graph(f *Filter, traversable [][]byte) bool {
-	entityb := []byte(f.entity)
+	entityb := []byte(strings.Replace(f.entity, string(f.separator), "", -1))
 
+	runes, flatt := 0, flatten(traversable)
 	for i, by := range traversable {
-		ok, last := index(i, traversable[i:], entityb, f.separator)
-		if ok {
-			fmt.Println(i)
-			fmt.Println(last)
+		if len(flatt) == runes {
+			break
 		}
 
-		if f.entity == string(by) {
+		if len(flatt[runes:]) >= len(entityb) &&
+			len(flatt[runes:runes+len(entityb)]) >= len(entityb)-1 &&
+			bytes.Equal(flatt[runes:runes+len(entityb)], entityb) {
 			leftwalker(i-1, traversable)
-			rightwalker(i+1, traversable)
+			//rightwalker(i+1, traversable)
 		}
+
+		runes += len(by)
 	}
 
 	return true
@@ -88,29 +92,10 @@ func rightwalker(index int, traversable [][]byte) {
 	}
 }
 
-func index(index int, traversable [][]byte, entityb []byte, separator []byte) (bool, int) {
-	t := make([][]byte, len(traversable) + 1)
-	copy(t, traversable)
-	t = append(t, separator)
-
-	flatt := reset(t, separator)
-
-	ok := true
-	i := len(entityb)
-	for i = range entityb {
-		if len(entityb) <= len(flatt) && entityb[i] != flatt[i] {
-			ok = false
-		}
-	}
-
-	return ok, i
-}
-
-func reset(traversable [][]byte, separator []byte) []byte {
+func flatten(traversable [][]byte) []byte {
 	f := make([]byte, 0)
 	for _, t := range traversable {
 		f = append(f, t...)
-		f = append(f, separator...)
 	}
 
 	return f
