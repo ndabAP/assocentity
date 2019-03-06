@@ -1,45 +1,67 @@
 package assocentity
 
 import (
+	"reflect"
 	"testing"
 )
 
-var (
-	text      = []byte("Hello, my name is John Max. I'm the best human and I'm John. The real John Max, oh yes!")
-	blacklist = []string{"while", "is", "yes", ",", ".", "!", "?", ":", ";"}
-	whitelist = []string{"nice"}
-	entity    = "John Max"
-	separator = []byte(" ")
-)
+func TestLatin_simpleOneWord(t *testing.T) {
+	text := "Hello, my name is Max Payne."
+	entity := "Max"
 
-func TestNewFilter(t *testing.T) {
-	f := NewFilter(blacklist, whitelist, entity, separator)
+	res := Latin(text, entity)
+	m := map[string]float64{
+		"Hello": 4,
+		"my":    3,
+		"name":  2,
+		"is":    1,
+		"Payne": 1,
+	}
 
-	if whitelist := len(f.whitelist); whitelist != 1 {
-		t.Errorf("Filter blacklist incorrect, got %d., want: %d.", whitelist, 1)
+	if !reflect.DeepEqual(res, m) {
+		t.Errorf("TestLatin_simpleOneWord: Not equal")
 	}
-	if blacklist := len(f.blacklist); blacklist != 9 {
-		t.Errorf("Filter blacklist incorrect, got %d., want: %d.", blacklist, 9)
+}
+func TestLatin_simpleTwoWords(t *testing.T) {
+	text := "Hello, my name is Max Payne."
+	entity := "Max Payne"
+
+	res := Latin(text, entity)
+	m := map[string]float64{
+		"Hello": 4,
+		"my":    3,
+		"name":  2,
+		"is":    1,
 	}
-	if f.entity != entity {
-		t.Errorf("Filter entities incorrect, got %s., want: %d.", f.entity, 1)
+
+	if !reflect.DeepEqual(res, m) {
+		t.Errorf("TestLatin_simpleTwoWords: Not equal")
 	}
 }
 
-func TestTraversableLatin(t *testing.T) {
-	f := NewFilter(blacklist, whitelist, entity, separator)
+func TestLatin_complexTwoWords(t *testing.T) {
+	text := "Max Payne. Hello, my name is Max Payne. I'm the best human and I'm Max. The real Max Payne, oh yes!"
+	entity := "Max Payne"
 
-	traversable := TraversableLatin(text, f)
-
-	if len(traversable) != 17 {
-		t.Errorf("Traversable latin incorrect, got %d., want: %d.", len(traversable), 17)
+	res := Latin(text, entity)
+	m := map[string]float64{
+		"Hello": 6.67,
+		"my":    6.33,
+		"name":  6,
+		"is":    5.67,
+		"I'm":   6.5,
+		"the":   6,
+		"best":  6.33,
+		"human": 6.67,
+		"and":   7,
+		"Max":   7.67,
+		"The":   8,
+		"real":  8.33,
+		"oh":    10.33,
+		"yes":   11.33,
 	}
-}
 
-func TestGraph(t *testing.T) {
-	f := NewFilter(blacklist, whitelist, entity, separator)
-
-	traversable := TraversableLatin(text, f)
-
-	Graph(f, traversable)
+	if !reflect.DeepEqual(res, m) {
+		t.Errorf("TestLatin_complexTwoWords: Not equal")
+	}
 }
