@@ -5,11 +5,46 @@ import (
 	"testing"
 )
 
-func TestLatin_simpleOneWord(t *testing.T) {
+func TestRomance_Empty(t *testing.T) {
+	text := "Hello world"
+	entity := "Bye"
+
+	res := Romance(text, entity)
+	if !reflect.DeepEqual(res, map[string]float64{}) {
+		t.Errorf("TestRomance_Empty: Not equal")
+	}
+}
+
+func TestRomance_Subset(t *testing.T) {
+	text := "Hello world"
+	entity := "Helloworld"
+
+	res := Romance(text, entity)
+	if !reflect.DeepEqual(res, map[string]float64{}) {
+		t.Errorf("TestRomance_Empty: Not equal")
+	}
+}
+
+func TestRomance_Start(t *testing.T) {
+	text := "Shang Tsung is my name."
+	entity := "Shang Tsung"
+
+	res := Romance(text, entity)
+	m := map[string]float64{
+		"is":   1,
+		"my":   2,
+		"name": 3,
+	}
+	if !reflect.DeepEqual(res, m) {
+		t.Errorf("TestRomance_Empty: Not equal")
+	}
+}
+
+func TestRomance_simpleOneWord(t *testing.T) {
 	text := "Hello, my name is Max Payne."
 	entity := "Max"
 
-	res := Latin(text, entity)
+	res := Romance(text, entity)
 	m := map[string]float64{
 		"Hello": 4,
 		"my":    3,
@@ -19,14 +54,14 @@ func TestLatin_simpleOneWord(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(res, m) {
-		t.Errorf("TestLatin_simpleOneWord: Not equal")
+		t.Errorf("TestRomance_simpleOneWord: Not equal")
 	}
 }
-func TestLatin_simpleTwoWords(t *testing.T) {
+func TestRomance_simpleTwoWords(t *testing.T) {
 	text := "Hello, my name is Max Payne."
 	entity := "Max Payne"
 
-	res := Latin(text, entity)
+	res := Romance(text, entity)
 	m := map[string]float64{
 		"Hello": 4,
 		"my":    3,
@@ -35,33 +70,49 @@ func TestLatin_simpleTwoWords(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(res, m) {
-		t.Errorf("TestLatin_simpleTwoWords: Not equal")
+		t.Errorf("TestRomance_simpleTwoWords: Not equal")
 	}
 }
 
-func TestLatin_complexTwoWords(t *testing.T) {
-	text := "Max Payne. Hello, my name is Max Payne. I'm the best human and I'm Max. The real Max Payne, oh yes!"
-	entity := "Max Payne"
+func TestRomance_simpleFourWords(t *testing.T) {
+	text := `If you smell, what Dwayne "The Rock" Johnson is cooking?`
+	entity := `Dwayne "The Rock" Johnson`
 
-	res := Latin(text, entity)
+	res := Romance(text, entity)
 	m := map[string]float64{
-		"Hello": 6.67,
-		"my":    6.33,
-		"name":  6,
-		"is":    5.67,
-		"I'm":   6.5,
-		"the":   6,
-		"best":  6.33,
-		"human": 6.67,
-		"and":   7,
-		"Max":   7.67,
-		"The":   8,
-		"real":  8.33,
-		"oh":    10.33,
-		"yes":   11.33,
+		"If":      4,
+		"you":     3,
+		"smell":   2,
+		"what":    1,
+		"is":      1,
+		"cooking": 2,
 	}
 
 	if !reflect.DeepEqual(res, m) {
-		t.Errorf("TestLatin_complexTwoWords: Not equal")
+		t.Errorf("TestRomance_simpleTwoWords: Not equal")
+	}
+}
+
+func TestRomance_complexTwoWords(t *testing.T) {
+	text := "Shao Kahn is the embodiment of evil. Shao Kahn is easily recognizable by his intimidating stature."
+	entity := "Shao Kahn"
+
+	res := Romance(text, entity)
+	m := map[string]float64{
+		"is":           3.75,
+		"the":          3,
+		"embodiment":   3,
+		"of":           3,
+		"evil":         3,
+		"easily":       5.5,
+		"recognizable": 6.5,
+		"by":           7.5,
+		"his":          8.5,
+		"intimidating": 9.5,
+		"stature":      10.5,
+	}
+
+	if !reflect.DeepEqual(res, m) {
+		t.Errorf("TestRomance_complexTwoWords: Not equal")
 	}
 }
