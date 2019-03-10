@@ -19,7 +19,7 @@ func tokenize(text string) []string {
 	for token := s.Scan(); token != scanner.EOF; token = s.Scan() {
 		isPunct := false
 		for _, r := range s.TokenText() {
-			if unicode.IsPunct(r) && r != unicodeapostrophe {
+			if unicode.IsPunct(r) && r != unicodeapostrophe && r != uncodedash {
 				isPunct = true
 			}
 		}
