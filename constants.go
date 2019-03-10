@@ -1,9 +1,8 @@
 package assocentity
 
 const (
-	unicodespace      = 32
 	unicodeapostrophe = 39
-	defaultsplit      = " "
+	uncodedash        = 45
 	escapedapos       = '\''
 	dashchar          = '-'
 )
