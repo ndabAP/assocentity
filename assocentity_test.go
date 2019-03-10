@@ -10,7 +10,7 @@ func TestRomance_SingleWord(t *testing.T) {
 		name   string
 		text   string
 		entity string
-		res    map[string]float64
+		want   map[string]float64
 	}{
 		{"empty", "Hello world", "Bye", map[string]float64{}},
 		{"subset", "Hello world", "Helloworld", map[string]float64{}},
@@ -27,8 +27,8 @@ func TestRomance_SingleWord(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			actual := Romance(test.text, test.entity)
-			if !reflect.DeepEqual(actual, test.res) {
-				t.Errorf("Romance(%v): expected %v, actual %v,", test.name, test.res, actual)
+			if !reflect.DeepEqual(actual, test.want) {
+				t.Errorf("Romance(%v): expected %v, actual %v,", test.name, test.want, actual)
 			}
 		})
 	}
@@ -39,7 +39,7 @@ func TestRomance_MultiWord(t *testing.T) {
 		name   string
 		text   string
 		entity string
-		res    map[string]float64
+		want   map[string]float64
 	}{
 		{"empty", "Hello world", "Bye", map[string]float64{}},
 		{"subset", "Hello world", "Helloworld", map[string]float64{}},
@@ -90,8 +90,71 @@ func TestRomance_MultiWord(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			actual := Romance(test.text, test.entity)
-			if !reflect.DeepEqual(actual, test.res) {
-				t.Errorf("Romance(%v): expected %v, actual %v,", test.name, test.res, actual)
+			if !reflect.DeepEqual(actual, test.want) {
+				t.Errorf("Romance(%v): expected %v, actual %v,", test.name, test.want, actual)
+			}
+		})
+	}
+}
+
+func Test_batch(t *testing.T) {
+	type args struct {
+		data []int
+		size int
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want [][]int
+	}{
+		{"data 4, size 1", args{[]int{1, 2, 3, 4}, 1}, [][]int{{1}, {2}, {3}, {4}}},
+		{"data 4, size 2", args{[]int{1, 2, 3, 4}, 2}, [][]int{{1, 2}, {3, 4}}},
+		{"data 4, size 3", args{[]int{1, 2, 3, 4}, 3}, [][]int{{1, 2, 3}, {4}}},
+		{"data 2, size 3", args{[]int{1, 2}, 3}, [][]int{{1, 2}}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := batch(tt.args.data, tt.args.size); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("batch() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_isSliceSubset(t *testing.T) {
+	type args struct {
+		data   []string
+		subset []string
+		index  int
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			"5 hits",
+			args{data: []string{"H", "e", "l", "l", "o"}, subset: []string{"H", "e", "l", "l", "o"}, index: 0},
+			true,
+		},
+		{
+			"0 hits",
+			args{data: []string{"H", "e", "l", "l", "o"}, subset: []string{"H"}, index: 1},
+			false,
+		},
+		{
+			"1 hit",
+			args{data: []string{"H", "e", "l", "l", "o"}, subset: []string{"e"}, index: 1},
+			true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isSliceSubset(tt.args.data, tt.args.subset, tt.args.index); got != tt.want {
+				t.Errorf("isSliceSubset() = %v, want %v", got, tt.want)
 			}
 		})
 	}
