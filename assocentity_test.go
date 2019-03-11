@@ -24,11 +24,10 @@ func TestRomance_SingleWord(t *testing.T) {
 		}},
 	}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			actual := Romance(test.text, test.entity)
-			if !reflect.DeepEqual(actual, test.want) {
-				t.Errorf("Romance(%v): expected %v, actual %v,", test.name, test.want, actual)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got, _ := Romance(tt.text, tt.entity); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Romance() = %v, want %v,", got, tt.want)
 			}
 		})
 	}
@@ -87,11 +86,10 @@ func TestRomance_MultiWord(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			actual := Romance(test.text, test.entity)
-			if !reflect.DeepEqual(actual, test.want) {
-				t.Errorf("Romance(%v): expected %v, actual %v,", test.name, test.want, actual)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got, _ := Romance(tt.text, tt.entity); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Romance() = %v, want %v,", got, tt.want)
 			}
 		})
 	}
@@ -155,6 +153,87 @@ func Test_isSliceSubset(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := isSliceSubset(tt.args.data, tt.args.subset, tt.args.index); got != tt.want {
 				t.Errorf("isSliceSubset() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_findEntityPos(t *testing.T) {
+	type args struct {
+		textSplit   []string
+		entitySplit []string
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want []int
+	}{
+		{"1 last hit", args{[]string{"Hello", "world"}, []string{"world"}}, []int{1}},
+		{"1 first hit", args{[]string{"Hello", "world"}, []string{"Hello"}}, []int{0}},
+		{"2 hits", args{[]string{"Hello", "world", "what's", "up"}, []string{"world", "what's"}}, []int{1, 2}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := findEntityPos(tt.args.textSplit, tt.args.entitySplit); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("findEntityPos() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_findWordPos(t *testing.T) {
+	type args struct {
+		textSplit       []string
+		entityPositions []int
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want map[string][]int
+	}{
+		{"0 hits", args{[]string{"Hello"}, []int{0}}, map[string][]int{}},
+		{"1 first hit", args{[]string{"Hello", "world"}, []int{0}}, map[string][]int{"world": []int{1}}},
+		{"1 last hit", args{[]string{"Hello", "world"}, []int{1}}, map[string][]int{"Hello": []int{0}}},
+		{"1 last hit", args{[]string{"Hello", "world", "what's", "up"}, []int{0, 1}}, map[string][]int{"what's": []int{2}, "up": []int{3}}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := findWordPos(tt.args.textSplit, tt.args.entityPositions); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("findWordPos() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_findWordEntityDist(t *testing.T) {
+	type args struct {
+		wordPositions          map[string][]int
+		batchedEntityPositions [][]int
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want map[string][]float64
+	}{
+		{
+			"1 word",
+			args{
+				map[string][]int{"Hello": {0}},
+				[][]int{{1}},
+			},
+			map[string][]float64{"Hello": []float64{1.0}},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := findWordEntityDist(tt.args.wordPositions, tt.args.batchedEntityPositions); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("findWordEntityDist() = %v, want %v", got, tt.want)
 			}
 		})
 	}

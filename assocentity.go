@@ -6,13 +6,41 @@ import (
 )
 
 // Romance accepts all Romance based languages.
-func Romance(text, entity string) map[string]float64 {
+func Romance(text, entity string) (map[string]float64, error) {
 	var textSplit []string
 	var entitySplit []string
 	textSplit = tokenize(text)
 	entitySplit = tokenize(entity)
 
 	// Find all entity positions as slice indices
+	var entityPositions []int
+	entityPositions = findEntityPos(textSplit, entitySplit)
+
+	// If entity is not present, return early
+	if len(entityPositions) == 0 {
+		return map[string]float64{}, ErrNoEntity
+	}
+
+	// Find word positions excluding entity
+	wordPositions := make(map[string][]int)
+	wordPositions = findWordPos(textSplit, entityPositions)
+
+	// Find distances between entity and words
+	batchedEntityPositions := batch(entityPositions, len(entitySplit))
+	distances := make(map[string][]float64)
+	distances = findWordEntityDist(wordPositions, batchedEntityPositions)
+
+	// Calculate the average distances
+	assocentity := make(map[string]float64)
+	for word, distances := range distances {
+		assocentity[word] = round(avg(distances))
+	}
+
+	return assocentity, nil
+}
+
+// Find entity indices
+func findEntityPos(textSplit, entitySplit []string) []int {
 	var entityPositions []int
 	for i := range textSplit {
 		if found := isSliceSubset(textSplit, entitySplit, i); found {
@@ -23,12 +51,11 @@ func Romance(text, entity string) map[string]float64 {
 		}
 	}
 
-	// If entity is not present, return early
-	if len(entityPositions) == 0 {
-		return map[string]float64{}
-	}
+	return entityPositions
+}
 
-	// Find word positions excluding entity
+// Find word indices excluding entity
+func findWordPos(textSplit []string, entityPositions []int) map[string][]int {
 	wordPositions := make(map[string][]int)
 	for i, word := range textSplit {
 		found := false
@@ -44,9 +71,12 @@ func Romance(text, entity string) map[string]float64 {
 		}
 	}
 
-	batchedEntityPositions := batch(entityPositions, len(entitySplit))
+	return wordPositions
+}
+
+// Find all distances between word and entity
+func findWordEntityDist(wordPositions map[string][]int, batchedEntityPositions [][]int) map[string][]float64 {
 	distances := make(map[string][]float64)
-	// Find distances between entity and words
 	for word, positions := range wordPositions {
 		for _, pos := range positions {
 			for _, batch := range batchedEntityPositions {
@@ -66,13 +96,7 @@ func Romance(text, entity string) map[string]float64 {
 		}
 	}
 
-	// Calculate the average distances
-	assocentity := make(map[string]float64)
-	for word, distances := range distances {
-		assocentity[word] = round(avg(distances))
-	}
-
-	return assocentity
+	return distances
 }
 
 // Checks if next elements of given slice equals antoher given slice
