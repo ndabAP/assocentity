@@ -113,6 +113,7 @@ func findEntityPositions(tokenizedText tokenized, tokenizedEntites []tokenized) 
 	return entityPositions
 }
 
+// Returns distances from entity to words.
 func findWordEntityDistances(wordPositions map[string][]int, entityPositions [][]int) map[string][]float64 {
 	wordDistances := make(map[string][]float64)
 	for word, positions := range wordPositions {
@@ -136,6 +137,7 @@ func findWordEntityDistances(wordPositions map[string][]int, entityPositions [][
 	return wordDistances
 }
 
+// Returns word indices.
 func findWordPositions(tokenizedText tokenized, entityPositions [][]int) map[string][]int {
 	wordPositions := make(map[string][]int)
 	for i, word := range tokenizedText {
