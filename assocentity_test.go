@@ -11,7 +11,7 @@ func TestEnglish(t *testing.T) {
 	type args struct {
 		text      string
 		entities  []string
-		tokenizer Tokenizer
+		tokenizer func(string) ([]string, error)
 	}
 	tests := []struct {
 		name    string

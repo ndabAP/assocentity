@@ -9,13 +9,12 @@ import (
 )
 
 type tokenized []string
-type Tokenizer func(string) ([]string, error)
 
-var ErrorNoEntityFound = errors.New("no entity was found inside text")
+var errorNoEntityFound = errors.New("no entity was found inside text")
 
 // Make accepts a text, entities including aliases and a tokenizer which
 // defaults to an English tokenizer.
-func Make(text string, entities []string, tokenizer Tokenizer) (map[string]float64, error) {
+func Make(text string, entities []string, tokenizer func(string) ([]string, error)) (map[string]float64, error) {
 	var tokenizedText tokenized
 	var tokenizedEntities []tokenized
 	var err error
@@ -54,7 +53,7 @@ func Make(text string, entities []string, tokenizer Tokenizer) (map[string]float
 
 	entityPositions := findEntityPositions(tokenizedText, tokenizedEntities)
 	if len(entityPositions) == 0 {
-		return nil, ErrorNoEntityFound
+		return nil, errorNoEntityFound
 	}
 	wordPositions := findWordPositions(tokenizedText, entityPositions)
 	wordsDistances := findWordEntityDistances(wordPositions, entityPositions)
