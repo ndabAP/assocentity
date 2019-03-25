@@ -1,126 +1,120 @@
+// Package assocentity returns the average distance from words to a given entity.
 package assocentity
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
-func TestRomance_SingleWord(t *testing.T) {
-	tests := []struct {
-		name   string
-		text   string
-		entity string
-		want   map[string]float64
-	}{
-		{"empty", "Hello world", "Bye", map[string]float64{}},
-		{"subset", "Hello world", "Helloworld", map[string]float64{}},
-		{"subset", "Hello world", "Helloworld", map[string]float64{}},
-		{"simple", "Hello, my name is Max Payne.", "Max", map[string]float64{
-			"Hello": 4,
-			"my":    3,
-			"name":  2,
-			"is":    1,
-			"Payne": 1,
-		}},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := Romance(tt.text, tt.entity); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Romance() = %v, want %v,", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestRomance_MultiWord(t *testing.T) {
-	tests := []struct {
-		name   string
-		text   string
-		entity string
-		want   map[string]float64
-	}{
-		{"empty", "Hello world", "Bye", map[string]float64{}},
-		{"subset", "Hello world", "Helloworld", map[string]float64{}},
-		{"start", "Shang Tsung is my name.", "Shang Tsung", map[string]float64{
-			"is":   1,
-			"my":   2,
-			"name": 3,
-		}},
-		{"simple", "Hello, my name is Max Payne.", "Max Payne", map[string]float64{
-			"Hello": 4,
-			"my":    3,
-			"name":  2,
-			"is":    1,
-		}},
-		{
-			"inline",
-			`If you smell, what Dwayne "The Rock" Johnson is cooking?`,
-			`Dwayne "The Rock" Johnson`,
-			map[string]float64{
-				"If":      4,
-				"you":     3,
-				"smell":   2,
-				"what":    1,
-				"is":      1,
-				"cooking": 2,
-			},
-		},
-		{
-			"inline multi",
-			`Shao Kahn is the embodiment of evil. Shao Kahn is easily recognizable by his intimidating stature.`,
-			"Shao Kahn",
-			map[string]float64{
-				"is":           3.75,
-				"the":          3,
-				"embodiment":   3,
-				"of":           3,
-				"evil":         3,
-				"easily":       5.5,
-				"recognizable": 6.5,
-				"by":           7.5,
-				"his":          8.5,
-				"intimidating": 9.5,
-				"stature":      10.5,
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := Romance(tt.text, tt.entity); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Romance() = %v, want %v,", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_batch(t *testing.T) {
+func TestEnglish(t *testing.T) {
 	type args struct {
-		data []int
-		size int
+		text      string
+		entities  []string
+		tokenizer Tokenizer
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    map[string]float64
+		wantErr bool
+	}{
+		{
+			"No aliases",
+			args{
+				"The quick brown fox jumps over the lazy dog. It seems that this fox has nothing to loose.",
+				[]string{"fox"},
+				nil,
+			},
+			map[string]float64{
+				"The":     8.5,
+				"quick":   7.5,
+				"brown":   6.5,
+				"jumps":   5.5,
+				"over":    5.5,
+				"the":     5.5,
+				"lazy":    5.5,
+				"dog":     5.5,
+				".":       8,
+				"It":      5.5,
+				"seems":   5.5,
+				"that":    5.5,
+				"this":    5.5,
+				"has":     6.5,
+				"nothing": 7.5,
+				"to":      8.5,
+				"loose":   9.5,
+			},
+			false,
+		},
+		{
+			"Aliases",
+			args{
+				"The quick brown fox jumps over the lazy dog. It seems that this fox has nothing to loose.",
+				[]string{"brown fox", "fox"},
+				nil,
+			},
+			map[string]float64{
+				"seems":   5.5,
+				"has":     6.5,
+				"It":      5.5,
+				".":       8,
+				"nothing": 7.5,
+				"the":     5.5,
+				"to":      8.5,
+				"dog":     5.5,
+				"The":     8,
+				"over":    5.5,
+				"jumps":   5.5,
+				"that":    5.5,
+				"lazy":    5.5,
+				"loose":   9.5,
+				"this":    5.5,
+				"quick":   7,
+			},
+			false,
+		},
+		{
+			"Error: Entity not found",
+			args{
+				"The quick brown fox jumps over the lazy dog. It seems that this fox has nothing to loose.",
+				[]string{"cat"},
+				nil,
+			},
+			nil,
+			true,
+		},
+		{
+			"Custom tokenizer",
+			args{
+				"Hello, world",
+				[]string{"world"},
+				func(text string) ([]string, error) {
+					return strings.Split(strings.Replace(text, " ", "", -1), ","), nil
+				},
+			},
+			map[string]float64{
+				"Hello": 1,
+			},
+			false,
+		},
 	}
 
-	tests := []struct {
-		name string
-		args args
-		want [][]int
-	}{
-		{"data 4, size 1", args{[]int{1, 2, 3, 4}, 1}, [][]int{{1}, {2}, {3}, {4}}},
-		{"data 4, size 2", args{[]int{1, 2, 3, 4}, 2}, [][]int{{1, 2}, {3, 4}}},
-		{"data 4, size 3", args{[]int{1, 2, 3, 4}, 3}, [][]int{{1, 2, 3}, {4}}},
-		{"data 2, size 3", args{[]int{1, 2}, 3}, [][]int{{1, 2}}},
-	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := batch(tt.args.data, tt.args.size); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("batch() = %v, want %v", got, tt.want)
+			got, err := Make(tt.args.text, tt.args.entities, tt.args.tokenizer)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Make() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Make() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_isSliceSubset(t *testing.T) {
+func TestIsSliceSubset(t *testing.T) {
 	type args struct {
 		data   []string
 		subset []string
@@ -133,11 +127,6 @@ func Test_isSliceSubset(t *testing.T) {
 		want bool
 	}{
 		{
-			"5 hits",
-			args{data: []string{"H", "e", "l", "l", "o"}, subset: []string{"H", "e", "l", "l", "o"}, index: 0},
-			true,
-		},
-		{
 			"0 hits",
 			args{data: []string{"H", "e", "l", "l", "o"}, subset: []string{"H"}, index: 1},
 			false,
@@ -145,6 +134,11 @@ func Test_isSliceSubset(t *testing.T) {
 		{
 			"1 hit",
 			args{data: []string{"H", "e", "l", "l", "o"}, subset: []string{"e"}, index: 1},
+			true,
+		},
+		{
+			"5 hits",
+			args{data: []string{"H", "e", "l", "l", "o"}, subset: []string{"H", "e", "l", "l", "o"}, index: 0},
 			true,
 		},
 	}
@@ -158,82 +152,20 @@ func Test_isSliceSubset(t *testing.T) {
 	}
 }
 
-func Test_findEntityPos(t *testing.T) {
-	type args struct {
-		textSplit   []string
-		entitySplit []string
-	}
-
+func TestAverage(t *testing.T) {
 	tests := []struct {
 		name string
-		args args
-		want []int
+		args []float64
+		want float64
 	}{
-		{"1 last hit", args{[]string{"Hello", "world"}, []string{"world"}}, []int{1}},
-		{"1 first hit", args{[]string{"Hello", "world"}, []string{"Hello"}}, []int{0}},
-		{"2 hits", args{[]string{"Hello", "world", "what's", "up"}, []string{"world", "what's"}}, []int{1, 2}},
+		{"Average of 1, 2, 3", []float64{1, 2, 3}, 2},
+		{"Average of 3, 2, 1", []float64{3, 2, 1}, 2},
+		{"Average of 1", []float64{1}, 1},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := findEntityPos(tt.args.textSplit, tt.args.entitySplit); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("findEntityPos() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_findWordPos(t *testing.T) {
-	type args struct {
-		textSplit       []string
-		entityPositions []int
-	}
-
-	tests := []struct {
-		name string
-		args args
-		want map[string][]int
-	}{
-		{"0 hits", args{[]string{"Hello"}, []int{0}}, map[string][]int{}},
-		{"1 first hit", args{[]string{"Hello", "world"}, []int{0}}, map[string][]int{"world": []int{1}}},
-		{"1 last hit", args{[]string{"Hello", "world"}, []int{1}}, map[string][]int{"Hello": []int{0}}},
-		{"1 last hit", args{[]string{"Hello", "world", "what's", "up"}, []int{0, 1}}, map[string][]int{"what's": []int{2}, "up": []int{3}}},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := findWordPos(tt.args.textSplit, tt.args.entityPositions); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("findWordPos() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_findWordEntityDist(t *testing.T) {
-	type args struct {
-		wordPositions          map[string][]int
-		batchedEntityPositions [][]int
-	}
-
-	tests := []struct {
-		name string
-		args args
-		want map[string][]float64
-	}{
-		{
-			"1 word",
-			args{
-				map[string][]int{"Hello": {0}},
-				[][]int{{1}},
-			},
-			map[string][]float64{"Hello": []float64{1.0}},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := findWordEntityDist(tt.args.wordPositions, tt.args.batchedEntityPositions); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("findWordEntityDist() = %v, want %v", got, tt.want)
+			if got := average(tt.args); got != tt.want {
+				t.Errorf("average() = %v, want %v", got, tt.want)
 			}
 		})
 	}
