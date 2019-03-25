@@ -9,7 +9,7 @@
 ## Installation
 
 ```bash
-$ go get github.com/ndabAP/assocentity
+$ go get github.com/ndabAP/assocentity/v2
 ```
 
 ## API
@@ -21,11 +21,17 @@ Make(text string, entities []string, tokenizer Tokenizer) (map[string]float64, e
 ## Usage
 
 ```go
-import "github.com/ndabAP/assocentity"
+import (
+    "fmt"
+
+    "github.com/ndabAP/assocentity"
+)
 
 func main() {
     text := "The quick brown fox jumps over the lazy dog"
-    res := assocentity.Make(text, []string{"fox"}, nil)
+    res, _ := assocentity.Make(text, []string{"fox"}, nil)
+    
+    fmt.Println(res)
 }
 
 ```
