@@ -1,9 +1,11 @@
 # assocentity
 
+Package assocentity returns the average distance from words to a given entity.
+
 ## Features
 
-- Calculates the distance between an entity and words
-- accepts a custom tokenizer
+- Accepts a custom tokenizer
+- pass aliases to entity
 - provides a default tokenzier
 
 ## Installation
@@ -30,7 +32,7 @@ import (
 func main() {
     text := "The quick brown fox jumps over the lazy dog"
     res, _ := assocentity.Make(text, []string{"fox"}, nil)
-    
+
     fmt.Println(res)
 }
 
