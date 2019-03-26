@@ -26,7 +26,7 @@ Make(text string, entities []string, tokenizer func(string) ([]string, error)) (
 import (
     "fmt"
 
-    "github.com/ndabAP/assocentity"
+    "github.com/ndabAP/assocentity/v2"
 )
 
 func main() {
