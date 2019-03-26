@@ -16,7 +16,7 @@ $ go get github.com/ndabAP/assocentity/v2
 
 ## API
 
-```
+```go
 Make(text string, entities []string, tokenizer func(string) ([]string, error)) (map[string]float64, error)
 ```
 
