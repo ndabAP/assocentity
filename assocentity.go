@@ -12,8 +12,7 @@ type tokenized []string
 
 var errorNoEntityFound = errors.New("no entity was found inside text")
 
-// Make accepts a text, entities including aliases and a tokenizer which
-// defaults to an English tokenizer.
+// Make accepts a text, entities including aliases and a tokenizer which defaults to an English tokenizer.
 func Make(text string, entities []string, tokenizer func(string) ([]string, error)) (map[string]float64, error) {
 	var tokenizedText tokenized
 	var tokenizedEntities []tokenized
@@ -87,14 +86,14 @@ func findEntityPositions(tokenizedText tokenized, tokenizedEntites []tokenized) 
 	var entityPositions [][]int
 	hits := 0
 	for _, tokenizedEntity := range tokenizedEntites {
-	TokenizedEntitesLoop:
+	TokenizedTextLoop:
 		for i := range tokenizedText {
 			if found := isSliceSubset(tokenizedText, tokenizedEntity, i); found {
 				// Check if entity position already found
 				for _, entityPosition := range entityPositions {
 					for _, position := range entityPosition {
 						if position == i {
-							continue TokenizedEntitesLoop
+							continue TokenizedTextLoop
 						}
 					}
 				}
