@@ -82,10 +82,10 @@ func englishTokenizer(text string) (tokenized, error) {
 }
 
 // Returns entity indices including aliases.
-func findEntityPositions(tokenizedText tokenized, tokenizedEntites []tokenized) [][]int {
+func findEntityPositions(tokenizedText tokenized, tokenizedEntities []tokenized) [][]int {
 	var entityPositions [][]int
 	hits := 0
-	for _, tokenizedEntity := range tokenizedEntites {
+	for _, tokenizedEntity := range tokenizedEntities {
 	TokenizedTextLoop:
 		for i := range tokenizedText {
 			if found := isSliceSubset(tokenizedText, tokenizedEntity, i); found {
