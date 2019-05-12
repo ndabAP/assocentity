@@ -33,7 +33,7 @@ func main() {
     text := "The quick brown fox jumps over the lazy dog"
     res, _ := assocentity.Make(text, []string{"fox"}, nil)
 
-    fmt.Println(res)
+    fmt.Println(res) // map[The:3 brown:1 dog:5 jumps:1 lazy:4 over:2 quick:2 the:3]
 }
 
 ```
