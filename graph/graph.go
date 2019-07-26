@@ -8,7 +8,7 @@ import (
 // Node represents a Node
 type Node struct {
 	Node string // Node
-	id   int64  // Index to get unique hash
+	id   int64  // Index
 }
 
 // ID returns the unique identifier for a graph node
@@ -25,6 +25,7 @@ type Graph struct {
 
 // Iterates over a graph
 type iterator struct {
+	init     bool       // Determinates if first iteration
 	currNode graph.Node // Current node
 	id       int64      // Internal counter
 }
@@ -36,6 +37,7 @@ func NewGraph(nodes []string) Graph {
 		multi.NewDirectedGraph(),
 		nodes,
 		iterator{
+			true,
 			Node{},
 			0,
 		},
@@ -77,8 +79,8 @@ func NewGraph(nodes []string) Graph {
 // Iteratee returns a function to iterate over the graph
 func (g *Graph) Iteratee() func() bool {
 	return func() bool {
-		if g.id == 0 {
-			g.id++
+		if g.init {
+			g.init = false
 
 			return true
 		}
@@ -87,11 +89,17 @@ func (g *Graph) Iteratee() func() bool {
 	}
 }
 
-// Next calls the next nodes with given starting point
+// Next calls the next node with given starting point
 func (g *Graph) Next() bool {
 	// We reached the end
 	if g.id == int64(len(g.nodes)-1) {
 		return false
+	}
+
+	if g.init {
+		g.init = false
+
+		return true
 	}
 
 	from := g.From(g.id)
@@ -105,11 +113,17 @@ func (g *Graph) Next() bool {
 	return false
 }
 
-// Prev calls the previous nodes with given starting point
+// Prev calls the previous node with given starting point
 func (g *Graph) Prev() bool {
 	// We reached the start
 	if g.id == 0 {
 		return false
+	}
+
+	if g.init {
+		g.init = false
+
+		return true
 	}
 
 	to := g.To(g.id)
@@ -127,6 +141,7 @@ func (g *Graph) Prev() bool {
 func (g *Graph) SetCurrNode(n Node) {
 	g.id = n.id
 	g.currNode = n
+	g.init = true
 }
 
 // GetCurrNode gets the current node

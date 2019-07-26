@@ -39,5 +39,5 @@ func englishTokenzier(text string) (tokenized, error) {
 
 	// fmt.Println(tokens)
 
-	return []string{"I'm", "Max", "Payne", "a", "real", "human", "Max", "was", "here", "a", "human"}, nil
+	return []string{"I'm", "Max Payne", "a", "real", "human", "Max", "was", "here", "a", "human"}, nil
 }

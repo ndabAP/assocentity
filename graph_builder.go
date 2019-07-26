@@ -10,44 +10,42 @@ import (
 func buildGraph(tokens, entities []string) (map[string]float64, error) {
 	g := graph.NewGraph(tokens)
 
+	var dist float64
 	assoccentities := make(map[string][]float64)
 	// Retreive the iteratee
 	next := g.Iteratee()
 	// Iterate over graph
 	for next() {
+		fmt.Println(g.GetCurrNode())
 		node := g.GetCurrNode()
 		// Ignore entities
 		if isInSlice(node.Node, entities) {
 			continue
 		}
 
-		var dist float64
+		dist = 0
+		right := g
+		right.SetCurrNode(node)
 		// Iterate right way
-		for g.Next() {
+		for right.Next() {
 			dist++
 
-			if isInSlice(g.GetCurrNode().Node, entities) {
+			if isInSlice(right.GetCurrNode().Node, entities) {
 				assoccentities[node.Node] = append(assoccentities[node.Node], dist)
 			}
 		}
-
-		g.SetCurrNode(node)
 
 		dist = 0
+		left := g
+		left.SetCurrNode(node)
 		// Iterate left way
-		for g.Prev() {
+		for left.Prev() {
 			dist++
 
-			if isInSlice(g.GetCurrNode().Node, entities) {
+			if isInSlice(left.GetCurrNode().Node, entities) {
 				assoccentities[node.Node] = append(assoccentities[node.Node], dist)
 			}
 		}
-
-		g.SetCurrNode(node)
-		next()
-
-		fmt.Println(node.Node)
-		// g.Next()
 	}
 
 	fmt.Println(assoccentities)
