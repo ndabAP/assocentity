@@ -1,19 +1,25 @@
 package graph
 
 import (
+	"hash/fnv"
+
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/multi"
 )
 
 // Node represents a Node
 type Node struct {
-	Node string // Node
-	id   int64  // Index
+	token 	string // Node
+	entity 	bool // Entity
+	dist 	[]int // Distances
 }
 
 // ID returns the unique identifier for a graph node
 func (n Node) ID() int64 {
-	return n.id
+	h := fnv.New32a()
+	h.Write([]byte(n.token))
+	
+	return h.Sum64()
 }
 
 // Graph represents a graph

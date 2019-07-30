@@ -1,4 +1,4 @@
-package assocentity
+package graph
 
 import (
 	"fmt"
