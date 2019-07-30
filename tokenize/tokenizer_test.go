@@ -1,13 +1,21 @@
 package tokenize
 
 import (
+	"flag"
 	"reflect"
 	"testing"
 )
 
 const credentialsFile = "../configs/google_nlp_service_account.json"
 
+var api = flag.Bool("api", false, "call google api")
+
 func TestNLP_Tokenize(t *testing.T) {
+	flag.Parse()
+	if !*api {
+		t.SkipNow()
+	}
+
 	type fields struct {
 		text     string
 		entities []string

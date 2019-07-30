@@ -44,14 +44,14 @@ func NewNLP(credentialsFile, text string, entities []string, punct bool) (*NLP, 
 
 // Tokenize tokenizes a text
 func (nlp *NLP) Tokenize() ([]string, error) {
-	return tokenize(nlp.text, nlp.punct)
+	return nlp.tokenize(nlp.text, nlp.punct)
 }
 
 // TokenizedNested returns nested tokenized entities
 func (nlp *NLP) TokenizedNested() ([][]string, error) {
 	var tokenizedEntities [][]string
 	for idx, entity := range nlp.entities {
-		tokenizedEntity, err := tokenize(entity, nlp.punct)
+		tokenizedEntity, err := nlp.tokenize(entity, nlp.punct)
 		if err != nil {
 			return nil, err
 		}
@@ -63,11 +63,11 @@ func (nlp *NLP) TokenizedNested() ([][]string, error) {
 }
 
 // tokenize does the actual tokenization work
-func tokenize(text string, punct bool) ([]string, error) {
+func (nlp *NLP) tokenize(text string, punct bool) ([]string, error) {
 	resp, err := client.AnnotateText(ctx, &languagepb.AnnotateTextRequest{
 		Document: &languagepb.Document{
 			Source: &languagepb.Document_Content{
-				Content: text,
+				Content: nlp.text,
 			},
 			Type: languagepb.Document_PLAIN_TEXT,
 		},
@@ -85,7 +85,7 @@ func tokenize(text string, punct bool) ([]string, error) {
 	var tokenizedText []string
 	for _, v := range resp.GetTokens() {
 		// Check for punctation
-		if punct {
+		if nlp.punct {
 			tokenizedText = append(tokenizedText, v.GetText().GetContent())
 		} else {
 			if v.PartOfSpeech.Tag != languagepb.PartOfSpeech_PUNCT {
