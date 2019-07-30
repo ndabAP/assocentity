@@ -4,6 +4,7 @@ import (
 	"context"
 
 	language "cloud.google.com/go/language/apiv1"
+	option "google.golang.org/api/option"
 	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
 )
 
@@ -13,6 +14,10 @@ type Tokenizer interface {
 	TokenizeEntities() ([][]string, error)
 }
 
+var client *language.Client
+var err error
+var ctx context.Context
+
 // NLP tokenizes a text using NLP
 type NLP struct {
 	text     string
@@ -21,12 +26,20 @@ type NLP struct {
 }
 
 // NewNLP returns a new NLP instance
-func NewNLP(text string, entities []string, punct bool) NLP {
-	return NLP{
+func NewNLP(credentialsFile, text string, entities []string, punct bool) (*NLP, error) {
+	ctx = context.Background()
+
+	// Create one client for all calls
+	client, err = language.NewClient(ctx, option.WithCredentialsFile(credentialsFile))
+	if err != nil {
+		return &NLP{}, err
+	}
+
+	return &NLP{
 		text:     text,
 		entities: entities,
 		punct:    punct,
-	}
+	}, nil
 }
 
 // Tokenize tokenizes a text
@@ -49,16 +62,8 @@ func (nlp *NLP) TokenizedNested() ([][]string, error) {
 	return tokenizedEntities, nil
 }
 
+// tokenize does the actual tokenization work
 func tokenize(text string, punct bool) ([]string, error) {
-	ctx := context.Background()
-
-	// Create a client
-	client, err := language.NewClient(ctx)
-	defer client.Close()
-	if err != nil {
-		return nil, err
-	}
-
 	resp, err := client.AnnotateText(ctx, &languagepb.AnnotateTextRequest{
 		Document: &languagepb.Document{
 			Source: &languagepb.Document_Content{
@@ -80,8 +85,12 @@ func tokenize(text string, punct bool) ([]string, error) {
 	var tokenizedText []string
 	for _, v := range resp.GetTokens() {
 		// Check for punctation
-		if (v.PartOfSpeech.Tag != languagepb.PartOfSpeech_PUNCT) && !punct {
+		if punct {
 			tokenizedText = append(tokenizedText, v.GetText().GetContent())
+		} else {
+			if v.PartOfSpeech.Tag != languagepb.PartOfSpeech_PUNCT {
+				tokenizedText = append(tokenizedText, v.GetText().GetContent())
+			}
 		}
 	}
 

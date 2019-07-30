@@ -1,6 +1,10 @@
 package tokenize
 
-import "github.com/ndabAP/assocentity/v3/internal/generator"
+import (
+	"strings"
+
+	"github.com/ndabAP/assocentity/v3/internal/generator"
+)
 
 // Multiplexer multiplexes a tokenizer
 type Multiplexer interface {
@@ -30,18 +34,49 @@ func (dm *DefaultMultiplex) Multiplex(tok Tokenizer) ([]string, error) {
 	textTraverser := generator.New(textTokens)
 	// For every text token
 	for textTraverser.Next() {
-		entityTraverser := generator.New(entityTokens[textTraverser.GetCurrPos()])
+		currTextIdx := textTraverser.CurrPos()
+		// For every tokenized entity
+		for idx := range entityTokens {
+			currEntityIdx := idx
+			entityTraverser := generator.New(entityTokens[currEntityIdx])
 
-		var isEntity bool
-		// For every entity token
-		for entityTraverser.Next() {
-			// Check if first text token matches the entity token
-			if textTraverser.GetCurrElem() != entityTraverser.GetCurrElem() {
+			// Skip single value entities
+			if entityTraverser.Len() == 1 {
 				break
 			}
 
+			var isEntity bool
+			// For every entity token
+			for entityTraverser.Next() {
+				isEntity = textTraverser.CurrElem() == entityTraverser.CurrElem()
+				// Check if first text token matches the entity token
+				if !isEntity {
+					break
+				}
+
+				isEntity = textTraverser.CurrElem() == entityTraverser.CurrElem()
+				// Check for next text token
+				textTraverser.Next()
+
+				if !isEntity {
+					break
+				}
+			}
+
+			if isEntity {
+				// Merge the entity
+				textTokens[currTextIdx] = strings.Join(entityTokens[currEntityIdx], " ")
+				// Remove text tokens that contain the entity
+				entityTraverser.Reset()
+				for entityTraverser.Next() {
+					idx := currTextIdx + 1
+					textTokens = append(textTokens[:idx], textTokens[idx+1:]...)
+				}
+			}
 		}
+
+		textTraverser.SetPos(currTextIdx)
 	}
 
-	return []string{}, nil
+	return textTokens, nil
 }
