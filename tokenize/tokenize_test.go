@@ -71,6 +71,10 @@ func TestNLP_TokenizeText(t *testing.T) {
 }
 
 func TestNLP_TokenizeEntities(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
+	}
+
 	type fields struct {
 		text     string
 		entities []string
@@ -82,7 +86,26 @@ func TestNLP_TokenizeEntities(t *testing.T) {
 		want    [][]string
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "one entitiy",
+			fields: fields{
+				text:     "You're in a computer game, Max.",
+				entities: []string{"Max"},
+				punct:    false,
+			},
+			want:    [][]string{{"Max"}},
+			wantErr: false,
+		},
+		{
+			name: "two entities",
+			fields: fields{
+				text:     "Mona Sax. Lisa's evil twin.",
+				entities: []string{"Mona Sax", "Mona"},
+				punct:    false,
+			},
+			want:    [][]string{{"Mona", "Sax"}, {"Mona"}},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
