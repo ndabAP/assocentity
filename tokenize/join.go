@@ -15,7 +15,7 @@ type Joiner interface {
 // DefaultJoin is the default joiner
 type DefaultJoin struct {
 	tokens []string
-	sep    string // Seperator
+	sep    string // Separator
 }
 
 // NewDefaultJoin returns a new default join
