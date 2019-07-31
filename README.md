@@ -38,19 +38,19 @@ func main() {
 	text := "Punchinello wanted Payne? He'd see the pain."
 	entities := []string{"Punchinello", "Payne"}
 
-    // Create a NLP instance
+    	// Create a NLP instance
 	nlp, err := tokenize.NewNLP(credentialsFile, text, entities, false)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-    // Join merges the entities with a simple algorithm
+    	// Join merges the entities with a simple algorithm
 	dj := tokenize.NewDefaultJoin(sep)
 	if err = dj.Join(nlp); err != nil {
 		log.Fatal(err)
 	}
 
-    // Assoc calculates the average distances
+    	// Assoc calculates the average distances
 	assocentities, err := assocentity.Assoc(dj, nlp, entities)
 	if err != nil {
 		log.Fatal(err)
