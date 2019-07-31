@@ -38,7 +38,7 @@ func (g *Generator) Next() bool {
 
 // Prev sets the next element
 func (g *Generator) Prev() bool {
-	if g.pos-1 == 0 {
+	if g.pos-1 < 0 {
 		return false
 	}
 
@@ -78,10 +78,11 @@ func (g *Generator) Len() int {
 
 // SetPos sets the position
 func (g *Generator) SetPos(pos int) bool {
-	if len(g.slice) >= pos {
+	if len(g.slice) > pos {
 		g.pos = pos
 		g.el = g.slice[pos]
+		g.init = true
 	}
 
-	return len(g.slice) >= pos
+	return len(g.slice) > pos
 }

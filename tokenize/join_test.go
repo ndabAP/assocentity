@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-type tokenizer string
+type tokenizer struct{}
 
 func (t *tokenizer) TokenizeText() ([]string, error) {
 	return texts[currPos], nil
@@ -17,7 +17,7 @@ func (t *tokenizer) TokenizeEntities() ([][]string, error) {
 
 var texts = [][]string{
 	{"Vinnie", "Gognitti", "Just", "the", "man", "I", "'ve", "been", "killing", "to", "see", "Gognitti", "bailed"},
-	{"You", "can'", "'t'", "win", "this", "one", "Max"},
+	{"You", "can", "'t'", "win", "this", "one", "Max"},
 	{"Alex", "Alex"},
 	{"I", "'m", "Frankie", "The", "Bat", "Niagara"},
 	{"Where", "'s", "Lupino", "Bad", "start", "Vinnie"},
@@ -58,7 +58,7 @@ func TestDefaultJoin_Join(t *testing.T) {
 			args: args{
 				new(tokenizer),
 			},
-			want:    []string{"You", "can'", "'t'", "win", "this", "one", "Max"},
+			want:    []string{"You", "can", "'t'", "win", "this", "one", "Max"},
 			wantErr: false,
 		},
 		{

@@ -8,40 +8,43 @@ import (
 )
 
 // Assoc returns the entity distances
-func Assoc(mp tokenize.Joiner, tokenizer tokenize.Tokenizer, entities []string) (map[string]float64, error) {
-	multiplexed, err := mp.Join(tokenizer)
+func Assoc(j tokenize.Joiner, tokenizer tokenize.Tokenizer, entities []string) (map[string]float64, error) {
+	joined, err := j.Join(tokenizer)
 	if err != nil {
 		return nil, err
 	}
 
 	var distAccum = make(map[string][]float64)
-	multiplexedTraverer := generator.New(multiplexed)
-	for multiplexedTraverer.Next() {
+	joinedTraverser := generator.New(joined)
+	for joinedTraverser.Next() {
 		// Ignore entities
-		if isInSlice(multiplexedTraverer.CurrElem(), entities) {
+		if isInSlice(joinedTraverser.CurrElem(), entities) {
 			continue
 		}
 
 		var dist float64
 
 		// Iterate positive direction
-		posTraverser := multiplexedTraverer
+		posTraverser := generator.New(joined)
+		posTraverser.SetPos(joinedTraverser.CurrPos())
 		for posTraverser.Next() {
-			dist++
-
 			if isInSlice(posTraverser.CurrElem(), entities) {
-				distAccum[posTraverser.CurrElem()] = append(distAccum[posTraverser.CurrElem()], dist)
+				distAccum[joinedTraverser.CurrElem()] = append(distAccum[joinedTraverser.CurrElem()], dist)
 			}
+
+			dist++
 		}
 
+		dist = 0
 		// Iterate negative direction
-		negTraverser := multiplexedTraverer
+		negTraverser := generator.New(joined)
+		negTraverser.SetPos(joinedTraverser.CurrPos())
 		for negTraverser.Prev() {
-			dist++
-
-			if isInSlice(posTraverser.CurrElem(), entities) {
-				distAccum[posTraverser.CurrElem()] = append(distAccum[posTraverser.CurrElem()], dist)
+			if isInSlice(negTraverser.CurrElem(), entities) {
+				distAccum[joinedTraverser.CurrElem()] = append(distAccum[joinedTraverser.CurrElem()], dist)
 			}
+
+			dist++
 		}
 	}
 
