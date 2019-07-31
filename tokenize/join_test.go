@@ -8,11 +8,11 @@ import (
 type tokenizer string
 
 func (t *tokenizer) TokenizeText() ([]string, error) {
-	return texts[pointer], nil
+	return texts[currPos], nil
 }
 
 func (t *tokenizer) TokenizeEntities() ([][]string, error) {
-	return entities[pointer], nil
+	return entities[currPos], nil
 }
 
 var texts = [][]string{
@@ -30,22 +30,22 @@ var entities = [][][]string{
 	{{"Lupino"}, {"Vinnie"}},
 }
 
-var pointer int
+var currPos int
 
-func TestDefaultMultiplex_Multiplex(t *testing.T) {
+func TestDefaultJoin_Join(t *testing.T) {
 	type args struct {
 		tok Tokenizer
 	}
 	tests := []struct {
 		name    string
-		dm      *DefaultMultiplex
+		dm      *DefaultJoin
 		args    args
 		want    []string
 		wantErr bool
 	}{
 		{
 			name: "multiple entities (two occurrences)",
-			dm:   &DefaultMultiplex{},
+			dm:   &DefaultJoin{sep: " "},
 			args: args{
 				new(tokenizer),
 			},
@@ -54,7 +54,7 @@ func TestDefaultMultiplex_Multiplex(t *testing.T) {
 		},
 		{
 			name: "one entity (one occurrence)",
-			dm:   &DefaultMultiplex{},
+			dm:   &DefaultJoin{sep: " "},
 			args: args{
 				new(tokenizer),
 			},
@@ -63,7 +63,7 @@ func TestDefaultMultiplex_Multiplex(t *testing.T) {
 		},
 		{
 			name: "one entity (one occurrence, twice)",
-			dm:   &DefaultMultiplex{},
+			dm:   &DefaultJoin{sep: " "},
 			args: args{
 				new(tokenizer),
 			},
@@ -72,7 +72,7 @@ func TestDefaultMultiplex_Multiplex(t *testing.T) {
 		},
 		{
 			name: "one entity (multiple occurrences)",
-			dm:   &DefaultMultiplex{},
+			dm:   &DefaultJoin{sep: " "},
 			args: args{
 				new(tokenizer),
 			},
@@ -81,7 +81,7 @@ func TestDefaultMultiplex_Multiplex(t *testing.T) {
 		},
 		{
 			name: "multiple entities (one occurrence)",
-			dm:   &DefaultMultiplex{},
+			dm:   &DefaultJoin{sep: " "},
 			args: args{
 				new(tokenizer),
 			},
@@ -91,8 +91,8 @@ func TestDefaultMultiplex_Multiplex(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			dm := &DefaultMultiplex{}
-			got, err := dm.Multiplex(tt.args.tok)
+			dm := tt.dm
+			got, err := dm.Join(tt.args.tok)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DefaultMultiplex.Multiplex() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -102,6 +102,6 @@ func TestDefaultMultiplex_Multiplex(t *testing.T) {
 			}
 		})
 
-		pointer++
+		currPos++
 	}
 }

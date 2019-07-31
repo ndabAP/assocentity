@@ -12,6 +12,7 @@ var api = flag.Bool("api", false, "call google api")
 
 func TestNLP_Tokenize(t *testing.T) {
 	flag.Parse()
+	// Call API only when flag is given
 	if !*api {
 		t.SkipNow()
 	}

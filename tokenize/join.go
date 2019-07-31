@@ -6,21 +6,23 @@ import (
 	"github.com/ndabAP/assocentity/v3/internal/generator"
 )
 
-// Multiplexer multiplexes a tokenizer
-type Multiplexer interface {
-	Multiplex(Tokenizer) ([]string, error)
+// Joiner joines a tokenizer
+type Joiner interface {
+	Join(Tokenizer) ([]string, error)
 }
 
-// DefaultMultiplex is the default multiplexer
-type DefaultMultiplex struct{}
-
-// NewDefaultMultiplex returns a new default multiplex
-func NewDefaultMultiplex() DefaultMultiplex {
-	return DefaultMultiplex{}
+// DefaultJoin is the default joiner
+type DefaultJoin struct {
+	sep string // Seperator
 }
 
-// Multiplex multiplexes a string slice
-func (dm *DefaultMultiplex) Multiplex(tok Tokenizer) ([]string, error) {
+// NewDefaultJoin returns a new default join
+func NewDefaultJoin(sep string) DefaultJoin {
+	return DefaultJoin{sep}
+}
+
+// Join joins strings in a string slice
+func (dm *DefaultJoin) Join(tok Tokenizer) ([]string, error) {
 	textTokens, err := tok.TokenizeText()
 	if err != nil {
 		return nil, err
@@ -67,11 +69,8 @@ func (dm *DefaultMultiplex) Multiplex(tok Tokenizer) ([]string, error) {
 				// Merge the entity
 				textTokens[currTextIdx] = strings.Join(entityTokens[currEntityIdx], " ")
 				// Remove text tokens that contain the entity
-				entityTraverser.Reset()
-				for entityTraverser.Next() {
-					idx := currTextIdx + 1
-					textTokens = append(textTokens[:idx], textTokens[idx+1:]...)
-				}
+				idx := currTextIdx + 1
+				textTokens = append(textTokens[:idx], textTokens[idx+entityTraverser.Len()-1:]...)
 			}
 		}
 

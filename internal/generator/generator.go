@@ -58,6 +58,7 @@ func (g *Generator) Prev() bool {
 func (g *Generator) Reset() {
 	g.pos = 0
 	g.el = g.slice[0]
+	g.init = true
 }
 
 // CurrPos returns the current position
