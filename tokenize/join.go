@@ -69,7 +69,7 @@ func (dj *DefaultJoin) Join(tok Tokenizer) error {
 
 			if isEntity {
 				// Merge the entity
-				textTokens[currTextIdx] = strings.Join(entityTokens[currEntityIdx], " ")
+				textTokens[currTextIdx] = strings.Join(entityTokens[currEntityIdx], dj.sep)
 				// Remove text tokens that contain the entity
 				idx := currTextIdx + 1
 				textTokens = append(textTokens[:idx], textTokens[idx+entityTraverser.Len()-1:]...)
