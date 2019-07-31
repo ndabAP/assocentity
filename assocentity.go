@@ -1,182 +1,67 @@
-// Package assocentity returns the average distance from words to a given entity.
 package assocentity
 
 import (
-	"errors"
 	"math"
 
-	"gopkg.in/jdkato/prose.v2"
+	"github.com/ndabAP/assocentity/v3/internal/generator"
+	"github.com/ndabAP/assocentity/v3/tokenize"
 )
 
-type tokenized []string
-
-var errorNoEntityFound = errors.New("no entity was found inside text")
-
-// Make accepts a text, entities including aliases and a tokenizer which defaults to an English tokenizer.
-func Make(text string, entities []string, tokenizer func(string) ([]string, error)) (map[string]float64, error) {
-	var tokenizedText tokenized
-	var tokenizedEntities []tokenized
-	var err error
-	// Apply user given tokenizer if not nil
-	if tokenizer == nil {
-		tokenizedText, err = englishTokenizer(text)
-
-		var tokenizedEntity tokenized
-		for _, entity := range entities {
-			tokenizedEntity, err = englishTokenizer(entity)
-			if err != nil {
-				return nil, err
-			}
-
-			tokenizedEntities = append(tokenizedEntities, tokenizedEntity)
-		}
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		tokenizedText, err = tokenizer(text)
-		if err != nil {
-			return nil, err
-		}
-
-		var tokenizedEntity tokenized
-		for _, entity := range entities {
-			tokenizedEntity, err = tokenizer(entity)
-			if err != nil {
-				return nil, err
-			}
-
-			tokenizedEntities = append(tokenizedEntities, tokenizedEntity)
-		}
-	}
-
-	entityPositions := findEntityPositions(tokenizedText, tokenizedEntities)
-	if len(entityPositions) == 0 {
-		return nil, errorNoEntityFound
-	}
-	wordPositions := findWordPositions(tokenizedText, entityPositions)
-	wordsDistances := findWordEntityDistances(wordPositions, entityPositions)
-
-	weighting := make(map[string]float64)
-	for word, distances := range wordsDistances {
-		avg := average(distances)
-		weighting[word] = avg
-	}
-
-	return weighting, nil
-}
-
-// Tokenizes English words.
-func englishTokenizer(text string) (tokenized, error) {
-	document, err := prose.NewDocument(string(text))
+// Assoc returns the entity distances
+func Assoc(j tokenize.Joiner, tokenizer tokenize.Tokenizer, entities []string) (map[string]float64, error) {
+	err := j.Join(tokenizer)
 	if err != nil {
 		return nil, err
 	}
 
-	var tokenizedText tokenized
-	for _, token := range document.Tokens() {
-		tokenizedText = append(tokenizedText, token.Text)
-	}
+	var distAccum = make(map[string][]float64)
+	joinedTraverser := generator.New(j.Tokens())
+	for joinedTraverser.Next() {
+		// Ignore entities
+		if isInSlice(joinedTraverser.CurrElem(), entities) {
+			continue
+		}
 
-	return tokenizedText, nil
-}
+		var dist float64
 
-// Returns entity indices including aliases.
-func findEntityPositions(tokenizedText tokenized, tokenizedEntities []tokenized) [][]int {
-	var entityPositions [][]int
-	hits := 0
-	for _, tokenizedEntity := range tokenizedEntities {
-	TokenizedTextLoop:
-		for i := range tokenizedText {
-			if found := isSliceSubset(tokenizedText, tokenizedEntity, i); found {
-				// Check if entity position already found
-				for _, entityPosition := range entityPositions {
-					for _, position := range entityPosition {
-						if position == i {
-							continue TokenizedTextLoop
-						}
-					}
-				}
-
-				entityPositions = append(entityPositions, []int{})
-				for range tokenizedEntity {
-					entityPositions[hits] = append(entityPositions[hits], i)
-					i++
-				}
-				hits++
+		// Iterate positive direction
+		posTraverser := generator.New(j.Tokens())
+		posTraverser.SetPos(joinedTraverser.CurrPos())
+		for posTraverser.Next() {
+			if isInSlice(posTraverser.CurrElem(), entities) {
+				distAccum[joinedTraverser.CurrElem()] = append(distAccum[joinedTraverser.CurrElem()], dist)
 			}
 
+			dist++
 		}
-	}
 
-	return entityPositions
-}
+		dist = 0
 
-// Returns distances from entity to words.
-func findWordEntityDistances(wordPositions map[string][]int, entityPositions [][]int) map[string][]float64 {
-	wordDistances := make(map[string][]float64)
-	for word, positions := range wordPositions {
-		for _, wordPosition := range positions {
-			for _, entityPosition := range entityPositions {
-				firstEntityPosition := entityPosition[0]
-				lastEntityPosition := entityPosition[len(entityPosition)-1]
-
-				distance := 0.0
-				if firstEntityPosition < wordPosition {
-					distance = math.Abs(float64(wordPosition - lastEntityPosition))
-				} else {
-					distance = math.Abs(float64(wordPosition - firstEntityPosition))
-				}
-
-				wordDistances[word] = append(wordDistances[word], distance)
+		// Iterate negative direction
+		negTraverser := generator.New(j.Tokens())
+		negTraverser.SetPos(joinedTraverser.CurrPos())
+		for negTraverser.Prev() {
+			if isInSlice(negTraverser.CurrElem(), entities) {
+				distAccum[joinedTraverser.CurrElem()] = append(distAccum[joinedTraverser.CurrElem()], dist)
 			}
+
+			dist++
 		}
 	}
 
-	return wordDistances
-}
-
-// Returns word indices.
-func findWordPositions(tokenizedText tokenized, entityPositions [][]int) map[string][]int {
-	wordPositions := make(map[string][]int)
-	for i, word := range tokenizedText {
-		found := false
-		for _, entityPosition := range entityPositions {
-			if isInSlice(i, entityPosition) {
-				found = true
-			}
-		}
-
-		if !found {
-			wordPositions[word] = append(wordPositions[word], i)
-		}
+	assoccentities := make(map[string]float64)
+	// Calculate the distances
+	for elem, dist := range distAccum {
+		assoccentities[elem] = avg(dist)
 	}
 
-	return wordPositions
+	return assoccentities, nil
 }
 
-// Checks if next elements of given slice equals antoher given slice.
-func isSliceSubset(data, subset []string, index int) bool {
-	hits := 0
-	for i, sub := range subset {
-		// Check for slice overflow
-		if index+i > len(data)-1 {
-			goto End
-		}
-
-		if data[index+i] == sub {
-			hits++
-		}
-	}
-
-End:
-	return hits == len(subset)
-}
-
-// Returns "true" if integer is in slice, else "false".
-func isInSlice(n int, sl []int) bool {
-	for _, e := range sl {
-		if e == n {
+// Checks if string is in slice
+func isInSlice(x string, y []string) bool {
+	for _, v := range y {
+		if v == x {
 			return true
 		}
 	}
@@ -184,8 +69,8 @@ func isInSlice(n int, sl []int) bool {
 	return false
 }
 
-// Returns the average of a float slice.
-func average(xs []float64) float64 {
+// Returns the average of a float slice
+func avg(xs []float64) float64 {
 	total := 0.0
 	for _, v := range xs {
 		total += v
@@ -194,7 +79,7 @@ func average(xs []float64) float64 {
 	return round(total / float64(len(xs)))
 }
 
-// Rounds to nearest 0.5.
+// Rounds to nearest 0.5
 func round(x float64) float64 {
 	return math.Round(x/0.5) * 0.5
 }

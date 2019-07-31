@@ -1,17 +1,66 @@
-// Package assocentity returns the average distance from words to a given entity.
 package assocentity
 
 import (
+	"log"
 	"reflect"
-	"strings"
 	"testing"
+
+	"github.com/ndabAP/assocentity/v3/tokenize"
 )
 
-func TestEnglish(t *testing.T) {
+type tokenizer struct{}
+
+func (t *tokenizer) TokenizeText() ([]string, error) {
+	return texts[currPos], nil
+}
+
+func (t *tokenizer) TokenizeEntities() ([][]string, error) {
+	return entities[currPos], nil
+}
+
+type joiner struct {
+	tokens []string
+}
+
+func (j *joiner) Join(t tokenize.Tokenizer) error {
+	j.tokens = joins[currPos]
+
+	return nil
+}
+
+func (j *joiner) Tokens() []string {
+	return j.tokens
+}
+
+var texts = [][]string{
+	{"Vinnie", "Gognitti", "Just", "the", "man", "I", "'ve", "been", "killing", "to", "see", "Gognitti", "bailed"},
+	{"You", "can", "'t'", "win", "this", "one", "Max"},
+	{"Alex", "Alex"},
+	{"I", "'m", "Frankie", "The", "Bat", "Niagara"},
+	{"Where", "'s", "Lupino", "Bad", "start", "Vinnie"},
+}
+var entities = [][][]string{
+	{{"Vinnie", "Gognitti"}, {"Gognitti"}},
+	{{"Max"}},
+	{{"Alex"}},
+	{{"Frankie", "The", "Bat", "Niagara"}},
+	{{"Lupino"}, {"Vinnie"}},
+}
+var joins = [][]string{
+	{"Vinnie Gognitti", "Just", "the", "man", "I", "'ve", "been", "killing", "to", "see", "Gognitti", "bailed"},
+	{"You", "can", "'t", "win", "this", "one", "Max"},
+	{"Alex", "Alex"},
+	{"I", "'m", "Frankie The Bat Niagara"},
+	{"Where", "'s", "Lupino", "Bad", "start", "Vinnie"},
+}
+
+var currPos int
+
+func TestAssoc(t *testing.T) {
 	type args struct {
-		text      string
+		j         tokenize.Joiner
+		tokenizer tokenize.Tokenizer
 		entities  []string
-		tokenizer func(string) ([]string, error)
 	}
 	tests := []struct {
 		name    string
@@ -20,153 +69,134 @@ func TestEnglish(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			"No aliases",
-			args{
-				"The quick brown fox jumps over the lazy dog. It seems that this fox has nothing to loose.",
-				[]string{"fox"},
-				nil,
+			name: "two entities",
+			args: args{
+				j:         new(joiner),
+				tokenizer: new(tokenizer),
+				entities:  []string{"Vinnie Gognitti", "Gognitti"},
 			},
-			map[string]float64{
-				"The":     8.5,
-				"quick":   7.5,
-				"brown":   6.5,
-				"jumps":   5.5,
-				"over":    5.5,
-				"the":     5.5,
-				"lazy":    5.5,
-				"dog":     5.5,
-				".":       8,
-				"It":      5.5,
-				"seems":   5.5,
-				"that":    5.5,
-				"this":    5.5,
-				"has":     6.5,
-				"nothing": 7.5,
-				"to":      8.5,
-				"loose":   9.5,
+			want: map[string]float64{
+				"Just":    5,
+				"bailed":  6,
+				"to":      5,
+				"man":     5,
+				"'ve":     5,
+				"see":     5,
+				"the":     5,
+				"I":       5,
+				"been":    5,
+				"killing": 5,
 			},
-			false,
+			wantErr: false,
 		},
 		{
-			"Aliases",
-			args{
-				"The quick brown fox jumps over the lazy dog. It seems that this fox has nothing to loose.",
-				[]string{"brown fox", "fox"},
-				nil,
+			name: "one entity (multiple words)",
+			args: args{
+				j:         new(joiner),
+				tokenizer: new(tokenizer),
+				entities:  []string{"Max"},
 			},
-			map[string]float64{
-				"seems":   5.5,
-				"has":     6.5,
-				"It":      5.5,
-				".":       8,
-				"nothing": 7.5,
-				"the":     5.5,
-				"to":      8.5,
-				"dog":     5.5,
-				"The":     8,
-				"over":    5.5,
-				"jumps":   5.5,
-				"that":    5.5,
-				"lazy":    5.5,
-				"loose":   9.5,
-				"this":    5.5,
-				"quick":   7,
+			want: map[string]float64{
+				"You":  6,
+				"can":  5,
+				"'t":   4,
+				"win":  3,
+				"this": 2,
+				"one":  1,
 			},
-			false,
+			wantErr: false,
 		},
 		{
-			"Error: Entity not found",
-			args{
-				"The quick brown fox jumps over the lazy dog. It seems that this fox has nothing to loose.",
-				[]string{"cat"},
-				nil,
+			name: "one entity (only entities)",
+			args: args{
+				j:         new(joiner),
+				tokenizer: new(tokenizer),
+				entities:  []string{"Alex"},
 			},
-			nil,
-			true,
+			want:    map[string]float64{},
+			wantErr: false,
 		},
 		{
-			"Custom tokenizer",
-			args{
-				"Hello, world",
-				[]string{"world"},
-				func(text string) ([]string, error) {
-					return strings.Split(strings.Replace(text, " ", "", -1), ","), nil
-				},
+			name: "one entity (multiple tokens)",
+			args: args{
+				j:         new(joiner),
+				tokenizer: new(tokenizer),
+				entities:  []string{"Frankie The Bat Niagara"},
 			},
-			map[string]float64{
-				"Hello": 1,
+			want: map[string]float64{
+				"I":  2,
+				"'m": 1,
 			},
-			false,
+			wantErr: false,
+		},
+		{
+			name: "two entities (in-between)",
+			args: args{
+				j:         new(joiner),
+				tokenizer: new(tokenizer),
+				entities:  []string{"Lupino", "Vinnie"},
+			},
+			want: map[string]float64{
+				"Where": 3.5,
+				"'s":    2.5,
+				"Bad":   1.5,
+				"start": 1.5,
+			},
+			wantErr: false,
 		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Make(tt.args.text, tt.args.entities, tt.args.tokenizer)
+			got, err := Assoc(tt.args.j, tt.args.tokenizer, tt.args.entities)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Make() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Assoc() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Make() = %v, want %v", got, tt.want)
+				t.Errorf("Assoc() = %v, want %v", got, tt.want)
 			}
 		})
+
+		currPos++
 	}
 }
 
-func TestIsSliceSubset(t *testing.T) {
-	type args struct {
-		data   []string
-		subset []string
-		index  int
+func TestAssocIntegration(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
 	}
 
-	tests := []struct {
-		name string
-		args args
-		want bool
-	}{
-		{
-			"0 hits",
-			args{data: []string{"H", "e", "l", "l", "o"}, subset: []string{"H"}, index: 1},
-			false,
-		},
-		{
-			"1 hit",
-			args{data: []string{"H", "e", "l", "l", "o"}, subset: []string{"e"}, index: 1},
-			true,
-		},
-		{
-			"5 hits",
-			args{data: []string{"H", "e", "l", "l", "o"}, subset: []string{"H", "e", "l", "l", "o"}, index: 0},
-			true,
-		},
+	const (
+		credentialsFile = "configs/google_nlp_service_account.json"
+		sep             = " "
+	)
+
+	text := "Punchinello wanted Payne? He'd see the pain."
+	entities := []string{"Punchinello", "Payne"}
+
+	nlp, err := tokenize.NewNLP(credentialsFile, text, entities, false)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := isSliceSubset(tt.args.data, tt.args.subset, tt.args.index); got != tt.want {
-				t.Errorf("isSliceSubset() = %v, want %v", got, tt.want)
-			}
-		})
+	dj := tokenize.NewDefaultJoin(sep)
+	if err = dj.Join(nlp); err != nil {
+		log.Fatal(err)
 	}
-}
 
-func TestAverage(t *testing.T) {
-	tests := []struct {
-		name string
-		args []float64
-		want float64
-	}{
-		{"Average of 1, 2, 3", []float64{1, 2, 3}, 2},
-		{"Average of 3, 2, 1", []float64{3, 2, 1}, 2},
-		{"Average of 1", []float64{1}, 1},
+	got, err := Assoc(dj, nlp, entities)
+	if err != nil {
+		log.Fatal(err)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := average(tt.args); got != tt.want {
-				t.Errorf("average() = %v, want %v", got, tt.want)
-			}
-		})
+
+	if !reflect.DeepEqual(got, map[string]float64{
+		"wanted": 1,
+		"He":     2,
+		"'d":     3,
+		"see":    4,
+		"the":    5,
+		"pain":   6,
+	}) {
+		t.Errorf("Assoc() = %v, want %v", got, map[string]float64{})
 	}
 }
