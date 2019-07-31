@@ -1,19 +1,14 @@
 package tokenize
 
 import (
-	"flag"
 	"reflect"
 	"testing"
 )
 
 const credentialsFile = "../configs/google_nlp_service_account.json"
 
-var api = flag.Bool("api", false, "call google api")
-
-func TestNLP_Tokenize(t *testing.T) {
-	flag.Parse()
-	// Call API only when flag is given
-	if !*api {
+func TestNLP_TokenizeText(t *testing.T) {
+	if testing.Short() {
 		t.SkipNow()
 	}
 
@@ -62,7 +57,7 @@ func TestNLP_Tokenize(t *testing.T) {
 
 				return
 			}
-			got, err := nlp.Tokenize()
+			got, err := nlp.TokenizeText()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NLP.Tokenize() error = %v, wantErr %v", err, tt.wantErr)
 
@@ -70,6 +65,39 @@ func TestNLP_Tokenize(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NLP.Tokenize() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNLP_TokenizeEntities(t *testing.T) {
+	type fields struct {
+		text     string
+		entities []string
+		punct    bool
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    [][]string
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			nlp := &NLP{
+				text:     tt.fields.text,
+				entities: tt.fields.entities,
+				punct:    tt.fields.punct,
+			}
+			got, err := nlp.TokenizeEntities()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NLP.TokenizeEntities() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NLP.TokenizeEntities() = %v, want %v", got, tt.want)
 			}
 		})
 	}

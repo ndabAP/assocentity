@@ -9,13 +9,13 @@ import (
 
 // Assoc returns the entity distances
 func Assoc(j tokenize.Joiner, tokenizer tokenize.Tokenizer, entities []string) (map[string]float64, error) {
-	joined, err := j.Join(tokenizer)
+	err := j.Join(tokenizer)
 	if err != nil {
 		return nil, err
 	}
 
 	var distAccum = make(map[string][]float64)
-	joinedTraverser := generator.New(joined)
+	joinedTraverser := generator.New(j.Tokens())
 	for joinedTraverser.Next() {
 		// Ignore entities
 		if isInSlice(joinedTraverser.CurrElem(), entities) {
@@ -25,7 +25,7 @@ func Assoc(j tokenize.Joiner, tokenizer tokenize.Tokenizer, entities []string) (
 		var dist float64
 
 		// Iterate positive direction
-		posTraverser := generator.New(joined)
+		posTraverser := generator.New(j.Tokens())
 		posTraverser.SetPos(joinedTraverser.CurrPos())
 		for posTraverser.Next() {
 			if isInSlice(posTraverser.CurrElem(), entities) {
@@ -36,8 +36,9 @@ func Assoc(j tokenize.Joiner, tokenizer tokenize.Tokenizer, entities []string) (
 		}
 
 		dist = 0
+
 		// Iterate negative direction
-		negTraverser := generator.New(joined)
+		negTraverser := generator.New(j.Tokens())
 		negTraverser.SetPos(joinedTraverser.CurrPos())
 		for negTraverser.Prev() {
 			if isInSlice(negTraverser.CurrElem(), entities) {

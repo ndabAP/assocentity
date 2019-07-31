@@ -45,7 +45,7 @@ func TestDefaultJoin_Join(t *testing.T) {
 	}{
 		{
 			name: "multiple entities (two occurrences)",
-			dm:   &DefaultJoin{sep: " "},
+			dm:   &DefaultJoin{tokens: []string{}, sep: " "},
 			args: args{
 				new(tokenizer),
 			},
@@ -54,7 +54,7 @@ func TestDefaultJoin_Join(t *testing.T) {
 		},
 		{
 			name: "one entity (one occurrence)",
-			dm:   &DefaultJoin{sep: " "},
+			dm:   &DefaultJoin{tokens: []string{}, sep: " "},
 			args: args{
 				new(tokenizer),
 			},
@@ -63,7 +63,7 @@ func TestDefaultJoin_Join(t *testing.T) {
 		},
 		{
 			name: "one entity (one occurrence, twice)",
-			dm:   &DefaultJoin{sep: " "},
+			dm:   &DefaultJoin{tokens: []string{}, sep: " "},
 			args: args{
 				new(tokenizer),
 			},
@@ -72,7 +72,7 @@ func TestDefaultJoin_Join(t *testing.T) {
 		},
 		{
 			name: "one entity (multiple occurrences)",
-			dm:   &DefaultJoin{sep: " "},
+			dm:   &DefaultJoin{tokens: []string{}, sep: " "},
 			args: args{
 				new(tokenizer),
 			},
@@ -81,7 +81,7 @@ func TestDefaultJoin_Join(t *testing.T) {
 		},
 		{
 			name: "multiple entities (one occurrence)",
-			dm:   &DefaultJoin{sep: " "},
+			dm:   &DefaultJoin{tokens: []string{}, sep: " "},
 			args: args{
 				new(tokenizer),
 			},
@@ -92,13 +92,13 @@ func TestDefaultJoin_Join(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			dm := tt.dm
-			got, err := dm.Join(tt.args.tok)
+			err := dm.Join(tt.args.tok)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DefaultMultiplex.Multiplex() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("DefaultMultiplex.Multiplex() = %v, want %v", got, tt.want)
+			if !reflect.DeepEqual(dm.tokens, tt.want) {
+				t.Errorf("DefaultMultiplex.Multiplex() = %v, want %v", dm.tokens, tt.want)
 			}
 		})
 

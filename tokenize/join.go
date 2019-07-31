@@ -8,29 +8,31 @@ import (
 
 // Joiner joines a tokenizer
 type Joiner interface {
-	Join(Tokenizer) ([]string, error)
+	Join(Tokenizer) error
+	Tokens() []string
 }
 
 // DefaultJoin is the default joiner
 type DefaultJoin struct {
-	sep string // Seperator
+	tokens []string
+	sep    string // Seperator
 }
 
 // NewDefaultJoin returns a new default join
-func NewDefaultJoin(sep string) DefaultJoin {
-	return DefaultJoin{sep}
+func NewDefaultJoin(sep string) *DefaultJoin {
+	return &DefaultJoin{[]string{}, sep}
 }
 
 // Join joins strings in a string slice
-func (dm *DefaultJoin) Join(tok Tokenizer) ([]string, error) {
+func (dj *DefaultJoin) Join(tok Tokenizer) error {
 	textTokens, err := tok.TokenizeText()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	entityTokens, err := tok.TokenizeEntities()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	textTraverser := generator.New(textTokens)
@@ -74,8 +76,15 @@ func (dm *DefaultJoin) Join(tok Tokenizer) ([]string, error) {
 			}
 		}
 
-		textTraverser.SetPos(currTextIdx)
+		textTraverser.SetPos(currTextIdx + 1)
 	}
 
-	return textTokens, nil
+	dj.tokens = textTokens
+
+	return nil
+}
+
+// Tokens returns the joined tokens
+func (dj *DefaultJoin) Tokens() []string {
+	return dj.tokens
 }

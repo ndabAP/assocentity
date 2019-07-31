@@ -1,6 +1,7 @@
 package assocentity
 
 import (
+	"log"
 	"reflect"
 	"testing"
 
@@ -17,10 +18,18 @@ func (t *tokenizer) TokenizeEntities() ([][]string, error) {
 	return entities[currPos], nil
 }
 
-type joiner struct{}
+type joiner struct {
+	tokens []string
+}
 
-func (j *joiner) Join(t tokenize.Tokenizer) ([]string, error) {
-	return joins[currPos], nil
+func (j *joiner) Join(t tokenize.Tokenizer) error {
+	j.tokens = joins[currPos]
+
+	return nil
+}
+
+func (j *joiner) Tokens() []string {
+	return j.tokens
 }
 
 var texts = [][]string{
@@ -149,5 +158,45 @@ func TestAssoc(t *testing.T) {
 		})
 
 		currPos++
+	}
+}
+
+func TestAssocIntegration(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
+	}
+
+	const (
+		credentialsFile = "configs/google_nlp_service_account.json"
+		sep             = " "
+	)
+
+	text := "Punchinello wanted Payne? He'd see the pain."
+	entities := []string{"Punchinello", "Payne"}
+
+	nlp, err := tokenize.NewNLP(credentialsFile, text, entities, false)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dj := tokenize.NewDefaultJoin(sep)
+	if err = dj.Join(nlp); err != nil {
+		log.Fatal(err)
+	}
+
+	got, err := Assoc(dj, nlp, entities)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(got, map[string]float64{
+		"wanted": 1,
+		"He":     2,
+		"'d":     3,
+		"see":    4,
+		"the":    5,
+		"pain":   6,
+	}) {
+		t.Errorf("Assoc() = %v, want %v", got, map[string]float64{})
 	}
 }

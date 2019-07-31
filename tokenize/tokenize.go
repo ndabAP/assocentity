@@ -42,21 +42,21 @@ func NewNLP(credentialsFile, text string, entities []string, punct bool) (*NLP, 
 	}, nil
 }
 
-// Tokenize tokenizes a text
-func (nlp *NLP) Tokenize() ([]string, error) {
+// TokenizeText tokenizes a text
+func (nlp *NLP) TokenizeText() ([]string, error) {
 	return nlp.tokenize(nlp.text, nlp.punct)
 }
 
-// TokenizedNested returns nested tokenized entities
-func (nlp *NLP) TokenizedNested() ([][]string, error) {
+// TokenizeEntities returns nested tokenized entities
+func (nlp *NLP) TokenizeEntities() ([][]string, error) {
 	var tokenizedEntities [][]string
-	for idx, entity := range nlp.entities {
+	for _, entity := range nlp.entities {
 		tokenizedEntity, err := nlp.tokenize(entity, nlp.punct)
 		if err != nil {
 			return nil, err
 		}
 
-		tokenizedEntities[idx] = tokenizedEntity
+		tokenizedEntities = append(tokenizedEntities, tokenizedEntity)
 	}
 
 	return tokenizedEntities, nil
@@ -67,7 +67,7 @@ func (nlp *NLP) tokenize(text string, punct bool) ([]string, error) {
 	resp, err := client.AnnotateText(ctx, &languagepb.AnnotateTextRequest{
 		Document: &languagepb.Document{
 			Source: &languagepb.Document_Content{
-				Content: nlp.text,
+				Content: text,
 			},
 			Type: languagepb.Document_PLAIN_TEXT,
 		},

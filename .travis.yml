@@ -4,4 +4,4 @@ env:
 go:
   - 1.12.x
 script:
-  - go test ./...
+  - go test ./... -short
