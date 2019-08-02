@@ -82,17 +82,17 @@ func (nlp *NLP) tokenize(text string, punct bool) ([]string, error) {
 	}
 
 	// Holds the tokenized text
-	var tokenizedText []string
-	for _, v := range resp.GetTokens() {
+	var tokenized []string
+	for _, t := range resp.GetTokens() {
 		// Check for punctation
 		if nlp.punct {
-			tokenizedText = append(tokenizedText, v.GetText().GetContent())
+			tokenized = append(tokenized, t.GetText().GetContent())
 		} else {
-			if v.PartOfSpeech.Tag != languagepb.PartOfSpeech_PUNCT {
-				tokenizedText = append(tokenizedText, v.GetText().GetContent())
+			if t.PartOfSpeech.Tag != languagepb.PartOfSpeech_PUNCT {
+				tokenized = append(tokenized, t.GetText().GetContent())
 			}
 		}
 	}
 
-	return tokenizedText, nil
+	return tokenized, nil
 }
