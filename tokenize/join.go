@@ -38,11 +38,10 @@ func (dj *DefaultJoin) Join(tok Tokenizer) error {
 	textTraverser := generator.New(textTokens)
 	// For every text token
 	for textTraverser.Next() {
-		currTextIdx := textTraverser.CurrPos()
+		textIdx := textTraverser.CurrPos()
 		// For every tokenized entity
-		for idx := range entityTokens {
-			currEntityIdx := idx
-			entityTraverser := generator.New(entityTokens[currEntityIdx])
+		for entityIdx := range entityTokens {
+			entityTraverser := generator.New(entityTokens[entityIdx])
 
 			// Skip single value entities
 			if entityTraverser.Len() == 1 {
@@ -69,14 +68,14 @@ func (dj *DefaultJoin) Join(tok Tokenizer) error {
 
 			if isEntity {
 				// Merge the entity
-				textTokens[currTextIdx] = strings.Join(entityTokens[currEntityIdx], dj.sep)
+				textTokens[textIdx] = strings.Join(entityTokens[entityIdx], dj.sep)
 				// Remove text tokens that contain the entity
-				idx := currTextIdx + 1
+				idx := textIdx + 1
 				textTokens = append(textTokens[:idx], textTokens[idx+entityTraverser.Len()-1:]...)
 			}
 		}
 
-		textTraverser.SetPos(currTextIdx + 1)
+		textTraverser.SetPos(textIdx + 1)
 	}
 
 	dj.tokens = textTokens

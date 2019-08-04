@@ -234,14 +234,14 @@ func TestAssocIntegration2(t *testing.T) {
 
 	wanted := map[string]float64{
 		",":      3,
-		".":      7,
-		"Chief":  3,
-		"Deputy": 3,
-		"NYPD":   6,
-		"from":   4,
-		"is":     3,
-		"the":    5,
 		"this":   3,
+		"Deputy": 3,
+		"Chief":  3,
+		"is":     3,
+		"from":   4,
+		"the":    5,
+		"NYPD":   6,
+		".":      7,
 	}
 	if !reflect.DeepEqual(got, wanted) {
 		t.Errorf("Assoc() = %v, want %v", got, wanted)

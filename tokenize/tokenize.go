@@ -62,19 +62,7 @@ func (nlp *NLP) TokenizeEntities() ([][]string, error) {
 
 // tokenize does the actual tokenization work
 func (nlp *NLP) tokenize(text string) ([]string, error) {
-	resp, err := client.AnnotateText(ctx, &languagepb.AnnotateTextRequest{
-		Document: &languagepb.Document{
-			Source: &languagepb.Document_Content{
-				Content: text,
-			},
-			Type: languagepb.Document_PLAIN_TEXT,
-		},
-		Features: &languagepb.AnnotateTextRequest_Features{
-			ExtractSyntax: true,
-		},
-		EncodingType: languagepb.EncodingType_UTF8,
-	})
-
+	resp, err := nlp.req(text)
 	if err != nil {
 		return nil, err
 	}
@@ -86,4 +74,20 @@ func (nlp *NLP) tokenize(text string) ([]string, error) {
 	}
 
 	return tokenized, nil
+}
+
+// req sends a req to the Google NLP server
+func (nlp *NLP) req(text string) (*languagepb.AnnotateTextResponse, error) {
+	return client.AnnotateText(ctx, &languagepb.AnnotateTextRequest{
+		Document: &languagepb.Document{
+			Source: &languagepb.Document_Content{
+				Content: text,
+			},
+			Type: languagepb.Document_PLAIN_TEXT,
+		},
+		Features: &languagepb.AnnotateTextRequest_Features{
+			ExtractSyntax: true,
+		},
+		EncodingType: languagepb.EncodingType_UTF8,
+	})
 }

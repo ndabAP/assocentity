@@ -49,13 +49,13 @@ func Do(j tokenize.Joiner, tokenizer tokenize.Tokenizer, entities []string) (map
 		}
 	}
 
-	assoccentities := make(map[string]float64)
+	assoccEntities := make(map[string]float64)
 	// Calculate the distances
 	for elem, dist := range distAccum {
-		assoccentities[elem] = avg(dist)
+		assoccEntities[elem] = avg(dist)
 	}
 
-	return assoccentities, nil
+	return assoccEntities, nil
 }
 
 // Checks if string is in slice
