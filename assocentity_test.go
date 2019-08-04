@@ -147,7 +147,7 @@ func TestAssoc(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Assoc(tt.args.j, tt.args.tokenizer, tt.args.entities)
+			got, err := Do(tt.args.j, tt.args.tokenizer, tt.args.entities)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Assoc() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -184,7 +184,7 @@ func TestAssocIntegration1(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	got, err := Assoc(dj, nlp, entities)
+	got, err := Do(dj, nlp, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -227,7 +227,7 @@ func TestAssocIntegration2(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	got, err := Assoc(dj, nlp, entities)
+	got, err := Do(dj, nlp, entities)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -7,8 +7,8 @@ import (
 	"github.com/ndabAP/assocentity/v3/tokenize"
 )
 
-// Assoc returns the entity distances
-func Assoc(j tokenize.Joiner, tokenizer tokenize.Tokenizer, entities []string) (map[string]float64, error) {
+// Do returns the entity distances
+func Do(j tokenize.Joiner, tokenizer tokenize.Tokenizer, entities []string) (map[string]float64, error) {
 	err := j.Join(tokenizer)
 	if err != nil {
 		return nil, err
