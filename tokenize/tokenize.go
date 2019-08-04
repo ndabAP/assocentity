@@ -22,11 +22,10 @@ var ctx context.Context
 type NLP struct {
 	text     string
 	entities []string
-	punct    bool // Punctation
 }
 
 // NewNLP returns a new NLP instance
-func NewNLP(credentialsFile, text string, entities []string, punct bool) (*NLP, error) {
+func NewNLP(credentialsFile, text string, entities []string) (*NLP, error) {
 	ctx = context.Background()
 
 	// Create one client for all calls
@@ -38,20 +37,19 @@ func NewNLP(credentialsFile, text string, entities []string, punct bool) (*NLP, 
 	return &NLP{
 		text:     text,
 		entities: entities,
-		punct:    punct,
 	}, nil
 }
 
 // TokenizeText tokenizes a text
 func (nlp *NLP) TokenizeText() ([]string, error) {
-	return nlp.tokenize(nlp.text, nlp.punct)
+	return nlp.tokenize(nlp.text)
 }
 
 // TokenizeEntities returns nested tokenized entities
 func (nlp *NLP) TokenizeEntities() ([][]string, error) {
 	var tokenizedEntities [][]string
 	for _, entity := range nlp.entities {
-		tokenizedEntity, err := nlp.tokenize(entity, nlp.punct)
+		tokenizedEntity, err := nlp.tokenize(entity)
 		if err != nil {
 			return nil, err
 		}
@@ -63,7 +61,7 @@ func (nlp *NLP) TokenizeEntities() ([][]string, error) {
 }
 
 // tokenize does the actual tokenization work
-func (nlp *NLP) tokenize(text string, punct bool) ([]string, error) {
+func (nlp *NLP) tokenize(text string) ([]string, error) {
 	resp, err := client.AnnotateText(ctx, &languagepb.AnnotateTextRequest{
 		Document: &languagepb.Document{
 			Source: &languagepb.Document_Content{
@@ -84,14 +82,7 @@ func (nlp *NLP) tokenize(text string, punct bool) ([]string, error) {
 	// Holds the tokenized text
 	var tokenized []string
 	for _, t := range resp.GetTokens() {
-		// Check for punctation
-		if nlp.punct {
-			tokenized = append(tokenized, t.GetText().GetContent())
-		} else {
-			if t.PartOfSpeech.Tag != languagepb.PartOfSpeech_PUNCT {
-				tokenized = append(tokenized, t.GetText().GetContent())
-			}
-		}
+		tokenized = append(tokenized, t.GetText().GetContent())
 	}
 
 	return tokenized, nil

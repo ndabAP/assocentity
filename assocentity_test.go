@@ -161,7 +161,7 @@ func TestAssoc(t *testing.T) {
 	}
 }
 
-func TestAssocIntegration(t *testing.T) {
+func TestAssocIntegration1(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
@@ -174,7 +174,7 @@ func TestAssocIntegration(t *testing.T) {
 	text := "Punchinello wanted Payne? He'd see the pain."
 	entities := []string{"Punchinello", "Payne"}
 
-	nlp, err := tokenize.NewNLP(credentialsFile, text, entities, false)
+	nlp, err := tokenize.NewNLP(credentialsFile, text, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -189,14 +189,61 @@ func TestAssocIntegration(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	if !reflect.DeepEqual(got, map[string]float64{
+	wanted := map[string]float64{
 		"wanted": 1,
-		"He":     2,
-		"'d":     3,
-		"see":    4,
+		"?":      2,
+		"He":     3,
+		"'d":     4,
+		"see":    5,
+		"the":    6,
+		"pain":   7,
+		".":      8,
+	}
+	if !reflect.DeepEqual(got, wanted) {
+		t.Errorf("Assoc() = %v, want %v", got, wanted)
+	}
+}
+
+func TestAssocIntegration2(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
+	}
+
+	const (
+		credentialsFile = "configs/google_nlp_service_account.json"
+		sep             = " "
+	)
+
+	text := "Max Payne, this is Deputy Chief Jim Bravura from the NYPD."
+	entities := []string{"Max Payne", "Jim Bravura"}
+
+	nlp, err := tokenize.NewNLP(credentialsFile, text, entities)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dj := tokenize.NewDefaultJoin(sep)
+	if err = dj.Join(nlp); err != nil {
+		log.Fatal(err)
+	}
+
+	got, err := Assoc(dj, nlp, entities)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	wanted := map[string]float64{
+		",":      3,
+		".":      7,
+		"Chief":  3,
+		"Deputy": 3,
+		"NYPD":   6,
+		"from":   4,
+		"is":     3,
 		"the":    5,
-		"pain":   6,
-	}) {
-		t.Errorf("Assoc() = %v, want %v", got, map[string]float64{})
+		"this":   3,
+	}
+	if !reflect.DeepEqual(got, wanted) {
+		t.Errorf("Assoc() = %v, want %v", got, wanted)
 	}
 }

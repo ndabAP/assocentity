@@ -15,7 +15,6 @@ func TestNLP_TokenizeText(t *testing.T) {
 	type fields struct {
 		text     string
 		entities []string
-		punct    bool
 	}
 	tests := []struct {
 		name    string
@@ -24,21 +23,10 @@ func TestNLP_TokenizeText(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "no punctation",
-			fields: fields{
-				text:     "No Payne, No Gain.",
-				entities: []string{"Payne"},
-				punct:    false,
-			},
-			want:    []string{"No", "Payne", "No", "Gain"},
-			wantErr: false,
-		},
-		{
 			name: "punctation",
 			fields: fields{
 				text:     "No Payne, No Gain.",
 				entities: []string{"Payne"},
-				punct:    true,
 			},
 			want:    []string{"No", "Payne", ",", "No", "Gain", "."},
 			wantErr: false,
@@ -50,7 +38,6 @@ func TestNLP_TokenizeText(t *testing.T) {
 				credentialsFile,
 				tt.fields.text,
 				tt.fields.entities,
-				tt.fields.punct,
 			)
 			if err != nil {
 				t.Errorf("NLP.Tokenize() error = %v", err)
@@ -78,7 +65,6 @@ func TestNLP_TokenizeEntities(t *testing.T) {
 	type fields struct {
 		text     string
 		entities []string
-		punct    bool
 	}
 	tests := []struct {
 		name    string
@@ -91,7 +77,6 @@ func TestNLP_TokenizeEntities(t *testing.T) {
 			fields: fields{
 				text:     "You're in a computer game, Max.",
 				entities: []string{"Max"},
-				punct:    false,
 			},
 			want:    [][]string{{"Max"}},
 			wantErr: false,
@@ -101,7 +86,6 @@ func TestNLP_TokenizeEntities(t *testing.T) {
 			fields: fields{
 				text:     "Mona Sax. Lisa's evil twin.",
 				entities: []string{"Mona Sax", "Mona"},
-				punct:    false,
 			},
 			want:    [][]string{{"Mona", "Sax"}, {"Mona"}},
 			wantErr: false,
@@ -112,7 +96,6 @@ func TestNLP_TokenizeEntities(t *testing.T) {
 			nlp := &NLP{
 				text:     tt.fields.text,
 				entities: tt.fields.entities,
-				punct:    tt.fields.punct,
 			}
 			got, err := nlp.TokenizeEntities()
 			if (err != nil) != tt.wantErr {
