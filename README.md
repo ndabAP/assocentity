@@ -39,7 +39,7 @@ func main() {
 	entities := []string{"Punchinello", "Payne"}
 
     	// Create a NLP instance
-	nlp, err := tokenize.NewNLP(credentialsFile, text, entities, false)
+	nlp, err := tokenize.NewNLP(credentialsFile, text, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -56,7 +56,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(assocentities) // map[wanted:1 He:2 'd:3 see:4 the:5 pain:6]
+	fmt.Println(assocentities) // map[wanted:1 ?:2 He:3 'd:4 see:5 the:6 pain:7 .:8]
 }
 ```
 
