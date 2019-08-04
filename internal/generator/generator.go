@@ -81,6 +81,9 @@ func (g *Generator) SetPos(pos int) bool {
 	if len(g.slice) > pos {
 		g.pos = pos
 		g.el = g.slice[pos]
+	}
+
+	if pos == 0 {
 		g.init = true
 	}
 
