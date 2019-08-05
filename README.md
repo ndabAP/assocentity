@@ -11,7 +11,7 @@ Package assocentity returns the average distance from words to a given entity.
 ## Installation
 
 ```bash
-$ go get github.com/ndabAP/assocentity/v3
+$ go get github.com/ndabAP/assocentity/v4
 ```
 
 ## Prerequisites
@@ -25,8 +25,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ndabAP/assocentity/v3/tokenize"
-	"github.com/ndabAP/assocentity/v3"
+	"github.com/ndabAP/assocentity/v4/tokenize"
+	"github.com/ndabAP/assocentity/v4"
 )
 
 const (
