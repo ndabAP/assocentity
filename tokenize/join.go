@@ -3,7 +3,7 @@ package tokenize
 import (
 	"strings"
 
-	"github.com/ndabAP/assocentity/v3/internal/iterator"
+	"github.com/ndabAP/assocentity/v4/internal/iterator"
 )
 
 // Joiner joines a tokenizer

@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ndabAP/assocentity/v3/tokenize"
+	"github.com/ndabAP/assocentity/v4/tokenize"
 )
 
 type tokenizer struct{}

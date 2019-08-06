@@ -3,8 +3,8 @@ package assocentity
 import (
 	"math"
 
-	"github.com/ndabAP/assocentity/v3/internal/iterator"
-	"github.com/ndabAP/assocentity/v3/tokenize"
+	"github.com/ndabAP/assocentity/v4/internal/iterator"
+	"github.com/ndabAP/assocentity/v4/tokenize"
 )
 
 // Do returns the entity distances
