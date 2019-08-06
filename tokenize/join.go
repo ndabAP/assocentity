@@ -35,13 +35,13 @@ func (dj *DefaultJoin) Join(tok Tokenizer) error {
 		return err
 	}
 
-	textTraverser := iterator.New(textTokens)
+	textTraverser := iterator.New(&textTokens)
 	// For every text token
 	for textTraverser.Next() {
 		textIdx := textTraverser.CurrPos()
 		// For every tokenized entity
 		for entityIdx := range entityTokens {
-			entityTraverser := iterator.New(entityTokens[entityIdx])
+			entityTraverser := iterator.New(&entityTokens[entityIdx])
 
 			// Skip single value entities
 			if entityTraverser.Len() == 1 {
@@ -57,13 +57,8 @@ func (dj *DefaultJoin) Join(tok Tokenizer) error {
 					break
 				}
 
-				isEntity = textTraverser.CurrElem() == entityTraverser.CurrElem()
 				// Check for next text token
 				textTraverser.Next()
-
-				if !isEntity {
-					break
-				}
 			}
 
 			if isEntity {
@@ -75,7 +70,7 @@ func (dj *DefaultJoin) Join(tok Tokenizer) error {
 			}
 		}
 
-		textTraverser.SetPos(textIdx + 1)
+		textTraverser.SetPos(textIdx)
 	}
 
 	dj.tokens = textTokens

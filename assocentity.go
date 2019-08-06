@@ -15,7 +15,8 @@ func Do(j tokenize.Joiner, tokenizer tokenize.Tokenizer, entities []string) (map
 	}
 
 	var distAccum = make(map[string][]float64)
-	joinedTraverser := iterator.New(j.Tokens())
+	tok := j.Tokens()
+	joinedTraverser := iterator.New(&tok)
 	for joinedTraverser.Next() {
 		// Ignore entities
 		if isInSlice(joinedTraverser.CurrElem(), entities) {
@@ -25,7 +26,7 @@ func Do(j tokenize.Joiner, tokenizer tokenize.Tokenizer, entities []string) (map
 		var dist float64
 
 		// Iterate positive direction
-		posTraverser := iterator.New(j.Tokens())
+		posTraverser := iterator.New(&tok)
 		posTraverser.SetPos(joinedTraverser.CurrPos())
 		for posTraverser.Next() {
 			if isInSlice(posTraverser.CurrElem(), entities) {
@@ -38,7 +39,7 @@ func Do(j tokenize.Joiner, tokenizer tokenize.Tokenizer, entities []string) (map
 		dist = 0
 
 		// Iterate negative direction
-		negTraverser := iterator.New(j.Tokens())
+		negTraverser := iterator.New(&tok)
 		negTraverser.SetPos(joinedTraverser.CurrPos())
 		for negTraverser.Prev() {
 			if isInSlice(negTraverser.CurrElem(), entities) {
