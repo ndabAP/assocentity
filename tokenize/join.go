@@ -3,7 +3,7 @@ package tokenize
 import (
 	"strings"
 
-	"github.com/ndabAP/assocentity/v3/internal/generator"
+	"github.com/ndabAP/assocentity/v3/internal/iterator"
 )
 
 // Joiner joines a tokenizer
@@ -35,13 +35,13 @@ func (dj *DefaultJoin) Join(tok Tokenizer) error {
 		return err
 	}
 
-	textTraverser := generator.New(textTokens)
+	textTraverser := iterator.New(textTokens)
 	// For every text token
 	for textTraverser.Next() {
 		textIdx := textTraverser.CurrPos()
 		// For every tokenized entity
 		for entityIdx := range entityTokens {
-			entityTraverser := generator.New(entityTokens[entityIdx])
+			entityTraverser := iterator.New(entityTokens[entityIdx])
 
 			// Skip single value entities
 			if entityTraverser.Len() == 1 {

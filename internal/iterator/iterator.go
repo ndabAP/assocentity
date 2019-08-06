@@ -1,16 +1,16 @@
-package generator
+package iterator
 
-// Generator represents a generator
-type Generator struct {
+// Iterator represents a iterator
+type Iterator struct {
 	slice []string
 	pos   int
 	el    string
 	init  bool
 }
 
-// New returns a new generator
-func New(slice []string) *Generator {
-	return &Generator{
+// New returns a new iterator
+func New(slice []string) *Iterator {
+	return &Iterator{
 		slice,
 		0,
 		slice[0],
@@ -19,7 +19,7 @@ func New(slice []string) *Generator {
 }
 
 // Next sets the next element
-func (g *Generator) Next() bool {
+func (g *Iterator) Next() bool {
 	if g.pos+1 > len(g.slice)-1 {
 		return false
 	}
@@ -37,7 +37,7 @@ func (g *Generator) Next() bool {
 }
 
 // Prev sets the next element
-func (g *Generator) Prev() bool {
+func (g *Iterator) Prev() bool {
 	if g.pos-1 < 0 {
 		return false
 	}
@@ -54,30 +54,30 @@ func (g *Generator) Prev() bool {
 	return true
 }
 
-// Reset resets the generator
-func (g *Generator) Reset() {
+// Reset resets the iterator
+func (g *Iterator) Reset() {
 	g.pos = 0
 	g.el = g.slice[0]
 	g.init = true
 }
 
 // CurrPos returns the current position
-func (g *Generator) CurrPos() int {
+func (g *Iterator) CurrPos() int {
 	return g.pos
 }
 
 // CurrElem returns the current element
-func (g *Generator) CurrElem() string {
+func (g *Iterator) CurrElem() string {
 	return g.el
 }
 
 // Len returns the length
-func (g *Generator) Len() int {
+func (g *Iterator) Len() int {
 	return len(g.slice)
 }
 
 // SetPos sets the position
-func (g *Generator) SetPos(pos int) bool {
+func (g *Iterator) SetPos(pos int) bool {
 	if len(g.slice) > pos {
 		g.pos = pos
 		g.el = g.slice[pos]

@@ -1,10 +1,10 @@
-package generator
+package iterator
 
 import (
 	"testing"
 )
 
-func TestGenerator_Next(t *testing.T) {
+func TestIterator_Next(t *testing.T) {
 	type fields struct {
 		slice []string
 		pos   int
@@ -39,20 +39,20 @@ func TestGenerator_Next(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := &Generator{
+			g := &Iterator{
 				slice: tt.fields.slice,
 				pos:   tt.fields.pos,
 				el:    tt.fields.el,
 				init:  tt.fields.init,
 			}
 			if got := g.Next(); got != tt.want {
-				t.Errorf("Generator.Next() = %v, want %v", got, tt.want)
+				t.Errorf("Iterator.Next() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestGenerator_Prev(t *testing.T) {
+func TestIterator_Prev(t *testing.T) {
 	type fields struct {
 		slice []string
 		pos   int
@@ -87,20 +87,20 @@ func TestGenerator_Prev(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := &Generator{
+			g := &Iterator{
 				slice: tt.fields.slice,
 				pos:   tt.fields.pos,
 				el:    tt.fields.el,
 				init:  tt.fields.init,
 			}
 			if got := g.Prev(); got != tt.want {
-				t.Errorf("Generator.Prev() = %v, want %v", got, tt.want)
+				t.Errorf("Iterator.Prev() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestGenerator_SetPos(t *testing.T) {
+func TestIterator_SetPos(t *testing.T) {
 	type fields struct {
 		slice []string
 		pos   int
@@ -145,14 +145,14 @@ func TestGenerator_SetPos(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := &Generator{
+			g := &Iterator{
 				slice: tt.fields.slice,
 				pos:   tt.fields.pos,
 				el:    tt.fields.el,
 				init:  tt.fields.init,
 			}
 			if got := g.SetPos(tt.args.pos); got != tt.want {
-				t.Errorf("Generator.SetPos() = %v, want %v", got, tt.want)
+				t.Errorf("Iterator.SetPos() = %v, want %v", got, tt.want)
 			}
 		})
 	}
