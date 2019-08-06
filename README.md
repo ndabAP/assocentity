@@ -11,7 +11,7 @@ Package assocentity returns the average distance from words to a given entity.
 ## Installation
 
 ```bash
-$ go get github.com/ndabAP/assocentity/v3
+$ go get github.com/ndabAP/assocentity/v4
 ```
 
 ## Prerequisites
@@ -25,8 +25,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ndabAP/assocentity/v3/tokenize"
-	"github.com/ndabAP/assocentity/v3"
+	"github.com/ndabAP/assocentity/v4/tokenize"
+	"github.com/ndabAP/assocentity/v4"
 )
 
 const (
@@ -50,13 +50,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-    	// Assoc calculates the average distances
-	assocentities, err := assocentity.Assoc(dj, nlp, entities)
+    	// Do calculates the average distances
+	assocEntities, err := assocentity.Do(dj, nlp, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(assocentities) // map[wanted:1 ?:2 He:3 'd:4 see:5 the:6 pain:7 .:8]
+	fmt.Println(assocEntities) // map[wanted:1 ?:2 He:3 'd:4 see:5 the:6 pain:7 .:8]
 }
 ```
 
