@@ -31,9 +31,12 @@ github.com/hashicorp/golang-lru v0.5.1 h1:0hERBMJE1eitiLkihrMvRVBYAkpHzc/J3QdDN+
 github.com/hashicorp/golang-lru v0.5.1/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
 github.com/ndabAP/assocentity v1.0.0 h1:2Hvda8rMk9cCgEe4o4SMIzTKxrJ12mE79mDeE7SZeTI=
+github.com/ndabAP/assocentity/v3 v3.0.5/go.mod h1:LDnlG6Aq4n1AHp5gyRITtr3KrXewWQfolgYuiYvhD7c=
 github.com/ndabAP/assocentity/v3 v3.0.7 h1:1S9twR+AEkdzRZAf6ZmXFpF5+Uj52zhI1RTLxN+2xzU=
 github.com/ndabAP/assocentity/v3 v3.0.7/go.mod h1:LDnlG6Aq4n1AHp5gyRITtr3KrXewWQfolgYuiYvhD7c=
 github.com/ndabAP/assocentity/v4 v4.0.4 h1:MXMSBzOmBhpAVH/FkigR8DuIvn2RUvTBHpTur4WdxA4=
+github.com/ndabAP/assocentity/v4 v4.0.5 h1:kjs7ll5rEs5p0GbMW1dp3OSHAGpI2PtE+iAnOPZotUo=
+github.com/ndabAP/assocentity/v4 v4.0.5/go.mod h1:6vQUW9YkxmfhrrSf7Zya2RguHIWhKW53IDtGn1apvOs=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
 go.opencensus.io v0.22.0 h1:C9hSCOW830chIVkdja34wa6Ky+IzWllkUinR+BtRZd4=
 go.opencensus.io v0.22.0/go.mod h1:+kGneAE2xo2IficOXnaByMWTGM9T73dGwxeWcUqIpI8=

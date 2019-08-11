@@ -1,32 +1,23 @@
 package tokenize
 
 import (
-	"strings"
-
 	"github.com/ndabAP/assocentity/v5/internal/iterator"
 )
 
-// Joiner joines a tokenizer taking the part of speech determinator into account
-type Joiner interface {
-	Join(PoSDetermer, Tokenizer) ([]string, error)
+// PoSDetermer determinates if part of speech tags should be deleted
+type PoSDetermer interface {
+	Determ(Tokenizer) ([]string, error)
 }
 
-// Join is the default joiner
-type Join struct {
-	sep string // Separator
-}
+// PoSDeterm represents the default part of speech determinator
+type PoSDeterm struct{ poS int }
 
-// NewJoin returns a new default join
-func NewJoin(sep string) *Join { return &Join{sep} }
+// NewPoSDetermer returns a new default part of speech determinator
+func NewPoSDetermer(poS int) *PoSDeterm { return &PoSDeterm{poS} }
 
-const (
-	// Whitespace is the default separator
-	Whitespace = " "
-)
-
-// Join joins strings in a string slice
-func (dj *Join) Join(dps PoSDetermer, tokenizer Tokenizer) ([]string, error) {
-	textTokens, err := dps.Determ(tokenizer)
+// Determ deterimantes if a part of speech tag should be deleted
+func (dps *PoSDeterm) Determ(tokenizer Tokenizer) ([]string, error) {
+	textTokens, err := tokenizer.TokenizeText()
 	if err != nil {
 		return []string{}, err
 	}
@@ -60,13 +51,9 @@ func (dj *Join) Join(dps PoSDetermer, tokenizer Tokenizer) ([]string, error) {
 			}
 
 			entityTraverser = iterator.New(e)
-			// Skip single value entities
-			if entityTraverser.Len() == 1 {
-				break
-			}
-
+			// For every entity token
 			for entityTraverser.Next() {
-				isEntity = textTraverser.CurrElem().(string) == entityTraverser.CurrElem().(Token).Token
+				isEntity = textTraverser.CurrElem().(Token).Token == entityTraverser.CurrElem().(Token).Token
 				// Check if first text token matches the entity token
 				if !isEntity {
 					break
@@ -78,13 +65,9 @@ func (dj *Join) Join(dps PoSDetermer, tokenizer Tokenizer) ([]string, error) {
 
 			if isEntity {
 				entityTraverser.Reset()
-				var entity []string
 				for entityTraverser.Next() {
-					entity = append(entity, entityTraverser.CurrElem().(Token).Token)
+					tokens = append(tokens, entityTraverser.CurrElem().(Token).Token)
 				}
-
-				// Merge the entity
-				tokens = append(tokens, strings.Join(entity, dj.sep))
 
 				// Skip about the tokenized entity length
 				nextTextTraverserPos += entityTraverser.Len() - 1
@@ -95,12 +78,14 @@ func (dj *Join) Join(dps PoSDetermer, tokenizer Tokenizer) ([]string, error) {
 
 		textTraverser.SetPos(nextTextTraverserPos)
 
-		// Entity is already joined
+		// Entity already added
 		if isEntity {
 			continue
 		}
 
-		tokens = append(tokens, textTraverser.CurrElem().(string))
+		if textTraverser.CurrElem().(Token).PoS&dps.poS != 0 {
+			tokens = append(tokens, textTraverser.CurrElem().(Token).Token)
+		}
 	}
 
 	return tokens, nil
