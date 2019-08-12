@@ -1,34 +1,74 @@
 package tokenize
 
 import (
+	"log"
+	"os"
 	"reflect"
 	"testing"
+
+	"github.com/joho/godotenv"
 )
 
-const credentialsFile = "../configs/google_nlp_service_account.json"
+var credentialsFile string
 
-func TestNLP_TokenizeText(t *testing.T) {
+func init() {
+	if err := godotenv.Load("../.env"); err != nil {
+		log.Fatal(err)
+	}
+
+	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
+}
+
+func TestNLP_tokenize(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
-
 	type fields struct {
-		text     string
-		entities []string
+		text              string
+		entities          []string
+		tokenizedText     []Token
+		tokenizedEntities [][]Token
 	}
 	tests := []struct {
 		name    string
 		fields  fields
-		want    []string
+		want    []Token
 		wantErr bool
 	}{
 		{
-			name: "punctation",
+			name: "three elements",
 			fields: fields{
-				text:     "No Payne, No Gain.",
-				entities: []string{"Payne"},
+				text:              "Punchinello was burning to get me",
+				entities:          []string{"Punchinello"},
+				tokenizedText:     []Token{},
+				tokenizedEntities: [][]Token{{}},
 			},
-			want:    []string{"No", "Payne", ",", "No", "Gain", "."},
+			want: []Token{
+				Token{
+					Token: "Punchinello",
+					PoS:   NOUN,
+				},
+				Token{
+					Token: "was",
+					PoS:   VERB,
+				},
+				Token{
+					Token: "burning",
+					PoS:   VERB,
+				},
+				Token{
+					Token: "to",
+					PoS:   PRT,
+				},
+				Token{
+					Token: "get",
+					PoS:   VERB,
+				},
+				Token{
+					Token: "me",
+					PoS:   PRON,
+				},
+			},
 			wantErr: false,
 		},
 	}
@@ -39,71 +79,18 @@ func TestNLP_TokenizeText(t *testing.T) {
 				tt.fields.text,
 				tt.fields.entities,
 			)
-			if err != nil {
-				t.Errorf("NLP.Tokenize() error = %v", err)
-
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NLP.NewNLP() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			got, err := nlp.TokenizeText()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("NLP.Tokenize() error = %v, wantErr %v", err, tt.wantErr)
 
+			got, err := nlp.tokenize(tt.fields.text)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NLP.tokenize() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NLP.Tokenize() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestNLP_TokenizeEntities(t *testing.T) {
-	if testing.Short() {
-		t.SkipNow()
-	}
-
-	type fields struct {
-		text     string
-		entities []string
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		want    [][]string
-		wantErr bool
-	}{
-		{
-			name: "one entitiy",
-			fields: fields{
-				text:     "You're in a computer game, Max.",
-				entities: []string{"Max"},
-			},
-			want:    [][]string{{"Max"}},
-			wantErr: false,
-		},
-		{
-			name: "two entities",
-			fields: fields{
-				text:     "Mona Sax. Lisa's evil twin.",
-				entities: []string{"Mona Sax", "Mona"},
-			},
-			want:    [][]string{{"Mona", "Sax"}, {"Mona"}},
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			nlp := &NLP{
-				text:     tt.fields.text,
-				entities: tt.fields.entities,
-			}
-			got, err := nlp.TokenizeEntities()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("NLP.TokenizeEntities() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NLP.TokenizeEntities() = %v, want %v", got, tt.want)
+				t.Errorf("NLP.TokenitokenizezeText() = %v, want %v", got, tt.want)
 			}
 		})
 	}

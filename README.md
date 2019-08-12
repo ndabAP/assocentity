@@ -11,12 +11,12 @@ Package assocentity returns the average distance from words to a given entity.
 ## Installation
 
 ```bash
-$ go get github.com/ndabAP/assocentity/v4
+$ go get github.com/ndabAP/assocentity/v5
 ```
 
 ## Prerequisites
 
-Sign-up for a Cloud Natural Language API service account key and download the generated JSON file. This equals the `credentialsFile` at the example below. You can also create your own tokenizer.
+Sign-up for a Cloud Natural Language API service account key and download the generated JSON file. This equals the `credentialsFile` at the example below. Don't commit that file.
 
 ## Usage
 
@@ -25,30 +25,26 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ndabAP/assocentity/v4/tokenize"
-	"github.com/ndabAP/assocentity/v4"
+	"github.com/ndabAP/assocentity/v5/tokenize"
+	"github.com/ndabAP/assocentity/v5"
 )
 
 const (
 	credentialsFile = "google_nlp_service_account.json"
-	sep             = " "
 )
 
 func main() {
 	text := "Punchinello wanted Payne? He'd see the pain."
 	entities := []string{"Punchinello", "Payne"}
 
-    	// Create a NLP instance
+	// Create a NLP instance
 	nlp, err := tokenize.NewNLP(credentialsFile, text, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-    	// Join merges the entities with a simple algorithm
-	dj := tokenize.NewDefaultJoin(sep)
-	if err = dj.Join(nlp); err != nil {
-		log.Fatal(err)
-	}
+	dps := tokenize.NewPoSDetermer(tokenize.ANY)
+	dj := tokenize.NewJoin(tokenize.Whitespace)
 
     	// Do calculates the average distances
 	assocEntities, err := assocentity.Do(dj, nlp, entities)

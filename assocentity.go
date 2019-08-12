@@ -3,47 +3,53 @@ package assocentity
 import (
 	"math"
 
-	"github.com/ndabAP/assocentity/v4/internal/iterator"
-	"github.com/ndabAP/assocentity/v4/tokenize"
+	"github.com/ndabAP/assocentity/v5/internal/iterator"
+	"github.com/ndabAP/assocentity/v5/tokenize"
 )
 
 // Do returns the entity distances
-func Do(j tokenize.Joiner, tokenizer tokenize.Tokenizer, entities []string) (map[string]float64, error) {
-	err := j.Join(tokenizer)
+func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, j tokenize.Joiner, entities []string) (map[string]float64, error) {
+	joined, err := j.Join(dps, tokenizer)
 	if err != nil {
-		return nil, err
+		return map[string]float64{}, err
 	}
 
 	var distAccum = make(map[string][]float64)
-	tok := j.Tokens()
-	joinedTraverser := iterator.New(&tok)
+
+	// Prepare for generic iterator
+	ji := make(iterator.Elements, len(joined))
+	for i, v := range joined {
+		ji[i] = v
+	}
+
+	joinedTraverser := iterator.New(ji)
 	for joinedTraverser.Next() {
+		joinedIdx := joinedTraverser.CurrPos()
 		// Ignore entities
-		if isInSlice(joinedTraverser.CurrElem(), entities) {
+		if isInSlice(joinedTraverser.CurrElem().(string), entities) {
 			continue
 		}
 
 		var dist float64
 
 		// Iterate positive direction
-		posTraverser := iterator.New(&tok)
-		posTraverser.SetPos(joinedTraverser.CurrPos())
+		posTraverser := iterator.New(ji)
+		posTraverser.SetPos(joinedIdx)
 		for posTraverser.Next() {
-			if isInSlice(posTraverser.CurrElem(), entities) {
-				distAccum[joinedTraverser.CurrElem()] = append(distAccum[joinedTraverser.CurrElem()], dist)
+			if isInSlice(posTraverser.CurrElem().(string), entities) {
+				distAccum[joinedTraverser.CurrElem().(string)] = append(distAccum[joinedTraverser.CurrElem().(string)], dist)
 			}
 
 			dist++
 		}
 
-		dist = 0
-
 		// Iterate negative direction
-		negTraverser := iterator.New(&tok)
-		negTraverser.SetPos(joinedTraverser.CurrPos())
+		dist = 0
+		negTraverser := iterator.New(ji)
+		negTraverser.SetPos(joinedIdx)
 		for negTraverser.Prev() {
-			if isInSlice(negTraverser.CurrElem(), entities) {
-				distAccum[joinedTraverser.CurrElem()] = append(distAccum[joinedTraverser.CurrElem()], dist)
+			if isInSlice(negTraverser.CurrElem().(string), entities) {
+				distAccum[joinedTraverser.CurrElem().(string)] = append(distAccum[joinedTraverser.CurrElem().(string)], dist)
 			}
 
 			dist++

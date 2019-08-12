@@ -5,103 +5,56 @@ import (
 	"testing"
 )
 
-type tokenizer struct{}
-
-func (t *tokenizer) TokenizeText() ([]string, error) {
-	return texts[currPos], nil
-}
-
-func (t *tokenizer) TokenizeEntities() ([][]string, error) {
-	return entities[currPos], nil
-}
-
-var texts = [][]string{
-	{"Vinnie", "Gognitti", "Just", "the", "man", "I", "'ve", "been", "killing", "to", "see", "Gognitti", "bailed"},
-	{"You", "can", "'t'", "win", "this", "one", "Max"},
-	{"Alex", "Alex"},
-	{"I", "'m", "Frankie", "The", "Bat", "Niagara"},
-	{"Where", "'s", "Lupino", "Bad", "start", "Vinnie"},
-}
-var entities = [][][]string{
-	{{"Vinnie", "Gognitti"}, {"Gognitti"}},
-	{{"Max"}},
-	{{"Alex"}},
-	{{"Frankie", "The", "Bat", "Niagara"}},
-	{{"Lupino"}, {"Vinnie"}},
-}
-
-var currPos int
-
-func TestDefaultJoin_Join(t *testing.T) {
+func TestNewJoin(t *testing.T) {
 	type args struct {
-		tok Tokenizer
+		sep string
+	}
+	tests := []struct {
+		name string
+		args args
+		want *Join
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := NewJoin(tt.args.sep); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewJoin() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestJoin_Join(t *testing.T) {
+	type fields struct {
+		sep string
+	}
+	type args struct {
+		dps       PoSDetermer
+		tokenizer Tokenizer
 	}
 	tests := []struct {
 		name    string
-		dm      *DefaultJoin
+		fields  fields
 		args    args
 		want    []string
 		wantErr bool
 	}{
-		{
-			name: "multiple entities (two occurrences)",
-			dm:   &DefaultJoin{tokens: []string{}, sep: " "},
-			args: args{
-				new(tokenizer),
-			},
-			want:    []string{"Vinnie Gognitti", "Just", "the", "man", "I", "'ve", "been", "killing", "to", "see", "Gognitti", "bailed"},
-			wantErr: false,
-		},
-		{
-			name: "one entity (one occurrence)",
-			dm:   &DefaultJoin{tokens: []string{}, sep: " "},
-			args: args{
-				new(tokenizer),
-			},
-			want:    []string{"You", "can", "'t'", "win", "this", "one", "Max"},
-			wantErr: false,
-		},
-		{
-			name: "one entity (one occurrence, twice)",
-			dm:   &DefaultJoin{tokens: []string{}, sep: " "},
-			args: args{
-				new(tokenizer),
-			},
-			want:    []string{"Alex", "Alex"},
-			wantErr: false,
-		},
-		{
-			name: "one entity (multiple occurrences)",
-			dm:   &DefaultJoin{tokens: []string{}, sep: " "},
-			args: args{
-				new(tokenizer),
-			},
-			want:    []string{"I", "'m", "Frankie The Bat Niagara"},
-			wantErr: false,
-		},
-		{
-			name: "multiple entities (one occurrence)",
-			dm:   &DefaultJoin{tokens: []string{}, sep: " "},
-			args: args{
-				new(tokenizer),
-			},
-			want:    []string{"Where", "'s", "Lupino", "Bad", "start", "Vinnie"},
-			wantErr: false,
-		},
+		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			dm := tt.dm
-			err := dm.Join(tt.args.tok)
+			dj := &Join{
+				sep: tt.fields.sep,
+			}
+			got, err := dj.Join(tt.args.dps, tt.args.tokenizer)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("DefaultMultiplex.Multiplex() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Join.Join() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(dm.tokens, tt.want) {
-				t.Errorf("DefaultMultiplex.Multiplex() = %v, want %v", dm.tokens, tt.want)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Join.Join() = %v, want %v", got, tt.want)
 			}
 		})
-
-		currPos++
 	}
 }
