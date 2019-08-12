@@ -11,18 +11,17 @@ import (
 
 var credentialsFile string
 
-func init() {
-	if err := godotenv.Load("../.env"); err != nil {
-		log.Fatal(err)
-	}
-
-	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
-}
-
 func TestNLP_tokenize(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
+
+	if err := godotenv.Load(); err != nil {
+		log.Fatal(err)
+	}
+
+	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
+
 	type fields struct {
 		text              string
 		entities          []string

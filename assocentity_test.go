@@ -12,18 +12,16 @@ import (
 
 var credentialsFile string
 
-func init() {
+func TestAssocIntegrationSingleWordEntities(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
+	}
+
 	if err := godotenv.Load(); err != nil {
 		log.Fatal(err)
 	}
 
 	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
-}
-
-func TestAssocIntegrationSingleWordEntities(t *testing.T) {
-	if testing.Short() {
-		t.SkipNow()
-	}
 
 	text := "Punchinello wanted Payne? He'd see the pain."
 	entities := []string{"Punchinello", "Payne"}
@@ -61,6 +59,12 @@ func TestAssocIntegrationMultiWordEntities(t *testing.T) {
 		t.SkipNow()
 	}
 
+	if err := godotenv.Load(); err != nil {
+		log.Fatal(err)
+	}
+
+	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
+
 	text := "Max Payne, this is Deputy Chief Jim Bravura from the NYPD."
 	entities := []string{"Max Payne", "Jim Bravura"}
 
@@ -97,6 +101,12 @@ func TestAssocIntegrationDefinedPartOfSpeech(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
+
+	if err := godotenv.Load(); err != nil {
+		log.Fatal(err)
+	}
+
+	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
 
 	text := `"The things that I want", by Max Payne.`
 	entities := []string{"Max Payne"}
