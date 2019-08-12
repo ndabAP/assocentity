@@ -27,7 +27,7 @@ func (dps *PoSDeterm) Determ(tokenizer Tokenizer) ([]string, error) {
 		return []string{}, err
 	}
 
-	var tokens []string
+	var res []string
 	// Prepare for generic iterator
 	t := make(iterator.Elements, len(textTokens))
 	for i, v := range textTokens {
@@ -66,7 +66,7 @@ func (dps *PoSDeterm) Determ(tokenizer Tokenizer) ([]string, error) {
 			if isEntity {
 				entityTraverser.Reset()
 				for entityTraverser.Next() {
-					tokens = append(tokens, entityTraverser.CurrElem().(Token).Token)
+					res = append(res, entityTraverser.CurrElem().(Token).Token)
 				}
 
 				// Skip about the tokenized entity length
@@ -84,9 +84,9 @@ func (dps *PoSDeterm) Determ(tokenizer Tokenizer) ([]string, error) {
 		}
 
 		if textTraverser.CurrElem().(Token).PoS&dps.poS != 0 {
-			tokens = append(tokens, textTraverser.CurrElem().(Token).Token)
+			res = append(res, textTraverser.CurrElem().(Token).Token)
 		}
 	}
 
-	return tokens, nil
+	return res, nil
 }

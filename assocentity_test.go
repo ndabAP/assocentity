@@ -2,13 +2,23 @@ package assocentity
 
 import (
 	"log"
+	"os"
 	"reflect"
 	"testing"
 
+	"github.com/joho/godotenv"
 	"github.com/ndabAP/assocentity/v5/tokenize"
 )
 
-const credentialsFile = "configs/google_nlp_service_account.json"
+var credentialsFile string
+
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatal(err)
+	}
+
+	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
+}
 
 func TestAssocIntegrationSingleWordEntities(t *testing.T) {
 	if testing.Short() {

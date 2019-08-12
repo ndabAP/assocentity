@@ -27,7 +27,7 @@ const (
 	ANY = ADJ | ADP | ADV | AFFIX | CONJ | DET | NOUN | NUM | PRON | PRT | PUNCT | UNKN | VERB | X
 )
 
-var poSMap = map[languagepb.PartOfSpeech_Tag]int{
+var poS = map[languagepb.PartOfSpeech_Tag]int{
 	languagepb.PartOfSpeech_ADJ:     ADJ,
 	languagepb.PartOfSpeech_ADP:     ADP,
 	languagepb.PartOfSpeech_ADV:     ADV,
@@ -136,7 +136,7 @@ func (nlp *NLP) tokenize(text string) ([]Token, error) {
 	var tokenized []Token
 	for _, t := range resp.GetTokens() {
 		tokenized = append(tokenized, Token{
-			PoS:   poSMap[t.PartOfSpeech.Tag],
+			PoS:   poS[t.PartOfSpeech.Tag],
 			Token: t.GetText().GetContent(),
 		})
 	}
@@ -144,7 +144,7 @@ func (nlp *NLP) tokenize(text string) ([]Token, error) {
 	return tokenized, nil
 }
 
-// req sends a req to the Google NLP server
+// req sends a request to the Google NLP server
 func (nlp *NLP) req(text string) (*languagepb.AnnotateTextResponse, error) {
 	return client.AnnotateText(ctx, &languagepb.AnnotateTextRequest{
 		Document: &languagepb.Document{

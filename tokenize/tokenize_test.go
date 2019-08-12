@@ -1,11 +1,23 @@
 package tokenize
 
 import (
+	"log"
+	"os"
 	"reflect"
 	"testing"
+
+	"github.com/joho/godotenv"
 )
 
-const credentialsFile = "../configs/google_nlp_service_account.json"
+var credentialsFile string
+
+func init() {
+	if err := godotenv.Load("../.env"); err != nil {
+		log.Fatal(err)
+	}
+
+	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
+}
 
 func TestNLP_tokenize(t *testing.T) {
 	if testing.Short() {

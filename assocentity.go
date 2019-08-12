@@ -16,6 +16,7 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, j tokenize.Joine
 
 	var distAccum = make(map[string][]float64)
 
+	// Prepare for generic iterator
 	ji := make(iterator.Elements, len(joined))
 	for i, v := range joined {
 		ji[i] = v

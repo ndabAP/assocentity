@@ -36,7 +36,7 @@ func (dj *Join) Join(dps PoSDetermer, tokenizer Tokenizer) ([]string, error) {
 		return []string{}, err
 	}
 
-	var tokens []string
+	var res []string
 	// Prepare for generic iterator
 	t := make(iterator.Elements, len(textTokens))
 	for i, v := range textTokens {
@@ -84,7 +84,7 @@ func (dj *Join) Join(dps PoSDetermer, tokenizer Tokenizer) ([]string, error) {
 				}
 
 				// Merge the entity
-				tokens = append(tokens, strings.Join(entity, dj.sep))
+				res = append(res, strings.Join(entity, dj.sep))
 
 				// Skip about the tokenized entity length
 				nextTextTraverserPos += entityTraverser.Len() - 1
@@ -100,8 +100,8 @@ func (dj *Join) Join(dps PoSDetermer, tokenizer Tokenizer) ([]string, error) {
 			continue
 		}
 
-		tokens = append(tokens, textTraverser.CurrElem().(string))
+		res = append(res, textTraverser.CurrElem().(string))
 	}
 
-	return tokens, nil
+	return res, nil
 }
