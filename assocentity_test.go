@@ -34,7 +34,7 @@ func TestAssocIntegrationSingleWordEntities(t *testing.T) {
 	}
 
 	dps := tokenize.NewPoSDetermer(tokenize.ANY)
-	dj := tokenize.NewJoin(" ")
+	dj := tokenize.NewJoin(tokenize.Whitespace)
 
 	got, err := Do(nlp, dps, dj, entities)
 	if err != nil {
