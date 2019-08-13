@@ -45,7 +45,7 @@ func main() {
 	dj := tokenize.NewJoin(tokenize.Whitespace)
 
     	// Do calculates the average distances
-	assocEntities, err := assocentity.Do(dj, nlp, entities)
+	assocEntities, err := assocentity.Do(nlp, dps, dj, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
