@@ -32,9 +32,8 @@ func TestAssocIntegrationSingleWordEntities(t *testing.T) {
 	}
 
 	dps := tokenize.NewPoSDetermer(tokenize.ANY)
-	dj := tokenize.NewJoin(tokenize.Whitespace)
 
-	got, err := Do(nlp, dps, dj, entities)
+	got, err := Do(nlp, dps, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -74,9 +73,8 @@ func TestAssocIntegrationMultiWordEntities(t *testing.T) {
 	}
 
 	dps := tokenize.NewPoSDetermer(tokenize.ANY)
-	dj := tokenize.NewJoin(tokenize.Whitespace)
 
-	got, err := Do(nlp, dps, dj, entities)
+	got, err := Do(nlp, dps, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -117,9 +115,8 @@ func TestAssocIntegrationDefinedPartOfSpeech(t *testing.T) {
 	}
 
 	dps := tokenize.NewPoSDetermer(tokenize.DET | tokenize.VERB | tokenize.PUNCT)
-	dj := tokenize.NewJoin(tokenize.Whitespace)
 
-	got, err := Do(nlp, dps, dj, entities)
+	got, err := Do(nlp, dps, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
