@@ -24,9 +24,9 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 	var distAccum = make(map[string][]float64)
 
 	// Prepare for generic iterator
-	ji := make(iterator.Elements, len(determTok))
+	di := make(iterator.Elements, len(determTok))
 	for i, v := range determTok {
-		ji[i] = v
+		di[i] = v
 	}
 
 	entityTokens, err := tokenizer.TokenizeEntities()
@@ -34,7 +34,7 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 		return map[string]float64{}, err
 	}
 
-	determTokTraverser := iterator.New(ji)
+	determTokTraverser := iterator.New(di)
 	for determTokTraverser.Next() {
 		determTokIdx := determTokTraverser.CurrPos()
 
@@ -80,7 +80,7 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 		determTokTraverser.SetPos(determTokIdx)
 
 		// Iterate positive direction
-		posTraverser := iterator.New(ji)
+		posTraverser := iterator.New(di)
 		posTraverser.SetPos(determTokIdx)
 		for posTraverser.Next() {
 			posTraverserIdx := posTraverser.CurrPos()
@@ -101,7 +101,7 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 
 		// Iterate negative direction
 		dist = 0
-		negTraverser := iterator.New(ji)
+		negTraverser := iterator.New(di)
 		negTraverser.SetPos(determTokIdx)
 		for negTraverser.Prev() {
 			negTraverserIdx := negTraverser.CurrPos()
