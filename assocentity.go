@@ -53,11 +53,6 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 			}
 
 			entityTraverser = iterator.New(e)
-			// Skip single value entities
-			if entityTraverser.Len() == 1 {
-				break
-			}
-
 			for entityTraverser.Next() {
 				isEntity = determTokTraverser.CurrElem().(tokenize.Token).Token == entityTraverser.CurrElem().(tokenize.Token).Token
 				// Check if first token matches the entity token
@@ -68,12 +63,16 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 				// Check for next token
 				determTokTraverser.Next()
 			}
+
+			// Skip entity
+			if isEntity {
+				determTokTraverser.SetPos(determTokIdx + entityTraverser.Len() - 1)
+
+				break
+			}
 		}
 
-		// Skip entity
 		if isEntity {
-			determTokTraverser.SetPos(determTokIdx + entityTraverser.Len())
-
 			continue
 		}
 
@@ -84,11 +83,11 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 		posTraverser.SetPos(determTokIdx)
 		for posTraverser.Next() {
 			posTraverserIdx := posTraverser.CurrPos()
-			if ok, pos := isPartOfEntity(posTraverser, entityTokens, posDir); ok {
+			if ok, len := isPartOfEntity(posTraverser, entityTokens, posDir); ok {
 				distAccum[determTokTraverser.CurrElem().(tokenize.Token)] = append(distAccum[determTokTraverser.CurrElem().(tokenize.Token)], dist)
 
 				// Skip about entity
-				posTraverser.SetPos(posTraverser.CurrPos() + pos)
+				posTraverser.SetPos(posTraverserIdx + len - 1)
 
 				continue
 			}
@@ -105,11 +104,11 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 		negTraverser.SetPos(determTokIdx)
 		for negTraverser.Prev() {
 			negTraverserIdx := negTraverser.CurrPos()
-			if ok, pos := isPartOfEntity(posTraverser, entityTokens, negDir); ok {
+			if ok, len := isPartOfEntity(negTraverser, entityTokens, negDir); ok {
 				distAccum[determTokTraverser.CurrElem().(tokenize.Token)] = append(distAccum[determTokTraverser.CurrElem().(tokenize.Token)], dist)
 
 				// Skip about entity
-				posTraverser.SetPos(posTraverser.CurrPos() + pos)
+				negTraverser.SetPos(negTraverserIdx - len + 1)
 
 				continue
 			}
@@ -144,10 +143,6 @@ func isPartOfEntity(determTokTraverser *iterator.Iterator, entityTokens [][]toke
 		}
 
 		entityTraverser = iterator.New(e)
-		// Skip single value entities
-		if entityTraverser.Len() == 1 {
-			break
-		}
 
 		if dir == posDir {
 			// Positive direction
@@ -161,6 +156,7 @@ func isPartOfEntity(determTokTraverser *iterator.Iterator, entityTokens [][]toke
 				// Check for next token
 				determTokTraverser.Next()
 			}
+
 		} else if dir == negDir {
 			// Negative direction
 			entityTraverser.SetPos(entityTraverser.Len() - 1)
@@ -174,6 +170,10 @@ func isPartOfEntity(determTokTraverser *iterator.Iterator, entityTokens [][]toke
 				// Check for next token
 				determTokTraverser.Prev()
 			}
+		}
+
+		if isEntity {
+			return isEntity, entityTraverser.Len()
 		}
 	}
 
