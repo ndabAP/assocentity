@@ -15,13 +15,13 @@ var (
 )
 
 // Do returns the entity distances
-func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []string) (map[string]float64, error) {
+func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []string) (map[tokenize.Token]float64, error) {
 	determTok, err := dps.Determ(tokenizer)
 	if err != nil {
-		return map[string]float64{}, err
+		return map[tokenize.Token]float64{}, err
 	}
 
-	var distAccum = make(map[string][]float64)
+	var distAccum = make(map[tokenize.Token][]float64)
 
 	// Prepare for generic iterator
 	di := make(iterator.Elements, len(determTok))
@@ -31,7 +31,7 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 
 	entityTokens, err := tokenizer.TokenizeEntities()
 	if err != nil {
-		return map[string]float64{}, err
+		return map[tokenize.Token]float64{}, err
 	}
 
 	determTokTraverser := iterator.New(di)
@@ -85,7 +85,7 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 		for posTraverser.Next() {
 			posTraverserIdx := posTraverser.CurrPos()
 			if ok, pos := isPartOfEntity(posTraverser, entityTokens, posDir); ok {
-				distAccum[determTokTraverser.CurrElem().(tokenize.Token).Token] = append(distAccum[determTokTraverser.CurrElem().(tokenize.Token).Token], dist)
+				distAccum[determTokTraverser.CurrElem().(tokenize.Token)] = append(distAccum[determTokTraverser.CurrElem().(tokenize.Token)], dist)
 
 				// Skip about entity
 				posTraverser.SetPos(posTraverser.CurrPos() + pos)
@@ -106,7 +106,7 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 		for negTraverser.Prev() {
 			negTraverserIdx := negTraverser.CurrPos()
 			if ok, pos := isPartOfEntity(posTraverser, entityTokens, negDir); ok {
-				distAccum[determTokTraverser.CurrElem().(tokenize.Token).Token] = append(distAccum[determTokTraverser.CurrElem().(tokenize.Token).Token], dist)
+				distAccum[determTokTraverser.CurrElem().(tokenize.Token)] = append(distAccum[determTokTraverser.CurrElem().(tokenize.Token)], dist)
 
 				// Skip about entity
 				posTraverser.SetPos(posTraverser.CurrPos() + pos)
@@ -121,7 +121,7 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 		}
 	}
 
-	assoccEntities := make(map[string]float64)
+	assoccEntities := make(map[tokenize.Token]float64)
 	// Calculate the distances
 	for elem, dist := range distAccum {
 		assoccEntities[elem] = avg(dist)
@@ -130,33 +130,7 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 	return assoccEntities, nil
 }
 
-// Checks if string is in slice
-func isInSlice(x string, y []string) bool {
-	for _, v := range y {
-		if v == x {
-			return true
-		}
-	}
-
-	return false
-}
-
-// Returns the average of a float slice
-func avg(xs []float64) float64 {
-	total := 0.0
-	for _, v := range xs {
-		total += v
-	}
-
-	return round(total / float64(len(xs)))
-}
-
-// Rounds to nearest 0.5
-func round(x float64) float64 {
-	return math.Round(x/0.5) * 0.5
-}
-
-// Iterates through tokens and return if found and positions to skip
+// Iterates through entity tokens and returns true if found and positions to skip
 func isPartOfEntity(determTokTraverser *iterator.Iterator, entityTokens [][]tokenize.Token, dir direction) (bool, int) {
 	var (
 		isEntity        bool
@@ -204,4 +178,19 @@ func isPartOfEntity(determTokTraverser *iterator.Iterator, entityTokens [][]toke
 	}
 
 	return isEntity, entityTraverser.Len()
+}
+
+// Returns the average of a float slice
+func avg(xs []float64) float64 {
+	total := 0.0
+	for _, v := range xs {
+		total += v
+	}
+
+	return round(total / float64(len(xs)))
+}
+
+// Rounds to nearest 0.5
+func round(x float64) float64 {
+	return math.Round(x/0.5) * 0.5
 }

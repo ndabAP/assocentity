@@ -69,6 +69,11 @@ type NLP struct {
 	tokenizedEntities [][]Token
 }
 
+// Equal is used to use Token as map key
+func (x *Token) Equal(y Token) bool {
+	return false
+}
+
 // NewNLP returns a new NLP instance
 func NewNLP(credentialsFile, text string, entities []string) (*NLP, error) {
 	ctx = context.Background()
