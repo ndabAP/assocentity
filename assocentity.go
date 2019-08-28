@@ -21,6 +21,11 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 		return map[tokenize.Token]float64{}, err
 	}
 
+	entityTokens, err := tokenizer.TokenizeEntities()
+	if err != nil {
+		return map[tokenize.Token]float64{}, err
+	}
+
 	var distAccum = make(map[tokenize.Token][]float64)
 
 	// Prepare for generic iterator
@@ -29,22 +34,15 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 		di[i] = v
 	}
 
-	entityTokens, err := tokenizer.TokenizeEntities()
-	if err != nil {
-		return map[tokenize.Token]float64{}, err
-	}
-
 	determTokTraverser := iterator.New(di)
 	//  Check if token is entity to skip it
 	for determTokTraverser.Next() {
 		determTokIdx := determTokTraverser.CurrPos()
 
-		// Check for entity
 		var (
 			isEntity        bool
 			entityTraverser *iterator.Iterator
 		)
-		// Check if entity
 		for entityIdx := range entityTokens {
 			// Prepare for generic iterator
 			e := make(iterator.Elements, len(entityTokens[entityIdx]))
@@ -78,6 +76,7 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 
 		var dist float64
 
+		// Reset because mutated
 		determTokTraverser.SetPos(determTokIdx)
 
 		// Iterate positive direction
@@ -102,7 +101,6 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 
 			// Reset because isPartOfEntity is mutating
 			posTraverser.SetPos(posTraverserIdx)
-
 		}
 
 		// Iterate negative direction
