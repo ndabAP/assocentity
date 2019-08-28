@@ -118,7 +118,6 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 
 				// Skip about entity
 				negTraverser.SetPos(negTraverserIdx - len + 1)
-
 			}
 
 			dist++
@@ -155,7 +154,6 @@ func isPartOfEntity(determTokTraverser *iterator.Iterator, entityTokens [][]toke
 		}
 
 		entityTraverser = iterator.New(e)
-
 		if dir == posDir {
 			// Positive direction
 			for entityTraverser.Next() {
