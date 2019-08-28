@@ -119,7 +119,7 @@ So, for example given this text:
 text := "Punchinello was burning to get me"
 ```
 
-The result from `TokenizeEntities` should be:
+The result from `TokenizeText` should be:
 
 ```go
 res := []Token{
