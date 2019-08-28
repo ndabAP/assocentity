@@ -29,9 +29,7 @@ import (
 	"github.com/ndabAP/assocentity/v6"
 )
 
-const (
-	credentialsFile = "google_nlp_service_account.json"
-)
+const credentialsFile = "google_nlp_service_account.json"
 
 func main() {
 	text := "Punchinello wanted Payne? He'd see the pain."
