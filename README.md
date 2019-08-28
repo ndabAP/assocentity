@@ -1,6 +1,6 @@
 # assocentity
 
-Package assocentity returns the average distance from words to a given entity. **Important**: At the moment, it's not recommend to use non-letters for entities.
+Package assocentity returns the average distance from words to a given entity. **Important**: At the moment, it's not recommend to use special characters for entities.
 
 ## Features
 
