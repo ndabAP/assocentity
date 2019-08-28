@@ -52,8 +52,8 @@ type Tokenizer interface {
 
 // Token represents a tokenized text unit
 type Token struct {
-	PoS   int
-	Token string
+	PoS   int    // Part of speech
+	Token string // Text
 }
 
 var client *language.Client

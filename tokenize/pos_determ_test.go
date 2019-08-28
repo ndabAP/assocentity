@@ -54,7 +54,7 @@ func TestPoSDeterm_Determ(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    []string
+		want    []Token
 		wantErr bool
 	}{
 		{
@@ -65,7 +65,12 @@ func TestPoSDeterm_Determ(t *testing.T) {
 			args: args{
 				tokenizer: new(tokenizerTest),
 			},
-			want:    []string{"Cold", "as", "a", "gun"},
+			want: []Token{
+				Token{PoS: NOUN, Token: "Cold"},
+				Token{PoS: ADP, Token: "as"},
+				Token{PoS: DET, Token: "a"},
+				Token{PoS: NOUN, Token: "gun"},
+			},
 			wantErr: false,
 		},
 		{
@@ -76,7 +81,10 @@ func TestPoSDeterm_Determ(t *testing.T) {
 			args: args{
 				tokenizer: new(tokenizerTest),
 			},
-			want:    []string{"Cold", "gun"},
+			want: []Token{
+				Token{PoS: NOUN, Token: "Cold"},
+				Token{PoS: NOUN, Token: "gun"},
+			},
 			wantErr: false,
 		},
 	}
