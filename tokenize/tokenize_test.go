@@ -43,27 +43,27 @@ func TestNLP_tokenize(t *testing.T) {
 				tokenizedEntities: [][]Token{{}},
 			},
 			want: []Token{
-				Token{
+				{
 					Token: "Punchinello",
 					PoS:   NOUN,
 				},
-				Token{
+				{
 					Token: "was",
 					PoS:   VERB,
 				},
-				Token{
+				{
 					Token: "burning",
 					PoS:   VERB,
 				},
-				Token{
+				{
 					Token: "to",
 					PoS:   PRT,
 				},
-				Token{
+				{
 					Token: "get",
 					PoS:   VERB,
 				},
-				Token{
+				{
 					Token: "me",
 					PoS:   PRON,
 				},

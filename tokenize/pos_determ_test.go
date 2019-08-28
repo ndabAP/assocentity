@@ -9,19 +9,19 @@ type tokenizerTest struct{}
 
 func (t *tokenizerTest) TokenizeText() ([]Token, error) {
 	return []Token{
-		Token{
+		{
 			Token: "Cold",
 			PoS:   NOUN,
 		},
-		Token{
+		{
 			Token: "as",
 			PoS:   ADP,
 		},
-		Token{
+		{
 			Token: "a",
 			PoS:   DET,
 		},
-		Token{
+		{
 			Token: "gun",
 			PoS:   NOUN,
 		},
@@ -66,10 +66,10 @@ func TestPoSDeterm_Determ(t *testing.T) {
 				tokenizer: new(tokenizerTest),
 			},
 			want: []Token{
-				Token{PoS: NOUN, Token: "Cold"},
-				Token{PoS: ADP, Token: "as"},
-				Token{PoS: DET, Token: "a"},
-				Token{PoS: NOUN, Token: "gun"},
+				{PoS: NOUN, Token: "Cold"},
+				{PoS: ADP, Token: "as"},
+				{PoS: DET, Token: "a"},
+				{PoS: NOUN, Token: "gun"},
 			},
 			wantErr: false,
 		},
@@ -82,8 +82,8 @@ func TestPoSDeterm_Determ(t *testing.T) {
 				tokenizer: new(tokenizerTest),
 			},
 			want: []Token{
-				Token{PoS: NOUN, Token: "Cold"},
-				Token{PoS: NOUN, Token: "gun"},
+				{PoS: NOUN, Token: "Cold"},
+				{PoS: NOUN, Token: "gun"},
 			},
 			wantErr: false,
 		},

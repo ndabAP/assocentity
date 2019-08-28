@@ -39,14 +39,14 @@ func TestAssocIntegrationSingleWordEntities(t *testing.T) {
 	}
 
 	want := map[tokenize.Token]float64{
-		tokenize.Token{PoS: tokenize.VERB, Token: "wanted"}: 1,
-		tokenize.Token{PoS: tokenize.PUNCT, Token: "?"}:     2,
-		tokenize.Token{PoS: tokenize.PRON, Token: "He"}:     3,
-		tokenize.Token{PoS: tokenize.VERB, Token: "'d"}:     4,
-		tokenize.Token{PoS: tokenize.VERB, Token: "see"}:    5,
-		tokenize.Token{PoS: tokenize.DET, Token: "the"}:     6,
-		tokenize.Token{PoS: tokenize.NOUN, Token: "pain"}:   7,
-		tokenize.Token{PoS: tokenize.PUNCT, Token: "."}:     8,
+		{PoS: tokenize.VERB, Token: "wanted"}: 1,
+		{PoS: tokenize.PUNCT, Token: "?"}:     2,
+		{PoS: tokenize.PRON, Token: "He"}:     3,
+		{PoS: tokenize.VERB, Token: "'d"}:     4,
+		{PoS: tokenize.VERB, Token: "see"}:    5,
+		{PoS: tokenize.DET, Token: "the"}:     6,
+		{PoS: tokenize.NOUN, Token: "pain"}:   7,
+		{PoS: tokenize.PUNCT, Token: "."}:     8,
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Assoc() = %v, want %v", got, want)
@@ -80,15 +80,15 @@ func TestAssocIntegrationMultiWordEntities(t *testing.T) {
 	}
 
 	want := map[tokenize.Token]float64{
-		tokenize.Token{PoS: tokenize.PUNCT, Token: ","}:     3,
-		tokenize.Token{PoS: tokenize.DET, Token: "this"}:    3,
-		tokenize.Token{PoS: tokenize.VERB, Token: "is"}:     3,
-		tokenize.Token{PoS: tokenize.NOUN, Token: "Deputy"}: 3,
-		tokenize.Token{PoS: tokenize.NOUN, Token: "Chief"}:  3,
-		tokenize.Token{PoS: tokenize.ADP, Token: "from"}:    4,
-		tokenize.Token{PoS: tokenize.DET, Token: "the"}:     5,
-		tokenize.Token{PoS: tokenize.NOUN, Token: "NYPD"}:   6,
-		tokenize.Token{PoS: tokenize.PUNCT, Token: "."}:     7,
+		{PoS: tokenize.PUNCT, Token: ","}:     3,
+		{PoS: tokenize.DET, Token: "this"}:    3,
+		{PoS: tokenize.VERB, Token: "is"}:     3,
+		{PoS: tokenize.NOUN, Token: "Deputy"}: 3,
+		{PoS: tokenize.NOUN, Token: "Chief"}:  3,
+		{PoS: tokenize.ADP, Token: "from"}:    4,
+		{PoS: tokenize.DET, Token: "the"}:     5,
+		{PoS: tokenize.NOUN, Token: "NYPD"}:   6,
+		{PoS: tokenize.PUNCT, Token: "."}:     7,
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Assoc() = %v, want %v", got, want)
@@ -122,12 +122,12 @@ func TestAssocIntegrationDefinedPartOfSpeech(t *testing.T) {
 	}
 
 	want := map[tokenize.Token]float64{
-		tokenize.Token{PoS: tokenize.PUNCT, Token: `"`}:   4,
-		tokenize.Token{PoS: tokenize.DET, Token: "The"}:   5,
-		tokenize.Token{PoS: tokenize.DET, Token: "that"}:  4,
-		tokenize.Token{PoS: tokenize.VERB, Token: "want"}: 3,
-		tokenize.Token{PoS: tokenize.PUNCT, Token: ","}:   1,
-		tokenize.Token{PoS: tokenize.PUNCT, Token: "."}:   1,
+		{PoS: tokenize.PUNCT, Token: `"`}:   4,
+		{PoS: tokenize.DET, Token: "The"}:   5,
+		{PoS: tokenize.DET, Token: "that"}:  4,
+		{PoS: tokenize.VERB, Token: "want"}: 3,
+		{PoS: tokenize.PUNCT, Token: ","}:   1,
+		{PoS: tokenize.PUNCT, Token: "."}:   1,
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Assoc() = %v, want %v", got, want)
