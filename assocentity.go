@@ -164,7 +164,6 @@ func isPartOfEntity(determTokTraverser *iterator.Iterator, entityTokens [][]toke
 				// Check for next token
 				determTokTraverser.Next()
 			}
-
 		} else if dir == negDir {
 			// Negative direction
 			entityTraverser.SetPos(entityTraverser.Len() - 1)
