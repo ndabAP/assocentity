@@ -16,7 +16,7 @@ func TestNLP_tokenize(t *testing.T) {
 		t.SkipNow()
 	}
 
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load("../.env"); err != nil {
 		log.Fatal(err)
 	}
 
@@ -35,7 +35,7 @@ func TestNLP_tokenize(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "three elements",
+			name: "six tokens",
 			fields: fields{
 				text:              "Punchinello was burning to get me",
 				entities:          []string{"Punchinello"},

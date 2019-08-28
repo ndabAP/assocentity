@@ -3,8 +3,8 @@ package assocentity
 import (
 	"math"
 
-	"github.com/ndabAP/assocentity/v5/internal/iterator"
-	"github.com/ndabAP/assocentity/v5/tokenize"
+	"github.com/ndabAP/assocentity/v6/internal/iterator"
+	"github.com/ndabAP/assocentity/v6/tokenize"
 )
 
 type direction int
@@ -35,12 +35,12 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 	}
 
 	determTokTraverser := iterator.New(di)
+	//  Check if token is entity to skip it
 	for determTokTraverser.Next() {
 		determTokIdx := determTokTraverser.CurrPos()
 
 		// Check for entity
 		var (
-			dist            float64
 			isEntity        bool
 			entityTraverser *iterator.Iterator
 		)
@@ -64,17 +64,19 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 				determTokTraverser.Next()
 			}
 
-			// Skip entity
 			if isEntity {
-				determTokTraverser.SetPos(determTokIdx + entityTraverser.Len() - 1)
-
 				break
 			}
 		}
 
 		if isEntity {
+			// Skip about entity positions
+			determTokTraverser.SetPos(determTokIdx + entityTraverser.Len() - 1)
+
 			continue
 		}
+
+		var dist float64
 
 		determTokTraverser.SetPos(determTokIdx)
 
@@ -83,19 +85,24 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 		posTraverser.SetPos(determTokIdx)
 		for posTraverser.Next() {
 			posTraverserIdx := posTraverser.CurrPos()
-			if ok, len := isPartOfEntity(posTraverser, entityTokens, posDir); ok {
+
+			ok, len := isPartOfEntity(posTraverser, entityTokens, posDir)
+			if ok {
 				distAccum[determTokTraverser.CurrElem().(tokenize.Token)] = append(distAccum[determTokTraverser.CurrElem().(tokenize.Token)], dist)
 
 				// Skip about entity
 				posTraverser.SetPos(posTraverserIdx + len - 1)
+			}
 
+			dist++
+
+			if ok {
 				continue
 			}
 
 			// Reset because isPartOfEntity is mutating
 			posTraverser.SetPos(posTraverserIdx)
 
-			dist++
 		}
 
 		// Iterate negative direction
@@ -104,19 +111,24 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 		negTraverser.SetPos(determTokIdx)
 		for negTraverser.Prev() {
 			negTraverserIdx := negTraverser.CurrPos()
-			if ok, len := isPartOfEntity(negTraverser, entityTokens, negDir); ok {
+
+			ok, len := isPartOfEntity(negTraverser, entityTokens, negDir)
+			if ok {
 				distAccum[determTokTraverser.CurrElem().(tokenize.Token)] = append(distAccum[determTokTraverser.CurrElem().(tokenize.Token)], dist)
 
 				// Skip about entity
 				negTraverser.SetPos(negTraverserIdx - len + 1)
 
+			}
+
+			dist++
+
+			if ok {
 				continue
 			}
 
 			// Reset because isPartOfEntity is mutating
 			negTraverser.SetPos(negTraverserIdx)
-
-			dist++
 		}
 	}
 

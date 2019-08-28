@@ -1,7 +1,7 @@
 package tokenize
 
 import (
-	"github.com/ndabAP/assocentity/v5/internal/iterator"
+	"github.com/ndabAP/assocentity/v6/internal/iterator"
 )
 
 // PoSDetermer determinates if part of speech tags should be deleted

@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/joho/godotenv"
-	"github.com/ndabAP/assocentity/v5/tokenize"
+	"github.com/ndabAP/assocentity/v6/tokenize"
 )
 
 var credentialsFile string
@@ -38,15 +38,15 @@ func TestAssocIntegrationSingleWordEntities(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	want := map[string]float64{
-		"wanted": 1,
-		"?":      2,
-		"He":     3,
-		"'d":     4,
-		"see":    5,
-		"the":    6,
-		"pain":   7,
-		".":      8,
+	want := map[tokenize.Token]float64{
+		tokenize.Token{PoS: tokenize.VERB, Token: "wanted"}: 1,
+		tokenize.Token{PoS: tokenize.PUNCT, Token: "?"}:     2,
+		tokenize.Token{PoS: tokenize.PRON, Token: "He"}:     3,
+		tokenize.Token{PoS: tokenize.VERB, Token: "'d"}:     4,
+		tokenize.Token{PoS: tokenize.VERB, Token: "see"}:    5,
+		tokenize.Token{PoS: tokenize.DET, Token: "the"}:     6,
+		tokenize.Token{PoS: tokenize.NOUN, Token: "pain"}:   7,
+		tokenize.Token{PoS: tokenize.PUNCT, Token: "."}:     8,
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Assoc() = %v, want %v", got, want)
@@ -79,16 +79,16 @@ func TestAssocIntegrationMultiWordEntities(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	want := map[string]float64{
-		",":      3,
-		"this":   3,
-		"Deputy": 3,
-		"Chief":  3,
-		"is":     3,
-		"from":   4,
-		"the":    5,
-		"NYPD":   6,
-		".":      7,
+	want := map[tokenize.Token]float64{
+		tokenize.Token{PoS: tokenize.PUNCT, Token: ","}:     3,
+		tokenize.Token{PoS: tokenize.DET, Token: "this"}:    3,
+		tokenize.Token{PoS: tokenize.VERB, Token: "is"}:     3,
+		tokenize.Token{PoS: tokenize.NOUN, Token: "Deputy"}: 3,
+		tokenize.Token{PoS: tokenize.NOUN, Token: "Chief"}:  3,
+		tokenize.Token{PoS: tokenize.ADP, Token: "from"}:    4,
+		tokenize.Token{PoS: tokenize.DET, Token: "the"}:     5,
+		tokenize.Token{PoS: tokenize.NOUN, Token: "NYPD"}:   6,
+		tokenize.Token{PoS: tokenize.PUNCT, Token: "."}:     7,
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Assoc() = %v, want %v", got, want)
@@ -121,13 +121,13 @@ func TestAssocIntegrationDefinedPartOfSpeech(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	want := map[string]float64{
-		`"`:    4,
-		"The":  5,
-		"that": 4,
-		"want": 3,
-		",":    1,
-		".":    1,
+	want := map[tokenize.Token]float64{
+		tokenize.Token{PoS: tokenize.PUNCT, Token: `"`}:   4,
+		tokenize.Token{PoS: tokenize.DET, Token: "The"}:   5,
+		tokenize.Token{PoS: tokenize.DET, Token: "that"}:  4,
+		tokenize.Token{PoS: tokenize.VERB, Token: "want"}: 3,
+		tokenize.Token{PoS: tokenize.PUNCT, Token: ","}:   1,
+		tokenize.Token{PoS: tokenize.PUNCT, Token: "."}:   1,
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Assoc() = %v, want %v", got, want)
