@@ -43,10 +43,10 @@ func main() {
 	}
 
 	// Allow any part of speech
-	dps := tokenize.NewPoSDetermer(tokenize.ANY)
+	psd := tokenize.NewPoSDetermer(tokenize.ANY)
 
     	// Do calculates the average distances
-	assocEntities, err := assocentity.Do(nlp, dps, entities)
+	assocEntities, err := assocentity.Do(nlp, psd, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
