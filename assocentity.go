@@ -51,7 +51,7 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 
 			entityTraverser = iterator.New(e)
 			for entityTraverser.Next() {
-				isEntity = determTokTraverser.CurrElem().(tokenize.Token).Token == entityTraverser.CurrElem().(tokenize.Token).Token
+				isEntity = determTokTraverser.CurrElem().(tokenize.Token) == entityTraverser.CurrElem().(tokenize.Token)
 				// Check if first token matches the entity token
 				if !isEntity {
 					break
@@ -128,13 +128,13 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 		}
 	}
 
-	assoccEntities := make(map[tokenize.Token]float64)
+	assocEntities := make(map[tokenize.Token]float64)
 	// Calculate the distances
 	for elem, dist := range distAccum {
-		assoccEntities[elem] = avg(dist)
+		assocEntities[elem] = avg(dist)
 	}
 
-	return assoccEntities, nil
+	return assocEntities, nil
 }
 
 // Iterates through entity tokens and returns true if found and positions to skip
