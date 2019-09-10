@@ -35,7 +35,6 @@ func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []strin
 	}
 
 	determTokTraverser := iterator.New(di)
-	//  Check if token is entity to skip it
 	for determTokTraverser.Next() {
 		determTokIdx := determTokTraverser.CurrPos()
 
