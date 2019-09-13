@@ -15,8 +15,8 @@ var (
 )
 
 // Do returns the entity distances
-func Do(tokenizer tokenize.Tokenizer, dps tokenize.PoSDetermer, entities []string) (map[tokenize.Token]float64, error) {
-	determTok, err := dps.Determ(tokenizer)
+func Do(tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, entities []string) (map[tokenize.Token]float64, error) {
+	determTok, err := psd.Determ(tokenizer)
 	if err != nil {
 		return map[tokenize.Token]float64{}, err
 	}
