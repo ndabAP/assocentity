@@ -84,7 +84,7 @@ func Do(tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, entities []strin
 		for posTraverser.Next() {
 			posTraverserIdx := posTraverser.CurrPos()
 
-			ok, len := isPartOfEntity(posTraverser, entityTokens, posDir)
+			ok, len := entityChecker(posTraverser, entityTokens, posDir)
 			if ok {
 				distAccum[determTokTraverser.CurrElem().(tokenize.Token)] = append(distAccum[determTokTraverser.CurrElem().(tokenize.Token)], dist)
 
@@ -98,7 +98,7 @@ func Do(tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, entities []strin
 				continue
 			}
 
-			// Reset because isPartOfEntity is mutating
+			// Reset because entityChecker is mutating
 			posTraverser.SetPos(posTraverserIdx)
 		}
 
@@ -109,7 +109,7 @@ func Do(tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, entities []strin
 		for negTraverser.Prev() {
 			negTraverserIdx := negTraverser.CurrPos()
 
-			ok, len := isPartOfEntity(negTraverser, entityTokens, negDir)
+			ok, len := entityChecker(negTraverser, entityTokens, negDir)
 			if ok {
 				distAccum[determTokTraverser.CurrElem().(tokenize.Token)] = append(distAccum[determTokTraverser.CurrElem().(tokenize.Token)], dist)
 
@@ -123,7 +123,7 @@ func Do(tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, entities []strin
 				continue
 			}
 
-			// Reset because isPartOfEntity is mutating
+			// Reset because entityChecker is mutating
 			negTraverser.SetPos(negTraverserIdx)
 		}
 	}
@@ -138,7 +138,7 @@ func Do(tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, entities []strin
 }
 
 // Iterates through entity tokens and returns true if found and positions to skip
-func isPartOfEntity(determTokTraverser *iterator.Iterator, entityTokens [][]tokenize.Token, dir direction) (bool, int) {
+func entityChecker(determTokTraverser *iterator.Iterator, entityTokens [][]tokenize.Token, dir direction) (bool, int) {
 	var (
 		isEntity        bool
 		entityTraverser *iterator.Iterator
