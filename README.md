@@ -12,7 +12,7 @@ Package assocentity returns the average distance from words to a given entity. *
 ## Installation
 
 ```bash
-$ go get github.com/ndabAP/assocentity/v6
+$ go get github.com/ndabAP/assocentity/v7
 ```
 
 ## Prerequisites
@@ -26,8 +26,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ndabAP/assocentity/v6/tokenize"
-	"github.com/ndabAP/assocentity/v6"
+	"github.com/ndabAP/assocentity/v7/tokenize"
+	"github.com/ndabAP/assocentity/v7"
 )
 
 const credentialsFile = "google_nlp_service_account.json"
@@ -37,7 +37,7 @@ func main() {
 	entities := []string{"Punchinello", "Payne"}
 
 	// Create a NLP instance
-	nlp, err := tokenize.NewNLP(credentialsFile, text, entities)
+	nlp, err := tokenize.NewNLP(credentialsFile, text, entities, tokenize.AutoLang)
 	if err != nil {
 		log.Fatal(err)
 	}
