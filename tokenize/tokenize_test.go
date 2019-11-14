@@ -77,6 +77,7 @@ func TestNLP_tokenize(t *testing.T) {
 				credentialsFile,
 				tt.fields.text,
 				tt.fields.entities,
+				AutoLang,
 			)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NLP.NewNLP() error = %v, wantErr %v", err, tt.wantErr)

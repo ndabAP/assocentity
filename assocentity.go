@@ -3,8 +3,8 @@ package assocentity
 import (
 	"math"
 
-	"github.com/ndabAP/assocentity/v6/internal/iterator"
-	"github.com/ndabAP/assocentity/v6/tokenize"
+	"github.com/ndabAP/assocentity/v7/internal/iterator"
+	"github.com/ndabAP/assocentity/v7/tokenize"
 )
 
 type direction int

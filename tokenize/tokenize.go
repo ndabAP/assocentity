@@ -56,21 +56,30 @@ type Token struct {
 	Token string // Text
 }
 
-var client *language.Client
-var err error
-var ctx context.Context
+var (
+	client *language.Client
+	err    error
+	ctx    context.Context
+)
+
+// Lang defines the language used to examine the text. Both ISO and BCP-47 language codes are accepted
+type Lang string
+
+// AutoLang tries to automatically recognize the language
+var AutoLang Lang = "auto"
 
 // NLP tokenizes a text using NLP
 type NLP struct {
-	text     string
 	entities []string
+	lang     Lang
+	text     string
 	// Cache
 	tokenizedText     []Token
 	tokenizedEntities [][]Token
 }
 
 // NewNLP returns a new NLP instance
-func NewNLP(credentialsFile, text string, entities []string) (*NLP, error) {
+func NewNLP(credentialsFile, text string, entities []string, lang Lang) (*NLP, error) {
 	ctx = context.Background()
 
 	// Create one client for all calls
@@ -80,8 +89,9 @@ func NewNLP(credentialsFile, text string, entities []string) (*NLP, error) {
 	}
 
 	return &NLP{
-		text:     text,
 		entities: entities,
+		lang:     lang,
+		text:     text,
 	}, nil
 }
 
@@ -146,13 +156,19 @@ func (nlp *NLP) tokenize(text string) ([]Token, error) {
 
 // req sends a request to the Google NLP server
 func (nlp *NLP) req(text string) (*languagepb.AnnotateTextResponse, error) {
-	return client.AnnotateText(ctx, &languagepb.AnnotateTextRequest{
-		Document: &languagepb.Document{
-			Source: &languagepb.Document_Content{
-				Content: text,
-			},
-			Type: languagepb.Document_PLAIN_TEXT,
+	doc := &languagepb.Document{
+		Source: &languagepb.Document_Content{
+			Content: text,
 		},
+		Type: languagepb.Document_PLAIN_TEXT,
+	}
+
+	if nlp.lang != "auto" {
+		doc.Language = string(nlp.lang)
+	}
+
+	return client.AnnotateText(ctx, &languagepb.AnnotateTextRequest{
+		Document: doc,
 		Features: &languagepb.AnnotateTextRequest_Features{
 			ExtractSyntax: true,
 		},
