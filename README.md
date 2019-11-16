@@ -167,6 +167,10 @@ We want to preserve the part of speech information. Therefore, we return `Token`
 
 This step can't be changed. It takes a `Tokenizer`, `PoSDetermer` and entities in a form of `[]string{"Punchinello", "Payne"}`. The method will call all the necessary implemented methods automatically and returns a `map` with the tokens and distances.
 
+## Projects using assocentity
+
+- [entityscrape](https://github.com/ndabAP/entityscrape) - Distance between word types (default: adjectives) in news articles and persons
+
 ## Author
 
 [Julian Claus](https://www.julian-claus.de) and contributors.
