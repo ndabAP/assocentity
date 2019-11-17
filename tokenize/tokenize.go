@@ -10,23 +10,24 @@ import (
 
 // Part of speech
 const (
-	ADJ = 1 << iota
-	ADP
-	ADV
-	AFFIX
-	CONJ
-	DET
-	NOUN
-	NUM
-	PRON
-	PRT
-	PUNCT
-	UNKN
-	VERB
-	X
-	ANY = ADJ | ADP | ADV | AFFIX | CONJ | DET | NOUN | NUM | PRON | PRT | PUNCT | UNKN | VERB | X
+	ADJ   = 1 << iota // Adjective
+	ADP               // Adposition
+	ADV               // Adverb
+	AFFIX             // Affix
+	CONJ              // Conjunction
+	DET               // Determiner
+	NOUN              // Noun
+	NUM               // Cardinal number
+	PRON              // Pronoun
+	PRT               // Particle or other function word
+	PUNCT             // Punctuation
+	UNKN              // Unknown
+	VERB              // Verb (all tenses and modes)
+	X                 // Other: foreign words, typos, abbreviations
+	ANY   = ADJ | ADP | ADV | AFFIX | CONJ | DET | NOUN | NUM | PRON | PRT | PUNCT | UNKN | VERB | X
 )
 
+// Use map to be independent from library
 var poS = map[languagepb.PartOfSpeech_Tag]int{
 	languagepb.PartOfSpeech_ADJ:     ADJ,
 	languagepb.PartOfSpeech_ADP:     ADP,
