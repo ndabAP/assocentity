@@ -18,7 +18,7 @@ func NewPoSDetermer(poS int) *PoSDeterm { return &PoSDeterm{poS} }
 // Determ deterimantes if a part of speech tag should be deleted
 func (dps *PoSDeterm) Determ(tokenizer Tokenizer) ([]Token, error) {
 	// If any part of speech, no need to filter
-	if dps.poS&ANY != 0 {
+	if dps.poS == ANY {
 		textTokens, err := tokenizer.TokenizeText()
 		if err != nil {
 			return []Token{}, err
