@@ -174,3 +174,75 @@ func TestAssocIntegrationDefinedPartOfSpeech(t *testing.T) {
 		t.Errorf("Assoc() = %v, want %v", got, want)
 	}
 }
+
+type nlp struct{}
+
+func (n *nlp) TokenizeText() ([]tokenize.Token, error) {
+	return []tokenize.Token{
+		{
+			Token: "Punchinello",
+			PoS:   tokenize.NOUN,
+		},
+		{
+			Token: "was",
+			PoS:   tokenize.VERB,
+		},
+		{
+			Token: "burning",
+			PoS:   tokenize.VERB,
+		},
+		{
+			Token: "to",
+			PoS:   tokenize.PRT,
+		},
+		{
+			Token: "get",
+			PoS:   tokenize.VERB,
+		},
+		{
+			Token: "me",
+			PoS:   tokenize.PRON,
+		},
+	}, nil
+}
+
+func (n *nlp) TokenizeEntities() ([][]tokenize.Token, error) {
+	return [][]tokenize.Token{
+		{
+			{
+				Token: "Punchinello",
+				PoS:   tokenize.NOUN,
+			},
+		},
+	}, nil
+}
+
+func TestAssocIntegrationSingleWordEntitiesShort(t *testing.T) {
+	dps := tokenize.NewPoSDetermer(tokenize.ANY)
+
+	entities := []string{"Punchinello"}
+
+	got, err := Do(&nlp{}, dps, entities)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	want := map[tokenize.Token]float64{
+		{PoS: tokenize.VERB, Token: "was"}:     1,
+		{PoS: tokenize.VERB, Token: "burning"}: 2,
+		{PoS: tokenize.PRT, Token: "to"}:       3,
+		{PoS: tokenize.VERB, Token: "get"}:     4,
+		{PoS: tokenize.PRON, Token: "me"}:      5,
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("Assoc() = %v, want %v", got, want)
+	}
+}
+
+func BenchmarkAssoc(b *testing.B) {
+	dps := tokenize.NewPoSDetermer(tokenize.ANY)
+
+	for n := 0; n < b.N; n++ {
+		Do(&nlp{}, dps, []string{"Punchinello"})
+	}
+}
