@@ -119,33 +119,33 @@ So, for example given this text:
 text := "Punchinello was burning to get me"
 ```
 
-The result from `TokenizeText` should be:
+The result from `TokenizeText` will be:
 
 ```go
 res := []Token{
-	Token{
+	{
 		Token: "Punchinello",
-		PoS:   NOUN,
+		PoS:   tokenize.NOUN,
 	},
-	Token{
+	{
 		Token: "was",
-		PoS:   VERB,
+		PoS:   tokenize.VERB,
 	},
-	Token{
+	{
 		Token: "burning",
-		PoS:   VERB,
+		PoS:   tokenize.VERB,
 	},
-	Token{
+	{
 		Token: "to",
-		PoS:   PRT,
+		PoS:   tokenize.PRT,
 	},
-	Token{
+	{
 		Token: "get",
-		PoS:   VERB,
+		PoS:   tokenize.VERB,
 	},
-	Token{
+	{
 		Token: "me",
-		PoS:   PRON,
+		PoS:   tokenize.PRON,
 	},
 }
 ```
