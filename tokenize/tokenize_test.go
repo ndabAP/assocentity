@@ -22,26 +22,15 @@ func TestNLP_tokenize(t *testing.T) {
 
 	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
 
-	type fields struct {
-		text              string
-		entities          []string
-		tokenizedText     []Token
-		tokenizedEntities [][]Token
-	}
 	tests := []struct {
 		name    string
-		fields  fields
+		text    string
 		want    []Token
 		wantErr bool
 	}{
 		{
 			name: "six tokens",
-			fields: fields{
-				text:              "Punchinello was burning to get me",
-				entities:          []string{"Punchinello"},
-				tokenizedText:     []Token{},
-				tokenizedEntities: [][]Token{{}},
-			},
+			text: "Punchinello was burning to get me",
 			want: []Token{
 				{
 					Token: "Punchinello",
@@ -75,8 +64,6 @@ func TestNLP_tokenize(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			nlp, err := NewNLP(
 				credentialsFile,
-				tt.fields.text,
-				tt.fields.entities,
 				AutoLang,
 			)
 			if (err != nil) != tt.wantErr {
@@ -84,7 +71,7 @@ func TestNLP_tokenize(t *testing.T) {
 				return
 			}
 
-			got, err := nlp.tokenize(tt.fields.text)
+			got, err := nlp.tokenize(tt.text)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NLP.tokenize() error = %v, wantErr %v", err, tt.wantErr)
 				return

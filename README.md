@@ -12,7 +12,7 @@ Package assocentity returns the average distance from words to a given entity. *
 ## Installation
 
 ```bash
-$ go get github.com/ndabAP/assocentity/v7
+$ go get github.com/ndabAP/assocentity/v8
 ```
 
 ## Prerequisites
@@ -26,8 +26,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ndabAP/assocentity/v7/tokenize"
-	"github.com/ndabAP/assocentity/v7"
+	"github.com/ndabAP/assocentity/v8/tokenize"
+	"github.com/ndabAP/assocentity/v8"
 )
 
 const credentialsFile = "google_nlp_service_account.json"
@@ -37,7 +37,7 @@ func main() {
 	entities := []string{"Punchinello", "Payne"}
 
 	// Create a NLP instance
-	nlp, err := tokenize.NewNLP(credentialsFile, text, entities, tokenize.AutoLang)
+	nlp, err := tokenize.NewNLP(credentialsFile, tokenize.AutoLang)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,7 +46,7 @@ func main() {
 	psd := tokenize.NewPoSDetermer(tokenize.ANY)
 
     	// Do calculates the average distances
-	assocEntities, err := assocentity.Do(nlp, psd, entities)
+	assocEntities, err := assocentity.Do(nlp, psd, text, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -106,10 +106,9 @@ type Token struct {
 	Token string
 }
 
-// Tokenizer tokenizes a text and entities
+// Tokenizer tokenizes a text
 type Tokenizer interface {
-	TokenizeText() ([]Token, error)
-	TokenizeEntities() ([][]Token, error)
+	Tokenize(text string) ([]Token, error)
 }
 ```
 
@@ -157,7 +156,7 @@ Interface to implement:
 ```go
 // PoSDetermer determinates if part of speech tags should be deleted
 type PoSDetermer interface {
-	Determ(Tokenizer) ([]Token, error)
+	Determ(tokenizedText []Token, tokenizedEntities [][]Token) ([]Token, error)
 }
 ```
 
@@ -165,7 +164,7 @@ We want to preserve the part of speech information. Therefore, we return `Token`
 
 #### Calculating the average
 
-This step can't be changed. It takes a `Tokenizer`, `PoSDetermer` and entities in a form of `[]string{"Punchinello", "Payne"}`. The method will call all the necessary implemented methods automatically and returns a `map` with the tokens and distances.
+This step can't be changed. It takes a `Tokenizer`, `PoSDetermer`, text as `string` and entities in a form of `[][]string`. The method will call all the necessary implemented methods automatically and returns a `map` with the tokens and distances.
 
 ## Projects using assocentity
 

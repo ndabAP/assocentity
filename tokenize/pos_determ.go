@@ -1,12 +1,12 @@
 package tokenize
 
 import (
-	"github.com/ndabAP/assocentity/v7/internal/iterator"
+	"github.com/ndabAP/assocentity/v8/internal/iterator"
 )
 
 // PoSDetermer determinates if part of speech tags should be deleted
 type PoSDetermer interface {
-	Determ(Tokenizer) ([]Token, error)
+	Determ(tokenizedText []Token, tokenizedEntities [][]Token) ([]Token, error)
 }
 
 // PoSDeterm represents the default part of speech determinator
@@ -16,31 +16,20 @@ type PoSDeterm struct{ poS int }
 func NewPoSDetermer(poS int) *PoSDeterm { return &PoSDeterm{poS} }
 
 // Determ deterimantes if a part of speech tag should be deleted
-func (dps *PoSDeterm) Determ(tokenizer Tokenizer) ([]Token, error) {
+func (dps *PoSDeterm) Determ(tokenizedText []Token, tokenizedEntities [][]Token) ([]Token, error) {
 	// If any part of speech, no need to filter
 	if dps.poS == ANY {
-		textTokens, err := tokenizer.TokenizeText()
 		if err != nil {
 			return []Token{}, err
 		}
 
-		return textTokens, err
-	}
-
-	textTokens, err := tokenizer.TokenizeText()
-	if err != nil {
-		return []Token{}, err
-	}
-
-	entityTokens, err := tokenizer.TokenizeEntities()
-	if err != nil {
-		return []Token{}, err
+		return tokenizedText, err
 	}
 
 	var res []Token
 	// Prepare for generic iterator
-	t := make(iterator.Elements, len(textTokens))
-	for i, v := range textTokens {
+	t := make(iterator.Elements, len(tokenizedText))
+	for i, v := range tokenizedText {
 		t[i] = v
 	}
 
@@ -53,10 +42,10 @@ func (dps *PoSDeterm) Determ(tokenizer Tokenizer) ([]Token, error) {
 			entityTraverser      *iterator.Iterator
 			nextTextTraverserPos int = textIdx
 		)
-		for entityIdx := range entityTokens {
+		for entityIdx := range tokenizedEntities {
 			// Prepare for generic iterator
-			e := make(iterator.Elements, len(entityTokens[entityIdx]))
-			for i, v := range entityTokens[entityIdx] {
+			e := make(iterator.Elements, len(tokenizedEntities[entityIdx]))
+			for i, v := range tokenizedEntities[entityIdx] {
 				e[i] = v
 			}
 

@@ -3,8 +3,8 @@ package assocentity
 import (
 	"math"
 
-	"github.com/ndabAP/assocentity/v7/internal/iterator"
-	"github.com/ndabAP/assocentity/v7/tokenize"
+	"github.com/ndabAP/assocentity/v8/internal/iterator"
+	"github.com/ndabAP/assocentity/v8/tokenize"
 )
 
 type direction int
@@ -15,13 +15,23 @@ var (
 )
 
 // Do returns the entity distances
-func Do(tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, entities []string) (map[tokenize.Token]float64, error) {
-	determTok, err := psd.Determ(tokenizer)
+func Do(tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, text string, entities []string) (map[tokenize.Token]float64, error) {
+	tokenizedText, err := tokenizer.Tokenize(text)
 	if err != nil {
 		return map[tokenize.Token]float64{}, err
 	}
 
-	entityTokens, err := tokenizer.TokenizeEntities()
+	var tokenizedEntity [][]tokenize.Token
+	for _, entity := range entities {
+		tokenized, err := tokenizer.Tokenize(entity)
+		if err != nil {
+			return map[tokenize.Token]float64{}, err
+		}
+
+		tokenizedEntity = append(tokenizedEntity, tokenized)
+	}
+
+	determTok, err := psd.Determ(tokenizedText, tokenizedEntity)
 	if err != nil {
 		return map[tokenize.Token]float64{}, err
 	}
@@ -42,10 +52,10 @@ func Do(tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, entities []strin
 			isEntity        bool
 			entityTraverser *iterator.Iterator
 		)
-		for entityIdx := range entityTokens {
+		for entityIdx := range tokenizedEntity {
 			// Prepare for generic iterator
-			e := make(iterator.Elements, len(entityTokens[entityIdx]))
-			for i, v := range entityTokens[entityIdx] {
+			e := make(iterator.Elements, len(tokenizedEntity[entityIdx]))
+			for i, v := range tokenizedEntity[entityIdx] {
 				e[i] = v
 			}
 
@@ -84,7 +94,7 @@ func Do(tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, entities []strin
 		for posTraverser.Next() {
 			posTraverserIdx := posTraverser.CurrPos()
 
-			ok, len := entityChecker(posTraverser, entityTokens, posDir)
+			ok, len := entityChecker(posTraverser, tokenizedEntity, posDir)
 			if ok {
 				distAccum[determTokTraverser.CurrElem().(tokenize.Token)] = append(distAccum[determTokTraverser.CurrElem().(tokenize.Token)], dist)
 
@@ -109,7 +119,7 @@ func Do(tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, entities []strin
 		for negTraverser.Prev() {
 			negTraverserIdx := negTraverser.CurrPos()
 
-			ok, len := entityChecker(negTraverser, entityTokens, negDir)
+			ok, len := entityChecker(negTraverser, tokenizedEntity, negDir)
 			if ok {
 				distAccum[determTokTraverser.CurrElem().(tokenize.Token)] = append(distAccum[determTokTraverser.CurrElem().(tokenize.Token)], dist)
 

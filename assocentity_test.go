@@ -7,10 +7,19 @@ import (
 	"testing"
 
 	"github.com/joho/godotenv"
-	"github.com/ndabAP/assocentity/v7/tokenize"
+	"github.com/ndabAP/assocentity/v8/tokenize"
 )
 
 var credentialsFile string
+
+func NewNLP(lang tokenize.Lang) *tokenize.NLP {
+	nlp, err := tokenize.NewNLP(credentialsFile, lang)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return nlp
+}
 
 func TestAssocIntegrationSingleWordEntities(t *testing.T) {
 	if testing.Short() {
@@ -26,14 +35,10 @@ func TestAssocIntegrationSingleWordEntities(t *testing.T) {
 	text := "Punchinello wanted Payne? He'd see the pain."
 	entities := []string{"Punchinello", "Payne"}
 
-	nlp, err := tokenize.NewNLP(credentialsFile, text, entities, tokenize.AutoLang)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	nlp := NewNLP("en")
 	dps := tokenize.NewPoSDetermer(tokenize.ANY)
 
-	got, err := Do(nlp, dps, entities)
+	got, err := Do(nlp, dps, text, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -67,14 +72,10 @@ func TestAssocIntegrationSingleWordEntitiesEnglishLanguage(t *testing.T) {
 	text := "Punchinello wanted Payne? He'd see the pain."
 	entities := []string{"Punchinello", "Payne"}
 
-	nlp, err := tokenize.NewNLP(credentialsFile, text, entities, "en")
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	nlp := NewNLP("en")
 	dps := tokenize.NewPoSDetermer(tokenize.ANY)
 
-	got, err := Do(nlp, dps, entities)
+	got, err := Do(nlp, dps, text, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -108,14 +109,10 @@ func TestAssocIntegrationMultiWordEntities(t *testing.T) {
 	text := "Max Payne, this is Deputy Chief Jim Bravura from the NYPD."
 	entities := []string{"Max Payne", "Jim Bravura"}
 
-	nlp, err := tokenize.NewNLP(credentialsFile, text, entities, tokenize.AutoLang)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	nlp := NewNLP("en")
 	dps := tokenize.NewPoSDetermer(tokenize.ANY)
 
-	got, err := Do(nlp, dps, entities)
+	got, err := Do(nlp, dps, text, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -150,14 +147,10 @@ func TestAssocIntegrationDefinedPartOfSpeech(t *testing.T) {
 	text := `"The things that I want", by Max Payne.`
 	entities := []string{"Max Payne"}
 
-	nlp, err := tokenize.NewNLP(credentialsFile, text, entities, tokenize.AutoLang)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	nlp := NewNLP("en")
 	dps := tokenize.NewPoSDetermer(tokenize.DET | tokenize.VERB | tokenize.PUNCT)
 
-	got, err := Do(nlp, dps, entities)
+	got, err := Do(nlp, dps, text, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -175,54 +168,60 @@ func TestAssocIntegrationDefinedPartOfSpeech(t *testing.T) {
 	}
 }
 
-type nlp struct{}
+// Create a custom NLP instance
+type nlpTest struct{}
 
-func (n *nlp) TokenizeText() ([]tokenize.Token, error) {
+// Second iteration is always for entites
+var iterations int
+
+func (n *nlpTest) Tokenize(text string) ([]tokenize.Token, error) {
+	if iterations == 0 {
+		iterations++
+
+		return []tokenize.Token{
+			{
+				Token: "Punchinello",
+				PoS:   tokenize.NOUN,
+			},
+			{
+				Token: "was",
+				PoS:   tokenize.VERB,
+			},
+			{
+				Token: "burning",
+				PoS:   tokenize.VERB,
+			},
+			{
+				Token: "to",
+				PoS:   tokenize.PRT,
+			},
+			{
+				Token: "get",
+				PoS:   tokenize.VERB,
+			},
+			{
+				Token: "me",
+				PoS:   tokenize.PRON,
+			},
+		}, nil
+	}
+
 	return []tokenize.Token{
 		{
 			Token: "Punchinello",
 			PoS:   tokenize.NOUN,
 		},
-		{
-			Token: "was",
-			PoS:   tokenize.VERB,
-		},
-		{
-			Token: "burning",
-			PoS:   tokenize.VERB,
-		},
-		{
-			Token: "to",
-			PoS:   tokenize.PRT,
-		},
-		{
-			Token: "get",
-			PoS:   tokenize.VERB,
-		},
-		{
-			Token: "me",
-			PoS:   tokenize.PRON,
-		},
 	}, nil
-}
 
-func (n *nlp) TokenizeEntities() ([][]tokenize.Token, error) {
-	return [][]tokenize.Token{
-		{
-			{
-				Token: "Punchinello",
-				PoS:   tokenize.NOUN,
-			},
-		},
-	}, nil
 }
 
 func TestAssocIntegrationSingleWordEntitiesShort(t *testing.T) {
-	dps := tokenize.NewPoSDetermer(tokenize.ANY)
-
+	text := "Punchinello was burning to get me"
 	entities := []string{"Punchinello"}
 
-	got, err := Do(&nlp{}, dps, entities)
+	dps := tokenize.NewPoSDetermer(tokenize.ANY)
+
+	got, err := Do(&nlpTest{}, dps, text, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -240,9 +239,12 @@ func TestAssocIntegrationSingleWordEntitiesShort(t *testing.T) {
 }
 
 func BenchmarkAssoc(b *testing.B) {
+	text := "Punchinello was burning to get me"
+	entities := []string{"Punchinello"}
+
 	dps := tokenize.NewPoSDetermer(tokenize.ANY)
 
 	for n := 0; n < b.N; n++ {
-		Do(&nlp{}, dps, []string{"Punchinello"})
+		Do(&nlpTest{}, dps, text, entities)
 	}
 }

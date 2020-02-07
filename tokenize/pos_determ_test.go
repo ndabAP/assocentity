@@ -7,48 +7,13 @@ import (
 
 type tokenizerTest struct{}
 
-func (t *tokenizerTest) TokenizeText() ([]Token, error) {
-	return []Token{
-		{
-			Token: "Cold",
-			PoS:   NOUN,
-		},
-		{
-			Token: "as",
-			PoS:   ADP,
-		},
-		{
-			Token: "a",
-			PoS:   DET,
-		},
-		{
-			Token: "gun",
-			PoS:   NOUN,
-		},
-	}, nil
-}
-
-func (t *tokenizerTest) TokenizeEntities() ([][]Token, error) {
-	return [][]Token{
-		{
-			Token{
-				Token: "Max",
-				PoS:   NOUN,
-			},
-			Token{
-				Token: "Payne",
-				PoS:   NOUN,
-			},
-		},
-	}, nil
-}
-
 func TestPoSDeterm_Determ(t *testing.T) {
 	type fields struct {
 		poS int
 	}
 	type args struct {
-		tokenizer Tokenizer
+		textTokens   []Token
+		entityTokens [][]Token
 	}
 	tests := []struct {
 		name    string
@@ -63,7 +28,24 @@ func TestPoSDeterm_Determ(t *testing.T) {
 				poS: ANY,
 			},
 			args: args{
-				tokenizer: new(tokenizerTest),
+				textTokens: []Token{
+					{PoS: NOUN, Token: "Cold"},
+					{PoS: ADP, Token: "as"},
+					{PoS: DET, Token: "a"},
+					{PoS: NOUN, Token: "gun"},
+				},
+				entityTokens: [][]Token{
+					{
+						{
+							Token: "Max",
+							PoS:   NOUN,
+						},
+						{
+							Token: "Payne",
+							PoS:   NOUN,
+						},
+					},
+				},
 			},
 			want: []Token{
 				{PoS: NOUN, Token: "Cold"},
@@ -79,7 +61,24 @@ func TestPoSDeterm_Determ(t *testing.T) {
 				poS: NOUN,
 			},
 			args: args{
-				tokenizer: new(tokenizerTest),
+				textTokens: []Token{
+					{PoS: NOUN, Token: "Cold"},
+					{PoS: ADP, Token: "as"},
+					{PoS: DET, Token: "a"},
+					{PoS: NOUN, Token: "gun"},
+				},
+				entityTokens: [][]Token{
+					{
+						{
+							Token: "Max",
+							PoS:   NOUN,
+						},
+						{
+							Token: "Payne",
+							PoS:   NOUN,
+						},
+					},
+				},
 			},
 			want: []Token{
 				{PoS: NOUN, Token: "Cold"},
@@ -93,7 +92,7 @@ func TestPoSDeterm_Determ(t *testing.T) {
 			dps := &PoSDeterm{
 				poS: tt.fields.poS,
 			}
-			got, err := dps.Determ(tt.args.tokenizer)
+			got, err := dps.Determ(tt.args.textTokens, tt.args.entityTokens)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PoSDeterm.Determ() error = %v, wantErr %v", err, tt.wantErr)
 				return

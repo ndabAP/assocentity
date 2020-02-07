@@ -47,8 +47,7 @@ var poS = map[languagepb.PartOfSpeech_Tag]int{
 
 // Tokenizer tokenizes a text and entities
 type Tokenizer interface {
-	TokenizeText() ([]Token, error)
-	TokenizeEntities() ([][]Token, error)
+	Tokenize(text string) ([]Token, error)
 }
 
 // Token represents a tokenized text unit
@@ -71,16 +70,11 @@ var AutoLang Lang = "auto"
 
 // NLP tokenizes a text using NLP
 type NLP struct {
-	entities []string
-	lang     Lang
-	text     string
-	// Cache
-	tokenizedText     []Token
-	tokenizedEntities [][]Token
+	lang Lang
 }
 
 // NewNLP returns a new NLP instance
-func NewNLP(credentialsFile, text string, entities []string, lang Lang) (*NLP, error) {
+func NewNLP(credentialsFile string, lang Lang) (*NLP, error) {
 	ctx = context.Background()
 
 	// Create one client for all calls
@@ -90,50 +84,19 @@ func NewNLP(credentialsFile, text string, entities []string, lang Lang) (*NLP, e
 	}
 
 	return &NLP{
-		entities: entities,
-		lang:     lang,
-		text:     text,
+		lang: lang,
 	}, nil
 }
 
-// TokenizeText tokenizes a text
-func (nlp *NLP) TokenizeText() ([]Token, error) {
-	// Check for cache
-	if len(nlp.tokenizedText) > 0 {
-		return nlp.tokenizedText, nil
-	}
-
-	var tokenizedText []Token
-	tokenizedText, err = nlp.tokenize(nlp.text)
+// Tokenize tokenizes a text
+func (nlp *NLP) Tokenize(text string) ([]Token, error) {
+	var tokenized []Token
+	tokenized, err = nlp.tokenize(text)
 	if err != nil {
 		return []Token{}, err
 	}
 
-	nlp.tokenizedText = tokenizedText
-
-	return tokenizedText, nil
-}
-
-// TokenizeEntities returns nested tokenized entities
-func (nlp *NLP) TokenizeEntities() ([][]Token, error) {
-	// Check for cache
-	if len(nlp.tokenizedEntities) > 0 {
-		return nlp.tokenizedEntities, nil
-	}
-
-	var tokenizedEntities [][]Token
-	for _, entity := range nlp.entities {
-		tokenizedEntity, err := nlp.tokenize(entity)
-		if err != nil {
-			return [][]Token{{}}, err
-		}
-
-		tokenizedEntities = append(tokenizedEntities, tokenizedEntity)
-	}
-
-	nlp.tokenizedEntities = tokenizedEntities
-
-	return tokenizedEntities, nil
+	return tokenized, nil
 }
 
 // tokenize does the actual tokenization work
