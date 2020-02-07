@@ -100,15 +100,19 @@ There are two steps to interfere the tokenization process. To interfere, the int
 Interface to implement:
 
 ```go
+// Tokenizer tokenizes a text
+type Tokenizer interface {
+	Tokenize(text string) ([]Token, error)
+}
+```
+
+While `Token` is of type:
+
+```go
 // Token represents a tokenized text unit
 type Token struct {
 	PoS   int
 	Token string
-}
-
-// Tokenizer tokenizes a text
-type Tokenizer interface {
-	Tokenize(text string) ([]Token, error)
 }
 ```
 
@@ -118,7 +122,7 @@ So, for example given this text:
 text := "Punchinello was burning to get me"
 ```
 
-The result from `TokenizeText` will be:
+The result from `Tokenize` could be:
 
 ```go
 res := []Token{
@@ -154,7 +158,7 @@ res := []Token{
 Interface to implement:
 
 ```go
-// PoSDetermer determinates if part of speech tags should be deleted
+// PoSDetermer determinates if part of speech tags should be kept
 type PoSDetermer interface {
 	Determ(tokenizedText []Token, tokenizedEntities [][]Token) ([]Token, error)
 }
