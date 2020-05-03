@@ -1,6 +1,7 @@
 package assocentity
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/ndabAP/assocentity/v8/internal/iterator"
@@ -15,10 +16,22 @@ var (
 )
 
 // Do returns the entity distances
-func Do(tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, text string, entities []string) (map[tokenize.Token]float64, error) {
+func Do(
+	tokenizer tokenize.Tokenizer,
+	psd tokenize.PoSDetermer,
+	text string,
+	entities []string,
+	trans func(string) string,
+) (map[tokenize.Token]float64, error) {
 	tokenizedText, err := tokenizer.Tokenize(text)
 	if err != nil {
 		return map[tokenize.Token]float64{}, err
+	}
+
+	if trans != nil {
+		for _, t := range tokenizedText {
+			fmt.Println(t)
+		}
 	}
 
 	var tokenizedEntity [][]tokenize.Token
