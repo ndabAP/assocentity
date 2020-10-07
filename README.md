@@ -6,7 +6,7 @@ Package assocentity returns the average distance from words to a given entity. *
 
 - Interfere at every step
 - pass aliases to entity
-- provides a default tokenzier
+- provides a default tokenizer
 - powered by Googles Cloud Natural Language API
 
 ## Installation
