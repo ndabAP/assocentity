@@ -42,7 +42,7 @@ func (g *Iterator) Next() bool {
 	return true
 }
 
-// Prev sets the next element
+// Prev sets the previous element
 func (g *Iterator) Prev() bool {
 	if g.init {
 		g.init = false
