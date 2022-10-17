@@ -10,10 +10,10 @@ type PoSDetermer interface {
 }
 
 // PoSDeterm represents the default part of speech determinator
-type PoSDeterm struct{ poS int }
+type PoSDeterm struct{ poS PoS }
 
 // NewPoSDetermer returns a new default part of speech determinator
-func NewPoSDetermer(poS int) *PoSDeterm { return &PoSDeterm{poS} }
+func NewPoSDetermer(poS PoS) *PoSDeterm { return &PoSDeterm{poS} }
 
 // Determ deterimantes if a part of speech tag should be deleted
 func (dps *PoSDeterm) Determ(tokenizedText []Token, tokenizedEntities [][]Token) ([]Token, error) {

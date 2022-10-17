@@ -12,8 +12,8 @@ import (
 
 var credentialsFile string
 
-func NewNLP(lang tokenize.Lang) *tokenize.NLP {
-	nlp, err := tokenize.NewNLP(credentialsFile, lang)
+func NewNLP(lang tokenize.Lang) *tokenize.NLPTokenizer {
+	nlp, err := tokenize.NewNLPTokenizer(credentialsFile, lang)
 	if err != nil {
 		log.Fatal(err)
 	}
