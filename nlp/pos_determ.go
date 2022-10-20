@@ -5,14 +5,15 @@ import (
 	"github.com/ndabAP/assocentity/v8/tokenize"
 )
 
-// NLPPoSDeterm represents the default part of speech determinator
-type NLPPoSDeterm struct{ poS tokenize.PoS }
+// NLPPoSDetermer represents the default part of speech determinator
+type NLPPoSDetermer struct{ poS tokenize.PoS }
 
 // NewNLPPoSDetermer returns a new default part of speech determinator
-func NewNLPPoSDetermer(poS tokenize.PoS) NLPPoSDeterm { return NLPPoSDeterm{poS} }
+func NewNLPPoSDetermer(poS tokenize.PoS) NLPPoSDetermer { return NLPPoSDetermer{poS} }
 
-// Determ deterimantes if a part of speech tag should be deleted
-func (dps NLPPoSDeterm) Determ(textTokens []tokenize.Token, entityTokens [][]tokenize.Token) ([]tokenize.Token, error) {
+// DetermPoS deterimantes if a part of speech tag should be deleted. Ignores
+// entities
+func (dps NLPPoSDetermer) DetermPoS(textTokens []tokenize.Token, entityTokens [][]tokenize.Token) ([]tokenize.Token, error) {
 	// If any part of speech, no need to filter
 	if dps.poS == tokenize.ANY {
 		return textTokens, nil

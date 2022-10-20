@@ -22,7 +22,6 @@ func TestNew(t *testing.T) {
 			want: &Iterator{
 				elems: []Element{"Gognitti", "bailed"},
 				pos:   0,
-				el:    "Gognitti",
 				len:   2,
 			},
 		},
@@ -47,7 +46,6 @@ func TestIterator_Next(t *testing.T) {
 			g: &Iterator{
 				elems: []Element{"No", "Payne", "No", "Gain"},
 				pos:   0,
-				el:    "No",
 				len:   4,
 			},
 			want: true,
@@ -57,7 +55,6 @@ func TestIterator_Next(t *testing.T) {
 			g: &Iterator{
 				elems: []Element{"No", "Payne", "No", "Gain"},
 				pos:   3,
-				el:    "Gain",
 				len:   4,
 			},
 			want: false,
@@ -83,7 +80,6 @@ func TestIterator_Prev(t *testing.T) {
 			g: &Iterator{
 				elems: []Element{"No", "Payne", "No", "Gain"},
 				pos:   0,
-				el:    "No",
 				len:   4,
 			},
 			want: true,
@@ -93,7 +89,6 @@ func TestIterator_Prev(t *testing.T) {
 			g: &Iterator{
 				elems: []Element{"No", "Payne", "No", "Gain"},
 				pos:   -1,
-				el:    "No",
 				len:   4,
 			},
 			want: false,
@@ -151,7 +146,6 @@ func TestIterator_CurrElem(t *testing.T) {
 			g: &Iterator{
 				elems: []Element{"Relax", "Max"},
 				pos:   0,
-				el:    "Relax",
 				len:   2,
 			},
 			want: "Relax",
@@ -177,7 +171,6 @@ func TestIterator_Len(t *testing.T) {
 			g: &Iterator{
 				elems: []Element{"Cold", "as", "a", "gun"},
 				pos:   0,
-				el:    "Cold",
 				len:   4,
 			},
 			want: 4,
@@ -207,7 +200,6 @@ func TestIterator_SetPos(t *testing.T) {
 			g: &Iterator{
 				elems: []Element{"With", "pleasure", "boss"},
 				pos:   0,
-				el:    "Cold",
 				len:   3,
 			},
 			args: args{
@@ -220,7 +212,6 @@ func TestIterator_SetPos(t *testing.T) {
 			g: &Iterator{
 				elems: []Element{"With", "pleasure", "boss"},
 				pos:   2,
-				el:    "Cold",
 				len:   3,
 			},
 			args: args{

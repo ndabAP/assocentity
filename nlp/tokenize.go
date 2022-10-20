@@ -27,7 +27,8 @@ var poSMap = map[languagepb.PartOfSpeech_Tag]tokenize.PoS{
 	languagepb.PartOfSpeech_X:       tokenize.X,
 }
 
-// Lang defines the language used to examine the text. Both ISO and BCP-47 language codes are accepted
+// Lang defines the language used to examine the text. Both ISO and BCP-47
+// language codes are accepted
 type Lang string
 
 // AutoLang tries to automatically recognize the language
@@ -55,7 +56,7 @@ func (nlp NLPTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.T
 	}
 
 	// Holds the tokens text
-	tokens := make([]tokenize.Token, len(res.GetTokens()))
+	tokens := make([]tokenize.Token, 0)
 	for _, tok := range res.GetTokens() {
 		tokens = append(tokens, tokenize.Token{
 			PoS:   poSMap[tok.PartOfSpeech.Tag],

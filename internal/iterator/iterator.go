@@ -26,13 +26,11 @@ func New(elems []Element) *Iterator {
 
 // Next sets the next element
 func (it *Iterator) Next() bool {
-	if it.pos >= it.len-1 {
+	if it.pos >= it.len {
 		return false
 	}
-
 	it.el = it.elems[it.pos]
 	it.pos++
-
 	return true
 }
 
@@ -41,17 +39,14 @@ func (it *Iterator) Prev() bool {
 	if it.pos < 0 {
 		return false
 	}
-
 	it.el = it.elems[it.pos]
 	it.pos--
-
 	return true
 }
 
 // Reset resets the iterator
 func (it *Iterator) Reset() {
 	it.pos = 0
-	it.el = it.elems[0]
 }
 
 // CurrPos returns the current position
@@ -71,9 +66,8 @@ func (it *Iterator) Len() int {
 
 // SetPos sets the position
 func (it *Iterator) SetPos(pos int) bool {
-	if it.len > pos {
+	if it.len > pos && pos >= 0 {
 		it.pos = pos
-		it.el = it.elems[pos]
 	}
-	return it.len > pos
+	return it.len > pos && pos >= 0
 }

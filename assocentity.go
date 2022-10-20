@@ -16,25 +16,31 @@ var (
 )
 
 // Do returns the entity distances
-func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, text string, entities []string) (map[tokenize.Token]float64, error) {
+func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, text string, entities []string) (map[string]float64, error) {
+	var (
+		assocEntities = make(map[string]float64)
+		distAccum     = make(map[string][]float64)
+
+		err error
+	)
+
 	textTokens, err := tokenizer.Tokenize(ctx, text)
 	if err != nil {
-		return map[tokenize.Token]float64{}, err
+		return assocEntities, err
 	}
 
 	var entityTokens [][]tokenize.Token
 	for _, entity := range entities {
 		tokenized, err := tokenizer.Tokenize(ctx, entity)
 		if err != nil {
-			return map[tokenize.Token]float64{}, err
+			return assocEntities, err
 		}
-
 		entityTokens = append(entityTokens, tokenized)
 	}
 
-	determTokens, err := psd.Determ(textTokens, entityTokens)
+	determTokens, err := psd.DetermPoS(textTokens, entityTokens)
 	if err != nil {
-		return map[tokenize.Token]float64{}, err
+		return assocEntities, err
 	}
 
 	// Prepare for generic iterator
@@ -43,11 +49,9 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 		determElems[i] = v
 	}
 
-	var distAccum = make(map[tokenize.Token][]float64)
-
-	determTokIter := iterator.New(determElems)
-	for determTokIter.Next() {
-		determTokIdx := determTokIter.CurrPos()
+	determTokensIter := iterator.New(determElems)
+	for determTokensIter.Next() {
+		determTokensIdx := determTokensIter.CurrPos()
 
 		var (
 			entityIter *iterator.Iterator
@@ -55,21 +59,21 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 		)
 		for entityIdx := range entityTokens {
 			// Prepare for generic iterator
-			e := make(iterator.Elements, len(entityTokens[entityIdx]))
+			entityElems := make(iterator.Elements, len(entityTokens[entityIdx]))
 			for i, v := range entityTokens[entityIdx] {
-				e[i] = v
+				entityElems[i] = v
 			}
 
-			entityIter = iterator.New(e)
+			entityIter = iterator.New(entityElems)
 			for entityIter.Next() {
-				isEntity = determTokIter.CurrElem().(tokenize.Token) == entityIter.CurrElem().(tokenize.Token)
+				isEntity = determTokensIter.CurrElem().(tokenize.Token) == entityIter.CurrElem().(tokenize.Token)
 				// Check if first token matches the entity token
 				if !isEntity {
 					break
 				}
 
 				// Check for next token
-				determTokIter.Next()
+				determTokensIter.Next()
 			}
 
 			if isEntity {
@@ -79,30 +83,32 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 
 		if isEntity {
 			// Skip about entity positions
-			determTokIter.SetPos(determTokIdx + entityIter.Len() - 1)
+			determTokensIter.SetPos(determTokensIdx + entityIter.Len() - 1)
 			continue
 		}
 
 		// Reset because mutated
-		determTokIter.SetPos(determTokIdx)
+		determTokensIter.SetPos(determTokensIdx)
+
+		// Iterate in positive and negative direction
 
 		// Distance
-		var dist float64
+		var entityDistance float64
 
 		// Iterate positive direction
 		posDirIter := iterator.New(determElems)
-		posDirIter.SetPos(determTokIdx)
+		posDirIter.SetPos(determTokensIdx)
 		for posDirIter.Next() {
 			posDirIdx := posDirIter.CurrPos()
 
 			isEntity, len := entityChecker(posDirIter, entityTokens, posDir)
 			if isEntity {
-				distAccum[determTokIter.CurrElem().(tokenize.Token)] = append(distAccum[determTokIter.CurrElem().(tokenize.Token)], dist)
+				distAccum[determTokensIter.CurrElem().(tokenize.Token).Token] = append(distAccum[determTokensIter.CurrElem().(tokenize.Token).Token], entityDistance)
 				// Skip about entity
 				posDirIter.SetPos(posDirIdx + len - 1)
 			}
 
-			dist++
+			entityDistance++
 
 			if isEntity {
 				continue
@@ -114,20 +120,21 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 
 		// Iterate negative direction
 		// Reset distance
-		dist = 0
+		entityDistance = 0
+
 		negDirIter := iterator.New(determElems)
-		negDirIter.SetPos(determTokIdx)
+		negDirIter.SetPos(determTokensIdx)
 		for negDirIter.Prev() {
 			negDirIdx := negDirIter.CurrPos()
 
 			isEntity, len := entityChecker(negDirIter, entityTokens, negDir)
 			if isEntity {
-				distAccum[determTokIter.CurrElem().(tokenize.Token)] = append(distAccum[determTokIter.CurrElem().(tokenize.Token)], dist)
+				distAccum[determTokensIter.CurrElem().(tokenize.Token).Token] = append(distAccum[determTokensIter.CurrElem().(tokenize.Token).Token], entityDistance)
 				// Skip about entity
 				negDirIter.SetPos(negDirIdx - len + 1)
 			}
 
-			dist++
+			entityDistance++
 
 			if isEntity {
 				continue
@@ -138,12 +145,10 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 		}
 	}
 
-	assocEntities := make(map[tokenize.Token]float64)
 	// Calculate the distances
 	for elem, dist := range distAccum {
 		assocEntities[elem] = avg(dist)
 	}
-
 	return assocEntities, nil
 }
 
@@ -156,13 +161,14 @@ func entityChecker(determTokTraverser *iterator.Iterator, entityTokens [][]token
 	)
 	for entityIdx := range entityTokens {
 		// Prepare for generic iterator
-		elems := make(iterator.Elements, len(entityTokens[entityIdx]))
+		entityElems := make(iterator.Elements, len(entityTokens[entityIdx]))
 		for i, v := range entityTokens[entityIdx] {
-			elems[i] = v
+			entityElems[i] = v
 		}
 
-		entityIter = iterator.New(elems)
+		entityIter = iterator.New(entityElems)
 		switch dir {
+
 		case posDir:
 			// Positive direction
 			for entityIter.Next() {
@@ -175,9 +181,12 @@ func entityChecker(determTokTraverser *iterator.Iterator, entityTokens [][]token
 				// Check for next token
 				determTokTraverser.Next()
 			}
+
 		case negDir:
 			// Negative direction
+
 			entityIter.SetPos(entityIter.Len() - 1)
+
 			for entityIter.Prev() {
 				isEntity = determTokTraverser.CurrElem().(tokenize.Token).Token == entityIter.CurrElem().(tokenize.Token).Token
 				// Check if first token matches the entity token
