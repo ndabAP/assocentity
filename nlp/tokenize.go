@@ -40,15 +40,15 @@ type NLPTokenizer struct {
 }
 
 // NewNLPTokenizer returns a new NLP instance
-func NewNLPTokenizer(credentialsFilename string, lang Lang) (*NLPTokenizer, error) {
-	return &NLPTokenizer{
+func NewNLPTokenizer(credentialsFilename string, lang Lang) NLPTokenizer {
+	return NLPTokenizer{
 		credsFilename: credentialsFilename,
 		lang:          lang,
-	}, nil
+	}
 }
 
 // Tokenize tokenizes a text
-func (nlp *NLPTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.Token, error) {
+func (nlp NLPTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.Token, error) {
 	res, err := nlp.req(ctx, text)
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (nlp *NLPTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.
 }
 
 // req sends a request to the Google NLP server
-func (nlp *NLPTokenizer) req(ctx context.Context, text string) (*languagepb.AnnotateTextResponse, error) {
+func (nlp NLPTokenizer) req(ctx context.Context, text string) (*languagepb.AnnotateTextResponse, error) {
 	client, err := language.NewClient(ctx, option.WithCredentialsFile(nlp.credsFilename))
 	if err != nil {
 		return nil, err

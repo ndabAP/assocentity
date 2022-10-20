@@ -1,24 +1,25 @@
 package assocentity
 
 import (
+	"context"
 	"log"
 	"os"
 	"reflect"
 	"testing"
 
 	"github.com/joho/godotenv"
+	"github.com/ndabAP/assocentity/v8/nlp"
 	"github.com/ndabAP/assocentity/v8/tokenize"
 )
 
-var credentialsFile string
+var (
+	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
+	nlpTokenizer    nlp.NLPTokenizer
+)
 
-func NewNLP(lang tokenize.Lang) *tokenize.NLPTokenizer {
-	nlp, err := tokenize.NewNLPTokenizer(credentialsFile, lang)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return nlp
+func newNLP(lang nlp.Lang) nlp.NLPTokenizer {
+	nlpTokenizer = nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
+	return nlpTokenizer
 }
 
 func TestAssocIntegrationSingleWordEntities(t *testing.T) {
@@ -26,23 +27,15 @@ func TestAssocIntegrationSingleWordEntities(t *testing.T) {
 		t.SkipNow()
 	}
 
-	if err := godotenv.Load(); err != nil {
-		log.Fatal(err)
-	}
-
-	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
-
 	text := "Punchinello wanted Payne? He'd see the pain."
 	entities := []string{"Punchinello", "Payne"}
 
-	nlp := NewNLP("en")
-	dps := tokenize.NewPoSDetermer(tokenize.ANY)
+	dps := nlp.NewNLPPoSDetermer(tokenize.ANY)
 
-	got, err := Do(nlp, dps, text, entities)
+	got, err := Do(context.Background(), nlpTokenizer, dps, text, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	want := map[tokenize.Token]float64{
 		{PoS: tokenize.VERB, Token: "wanted"}: 1,
 		{PoS: tokenize.PUNCT, Token: "?"}:     2,
@@ -67,13 +60,10 @@ func TestAssocIntegrationSingleWordEntitiesEnglishLanguage(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
-
 	text := "Punchinello wanted Payne? He'd see the pain."
 	entities := []string{"Punchinello", "Payne"}
 
-	nlp := NewNLP("en")
-	dps := tokenize.NewPoSDetermer(tokenize.ANY)
+	dps := nlp.NewNLPPoSDetermer(tokenize.ANY)
 
 	got, err := Do(nlp, dps, text, entities)
 	if err != nil {

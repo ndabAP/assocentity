@@ -1,6 +1,7 @@
 package assocentity
 
 import (
+	"context"
 	"math"
 
 	"github.com/ndabAP/assocentity/v8/internal/iterator"
@@ -15,60 +16,60 @@ var (
 )
 
 // Do returns the entity distances
-func Do(tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, text string, entities []string) (map[tokenize.Token]float64, error) {
-	tokenizedText, err := tokenizer.Tokenize(text)
+func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, text string, entities []string) (map[tokenize.Token]float64, error) {
+	textTokens, err := tokenizer.Tokenize(ctx, text)
 	if err != nil {
 		return map[tokenize.Token]float64{}, err
 	}
 
-	var tokenizedEntity [][]tokenize.Token
+	var entityTokens [][]tokenize.Token
 	for _, entity := range entities {
-		tokenized, err := tokenizer.Tokenize(entity)
+		tokenized, err := tokenizer.Tokenize(ctx, entity)
 		if err != nil {
 			return map[tokenize.Token]float64{}, err
 		}
 
-		tokenizedEntity = append(tokenizedEntity, tokenized)
+		entityTokens = append(entityTokens, tokenized)
 	}
 
-	determTok, err := psd.Determ(tokenizedText, tokenizedEntity)
+	determTokens, err := psd.Determ(textTokens, entityTokens)
 	if err != nil {
 		return map[tokenize.Token]float64{}, err
 	}
 
-	var distAccum = make(map[tokenize.Token][]float64)
-
 	// Prepare for generic iterator
-	di := make(iterator.Elements, len(determTok))
-	for i, v := range determTok {
-		di[i] = v
+	determElems := make(iterator.Elements, len(determTokens))
+	for i, v := range determTokens {
+		determElems[i] = v
 	}
 
-	determTokTraverser := iterator.New(di)
-	for determTokTraverser.Next() {
-		determTokIdx := determTokTraverser.CurrPos()
+	var distAccum = make(map[tokenize.Token][]float64)
+
+	determTokIter := iterator.New(determElems)
+	for determTokIter.Next() {
+		determTokIdx := determTokIter.CurrPos()
 
 		var (
-			isEntity        bool
-			entityTraverser *iterator.Iterator
+			entityIter *iterator.Iterator
+			isEntity   bool
 		)
-		for entityIdx := range tokenizedEntity {
+		for entityIdx := range entityTokens {
 			// Prepare for generic iterator
-			e := make(iterator.Elements, len(tokenizedEntity[entityIdx]))
-			for i, v := range tokenizedEntity[entityIdx] {
+			e := make(iterator.Elements, len(entityTokens[entityIdx]))
+			for i, v := range entityTokens[entityIdx] {
 				e[i] = v
 			}
 
-			entityTraverser = iterator.New(e)
-			for entityTraverser.Next() {
-				isEntity = determTokTraverser.CurrElem().(tokenize.Token) == entityTraverser.CurrElem().(tokenize.Token)
+			entityIter = iterator.New(e)
+			for entityIter.Next() {
+				isEntity = determTokIter.CurrElem().(tokenize.Token) == entityIter.CurrElem().(tokenize.Token)
 				// Check if first token matches the entity token
 				if !isEntity {
 					break
 				}
 
 				// Check for next token
-				determTokTraverser.Next()
+				determTokIter.Next()
 			}
 
 			if isEntity {
@@ -78,63 +79,62 @@ func Do(tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, text string, ent
 
 		if isEntity {
 			// Skip about entity positions
-			determTokTraverser.SetPos(determTokIdx + entityTraverser.Len() - 1)
-
+			determTokIter.SetPos(determTokIdx + entityIter.Len() - 1)
 			continue
 		}
 
+		// Reset because mutated
+		determTokIter.SetPos(determTokIdx)
+
+		// Distance
 		var dist float64
 
-		// Reset because mutated
-		determTokTraverser.SetPos(determTokIdx)
-
 		// Iterate positive direction
-		posTraverser := iterator.New(di)
-		posTraverser.SetPos(determTokIdx)
-		for posTraverser.Next() {
-			posTraverserIdx := posTraverser.CurrPos()
+		posDirIter := iterator.New(determElems)
+		posDirIter.SetPos(determTokIdx)
+		for posDirIter.Next() {
+			posDirIdx := posDirIter.CurrPos()
 
-			ok, len := entityChecker(posTraverser, tokenizedEntity, posDir)
-			if ok {
-				distAccum[determTokTraverser.CurrElem().(tokenize.Token)] = append(distAccum[determTokTraverser.CurrElem().(tokenize.Token)], dist)
-
+			isEntity, len := entityChecker(posDirIter, entityTokens, posDir)
+			if isEntity {
+				distAccum[determTokIter.CurrElem().(tokenize.Token)] = append(distAccum[determTokIter.CurrElem().(tokenize.Token)], dist)
 				// Skip about entity
-				posTraverser.SetPos(posTraverserIdx + len - 1)
+				posDirIter.SetPos(posDirIdx + len - 1)
 			}
 
 			dist++
 
-			if ok {
+			if isEntity {
 				continue
 			}
 
 			// Reset because entityChecker is mutating
-			posTraverser.SetPos(posTraverserIdx)
+			posDirIter.SetPos(posDirIdx)
 		}
 
 		// Iterate negative direction
+		// Reset distance
 		dist = 0
-		negTraverser := iterator.New(di)
-		negTraverser.SetPos(determTokIdx)
-		for negTraverser.Prev() {
-			negTraverserIdx := negTraverser.CurrPos()
+		negDirIter := iterator.New(determElems)
+		negDirIter.SetPos(determTokIdx)
+		for negDirIter.Prev() {
+			negDirIdx := negDirIter.CurrPos()
 
-			ok, len := entityChecker(negTraverser, tokenizedEntity, negDir)
-			if ok {
-				distAccum[determTokTraverser.CurrElem().(tokenize.Token)] = append(distAccum[determTokTraverser.CurrElem().(tokenize.Token)], dist)
-
+			isEntity, len := entityChecker(negDirIter, entityTokens, negDir)
+			if isEntity {
+				distAccum[determTokIter.CurrElem().(tokenize.Token)] = append(distAccum[determTokIter.CurrElem().(tokenize.Token)], dist)
 				// Skip about entity
-				negTraverser.SetPos(negTraverserIdx - len + 1)
+				negDirIter.SetPos(negDirIdx - len + 1)
 			}
 
 			dist++
 
-			if ok {
+			if isEntity {
 				continue
 			}
 
 			// Reset because entityChecker is mutating
-			negTraverser.SetPos(negTraverserIdx)
+			negDirIter.SetPos(negDirIdx)
 		}
 	}
 
@@ -147,24 +147,26 @@ func Do(tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, text string, ent
 	return assocEntities, nil
 }
 
-// Iterates through entity tokens and returns true if found and positions to skip
+// Iterates through entity and PoS determinated tokens and returns true if found
+// and positions to skip
 func entityChecker(determTokTraverser *iterator.Iterator, entityTokens [][]tokenize.Token, dir direction) (bool, int) {
 	var (
-		isEntity        bool
-		entityTraverser *iterator.Iterator
+		entityIter *iterator.Iterator
+		isEntity   bool
 	)
 	for entityIdx := range entityTokens {
 		// Prepare for generic iterator
-		e := make(iterator.Elements, len(entityTokens[entityIdx]))
+		elems := make(iterator.Elements, len(entityTokens[entityIdx]))
 		for i, v := range entityTokens[entityIdx] {
-			e[i] = v
+			elems[i] = v
 		}
 
-		entityTraverser = iterator.New(e)
-		if dir == posDir {
+		entityIter = iterator.New(elems)
+		switch dir {
+		case posDir:
 			// Positive direction
-			for entityTraverser.Next() {
-				isEntity = determTokTraverser.CurrElem().(tokenize.Token).Token == entityTraverser.CurrElem().(tokenize.Token).Token
+			for entityIter.Next() {
+				isEntity = determTokTraverser.CurrElem().(tokenize.Token).Token == entityIter.CurrElem().(tokenize.Token).Token
 				// Check if first token matches the entity token
 				if !isEntity {
 					break
@@ -173,11 +175,11 @@ func entityChecker(determTokTraverser *iterator.Iterator, entityTokens [][]token
 				// Check for next token
 				determTokTraverser.Next()
 			}
-		} else if dir == negDir {
+		case negDir:
 			// Negative direction
-			entityTraverser.SetPos(entityTraverser.Len() - 1)
-			for entityTraverser.Prev() {
-				isEntity = determTokTraverser.CurrElem().(tokenize.Token).Token == entityTraverser.CurrElem().(tokenize.Token).Token
+			entityIter.SetPos(entityIter.Len() - 1)
+			for entityIter.Prev() {
+				isEntity = determTokTraverser.CurrElem().(tokenize.Token).Token == entityIter.CurrElem().(tokenize.Token).Token
 				// Check if first token matches the entity token
 				if !isEntity {
 					break
@@ -189,11 +191,11 @@ func entityChecker(determTokTraverser *iterator.Iterator, entityTokens [][]token
 		}
 
 		if isEntity {
-			return isEntity, entityTraverser.Len()
+			return isEntity, entityIter.Len()
 		}
 	}
 
-	return isEntity, entityTraverser.Len()
+	return isEntity, entityIter.Len()
 }
 
 // Returns the average of a float slice
@@ -202,7 +204,6 @@ func avg(xs []float64) float64 {
 	for _, v := range xs {
 		total += v
 	}
-
 	return round(total / float64(len(xs)))
 }
 
