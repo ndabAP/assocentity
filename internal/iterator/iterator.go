@@ -1,93 +1,79 @@
 package iterator
 
 // Element represents a slice element
-type Element interface{}
+type Element any
 
 // Elements represents a slice
 type Elements []Element
 
 // Iterator represents a iterator
 type Iterator struct {
-	slice []Element
-	pos   int
 	el    Element
-	init  bool
+	elems []Element
+	len   int
+	pos   int
 }
 
 // New returns a new iterator
-func New(slice []Element) *Iterator {
+func New(elems []Element) *Iterator {
 	return &Iterator{
-		slice,
+		elems[0],
+		elems,
+		len(elems),
 		0,
-		slice[0],
-		true,
 	}
 }
 
 // Next sets the next element
-func (g *Iterator) Next() bool {
-	if g.init {
-		g.init = false
-
-		return true
-	}
-
-	if g.pos+1 > g.Len()-1 {
+func (it *Iterator) Next() bool {
+	if it.pos >= it.len-1 {
 		return false
 	}
 
-	g.pos++
-	g.el = g.slice[g.pos]
+	it.el = it.elems[it.pos]
+	it.pos++
 
 	return true
 }
 
 // Prev sets the previous element
-func (g *Iterator) Prev() bool {
-	if g.init {
-		g.init = false
-
-		return true
-	}
-
-	if g.pos-1 < 0 {
+func (it *Iterator) Prev() bool {
+	if it.pos < 0 {
 		return false
 	}
 
-	g.pos--
-	g.el = g.slice[g.pos]
+	it.el = it.elems[it.pos]
+	it.pos--
 
 	return true
 }
 
 // Reset resets the iterator
-func (g *Iterator) Reset() {
-	g.pos = 0
-	g.el = g.slice[0]
-	g.init = true
+func (it *Iterator) Reset() {
+	it.pos = 0
+	it.el = it.elems[0]
 }
 
 // CurrPos returns the current position
-func (g *Iterator) CurrPos() int {
-	return g.pos
+func (it *Iterator) CurrPos() int {
+	return it.pos
 }
 
 // CurrElem returns the current element
-func (g *Iterator) CurrElem() Element {
-	return g.el
+func (it *Iterator) CurrElem() Element {
+	return it.el
 }
 
 // Len returns the length
-func (g *Iterator) Len() int {
-	return len(g.slice)
+func (it *Iterator) Len() int {
+	return it.len
 }
 
 // SetPos sets the position
-func (g *Iterator) SetPos(pos int) bool {
-	if g.Len() > pos {
-		g.pos = pos
-		g.el = g.slice[pos]
+func (it *Iterator) SetPos(pos int) bool {
+	if it.len > pos {
+		it.pos = pos
+		it.el = it.elems[pos]
 	}
-
-	return g.Len() > pos
+	return it.len > pos
 }

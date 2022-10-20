@@ -20,10 +20,10 @@ func TestNew(t *testing.T) {
 				slice: []Element{"Gognitti", "bailed"},
 			},
 			want: &Iterator{
-				slice: []Element{"Gognitti", "bailed"},
+				elems: []Element{"Gognitti", "bailed"},
 				pos:   0,
 				el:    "Gognitti",
-				init:  true,
+				len:   2,
 			},
 		},
 	}
@@ -45,20 +45,20 @@ func TestIterator_Next(t *testing.T) {
 		{
 			name: "element left",
 			g: &Iterator{
-				slice: []Element{"No", "Payne", "No", "Gain"},
+				elems: []Element{"No", "Payne", "No", "Gain"},
 				pos:   0,
 				el:    "No",
-				init:  true,
+				len:   4,
 			},
 			want: true,
 		},
 		{
 			name: "no element left",
 			g: &Iterator{
-				slice: []Element{"No", "Payne", "No", "Gain"},
+				elems: []Element{"No", "Payne", "No", "Gain"},
 				pos:   3,
 				el:    "Gain",
-				init:  false,
+				len:   4,
 			},
 			want: false,
 		},
@@ -81,20 +81,20 @@ func TestIterator_Prev(t *testing.T) {
 		{
 			name: "next",
 			g: &Iterator{
-				slice: []Element{"No", "Payne", "No", "Gain"},
+				elems: []Element{"No", "Payne", "No", "Gain"},
 				pos:   0,
 				el:    "No",
-				init:  true,
+				len:   4,
 			},
 			want: true,
 		},
 		{
 			name: "no element left",
 			g: &Iterator{
-				slice: []Element{"No", "Payne", "No", "Gain"},
-				pos:   0,
+				elems: []Element{"No", "Payne", "No", "Gain"},
+				pos:   -1,
 				el:    "No",
-				init:  false,
+				len:   4,
 			},
 			want: false,
 		},
@@ -125,7 +125,7 @@ func TestIterator_CurrPos(t *testing.T) {
 			name: "next position",
 			g:    New([]Element{"You", "play", "you", "pay"}),
 			next: true,
-			want: 0,
+			want: 1,
 		},
 	}
 	for _, tt := range tests {
@@ -149,10 +149,10 @@ func TestIterator_CurrElem(t *testing.T) {
 		{
 			name: "current element",
 			g: &Iterator{
-				slice: []Element{"Relax", "Max"},
+				elems: []Element{"Relax", "Max"},
 				pos:   0,
 				el:    "Relax",
-				init:  true,
+				len:   2,
 			},
 			want: "Relax",
 		},
@@ -175,10 +175,10 @@ func TestIterator_Len(t *testing.T) {
 		{
 			name: "current element",
 			g: &Iterator{
-				slice: []Element{"Cold", "as", "a", "gun"},
+				elems: []Element{"Cold", "as", "a", "gun"},
 				pos:   0,
 				el:    "Cold",
-				init:  true,
+				len:   4,
 			},
 			want: 4,
 		},
@@ -205,10 +205,10 @@ func TestIterator_SetPos(t *testing.T) {
 		{
 			name: "available position",
 			g: &Iterator{
-				slice: []Element{"With", "pleasure", "boss"},
+				elems: []Element{"With", "pleasure", "boss"},
 				pos:   0,
 				el:    "Cold",
-				init:  true,
+				len:   3,
 			},
 			args: args{
 				pos: 1,
@@ -218,10 +218,10 @@ func TestIterator_SetPos(t *testing.T) {
 		{
 			name: "unavailable position",
 			g: &Iterator{
-				slice: []Element{"With", "pleasure", "boss"},
+				elems: []Element{"With", "pleasure", "boss"},
 				pos:   2,
 				el:    "Cold",
-				init:  false,
+				len:   3,
 			},
 			args: args{
 				pos: 3,
