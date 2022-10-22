@@ -17,6 +17,7 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.6.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
+	golang.org/x/exp v0.0.0-20221019170559-20944726eadf // indirect
 	golang.org/x/net v0.0.0-20221014081412-f15817d10f9b // indirect
 	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783 // indirect
 	golang.org/x/sys v0.0.0-20221013171732-95e765b1cc43 // indirect
