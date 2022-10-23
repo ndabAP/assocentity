@@ -59,6 +59,7 @@ func (it *Iterator[T]) Prev() bool {
 func (it *Iterator[T]) Reset() {
 	it.pos = 0
 	it.el = it.elems[0]
+	it.init = true
 }
 
 // CurrPos returns the current position

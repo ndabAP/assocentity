@@ -39,90 +39,89 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 	}
 
 	// Determinate part of speech
-	determTokens, err := psd.DetermPoS(textTokens, entityTokens)
-	if err != nil {
-		return assocEntities, err
-	}
+	determTokens := psd.DetermPoS(textTokens, entityTokens)
 
-	// Create iterators
-	determTokensIter := iterator.New[tokenize.Token](determTokens)
-	entityTokensIter := iterator.New[[]tokenize.Token](entityTokens)
+	determTokensIter := iterator.New(determTokens)
+	entityTokensIter := iterator.New(entityTokens)
 
 	// Iterate through part of speech determinated text tokens
 	for determTokensIter.Next() {
-		// Skip about entity positions if entity. It's easier to do that up
-		// front instead of during positive/negative iteration
+
+		// Skip about entity positions, if entity
 
 		currDetermTokensPos := determTokensIter.CurrPos()
 
 		var isEntity bool
 
-		// For every entity tokens
 		for entityTokensIter.Next() {
-			entityTokenIter := iterator.New[tokenize.Token](entityTokensIter.CurrElem())
+			entityTokenIter := iterator.New(entityTokensIter.CurrElem())
 
 			// Compare every entity token with part of speech determianted token
 			for entityTokenIter.Next() {
 				if entityTokenIter.CurrElem() != determTokensIter.CurrElem() {
 					isEntity = false
+					break
 				}
 
+				// Compare with next text token
 				determTokensIter.Next()
 			}
 
 			if isEntity {
-				// If entity, skip about entity positions
+				// If entity, skip about entity positions and cancel loop
 				determTokensIter.SetPos(currDetermTokensPos + entityTokenIter.Len())
-				goto SKIP_ENTITY
+				goto IS_ENTITY
 			}
 		}
 
 		// Reset state if no entity
 		determTokensIter.SetPos(currDetermTokensPos)
 
-	SKIP_ENTITY:
+	IS_ENTITY:
 
 		// Distance
-		var entityDistance float64
+		var entityDist float64
 
 		// Iterate in positive and negative direction to find entity distances
 		posDirIter := determTokensIter
 		negDirIter := determTokensIter
 
 		for posDirIter.Next() {
-			posDirIdx := posDirIter.CurrPos()
+			currPosDirPos := negDirIter.CurrPos()
 
-			isEntity, pos := entityChecker(posDirIter, entityTokens, posDir)
+			// Tells if current text token is entity and how many positions from
+			// here
+			isEntity, entityLen := entityChecker(posDirIter, entityTokens, posDir)
 			if isEntity {
-				appendMap(assocEntitiesVals, determTokensIter.CurrElem().Token, entityDistance)
+				appendMap(assocEntitiesVals, determTokensIter.CurrElem().Token, entityDist)
 				// Skip about entity
-				posDirIter.SetPos(posDirIdx + pos)
+				posDirIter.SetPos(currPosDirPos + entityLen)
 			}
 
-			entityDistance++
+			entityDist++
 
 			if isEntity {
 				continue
 			}
 
 			// Reset because mutated
-			posDirIter.SetPos(posDirIdx)
+			posDirIter.SetPos(currPosDirPos)
 		}
 
 		// Reset distance
-		entityDistance = 0
+		entityDist = 0
 
 		for negDirIter.Prev() {
 			negDirIdx := negDirIter.CurrPos()
 
-			isEntity, pos := entityChecker(negDirIter, entityTokens, negDir)
+			isEntity, entityLen := entityChecker(negDirIter, entityTokens, negDir)
 			if isEntity {
-				appendMap(assocEntitiesVals, determTokensIter.CurrElem().Token, entityDistance)
+				appendMap(assocEntitiesVals, determTokensIter.CurrElem().Token, entityDist)
 
-				negDirIter.SetPos(negDirIdx - pos)
+				negDirIter.SetPos(negDirIdx - entityLen)
 			}
 
-			entityDistance++
+			entityDist++
 
 			if isEntity {
 				continue
@@ -132,36 +131,27 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 		}
 	}
 
-	// Calculate the distances
-	for elem, dist := range assocEntitiesVals {
-		assocEntities[elem] = avg(dist)
+	// Calculate the average distances
+	for token, dist := range assocEntitiesVals {
+		assocEntities[token] = avg(dist)
 	}
 	return assocEntities, err
 }
 
 // Iterates through entity and PoS determinated tokens and returns true if found
 // and positions to skip
-func entityChecker[T any](determTokensIter *iterator.Iterator[tokenize.Token], entityTokens [][]tokenize.Token, dir direction) (bool, int) {
-	var (
-		entityIter *iterator.Iterator
-		isEntity   bool
-	)
+func entityChecker(determTokensIter *iterator.Iterator[tokenize.Token], entityTokens [][]tokenize.Token, dir direction) (bool, int) {
+	var isEntity bool
 	for entityIdx := range entityTokens {
-		// Prepare for generic iterator
-		entityElems := make(iterator.Elements, len(entityTokens[entityIdx]))
-		for i, v := range entityTokens[entityIdx] {
-			entityElems[i] = v
-		}
+		entityIter := iterator.New(entityTokens[entityIdx])
 
-		entityIter = iterator.New(entityElems)
 		switch dir {
 
 		case posDir:
-			// Positive direction
 			for entityIter.Next() {
-				isEntity = determTokensIter.CurrElem().(tokenize.Token).Token == entityIter.CurrElem().(tokenize.Token).Token
-				// Check if first token matches the entity token
-				if !isEntity {
+				if determTokensIter.CurrElem() != entityIter.CurrElem() {
+					// Check if first token matches the entity token
+					isEntity = false
 					break
 				}
 
@@ -170,14 +160,10 @@ func entityChecker[T any](determTokensIter *iterator.Iterator[tokenize.Token], e
 			}
 
 		case negDir:
-			// Negative direction
-
-			entityIter.SetPos(entityIter.Len() - 1)
-
 			for entityIter.Prev() {
-				isEntity = determTokensIter.CurrElem().(tokenize.Token).Token == entityIter.CurrElem().(tokenize.Token).Token
-				// Check if first token matches the entity token
-				if !isEntity {
+				if determTokensIter.CurrElem() != entityIter.CurrElem() {
+					// Check if first token matches the entity token
+					isEntity = false
 					break
 				}
 
@@ -187,11 +173,11 @@ func entityChecker[T any](determTokensIter *iterator.Iterator[tokenize.Token], e
 		}
 
 		if isEntity {
-			return isEntity, entityIter.Len() - 1
+			return isEntity, entityIter.Len()
 		}
 	}
 
-	return isEntity, entityIter.Len() - 1
+	return false, 0
 }
 
 // Returns the average of a float slice

@@ -11,74 +11,63 @@ type NLPPoSDetermer struct{ poS tokenize.PoS }
 // NewNLPPoSDetermer returns a new default part of speech determinator
 func NewNLPPoSDetermer(poS tokenize.PoS) NLPPoSDetermer { return NLPPoSDetermer{poS} }
 
-// DetermPoS deterimantes if a part of speech tag should be deleted. Ignores
-// entities
-func (dps NLPPoSDetermer) DetermPoS(textTokens []tokenize.Token, entityTokens [][]tokenize.Token) ([]tokenize.Token, error) {
-	// If any part of speech, no need to filter
+// DetermPoS deterimantes if a part of speech tag should be deleted. It appends
+// entities without filtering
+func (dps NLPPoSDetermer) DetermPoS(textTokens []tokenize.Token, entityTokens [][]tokenize.Token) []tokenize.Token {
+	// If any part of speech, no need to determinate
 	if dps.poS == tokenize.ANY {
-		return textTokens, nil
+		return textTokens
 	}
 
 	var determTokens []tokenize.Token
-	// Prepare for generic iterator
-	textElems := make(iterator.Elements, len(textTokens))
-	for i, v := range textTokens {
-		textElems[i] = v
-	}
 
-	textIter := iterator.New(textElems)
+	textIter := iterator.New(textTokens)
+	entityTokensIter := iterator.New(entityTokens)
+
+IS_ENTITY:
 	for textIter.Next() {
-		textIdx := textIter.CurrPos()
+		// Reset from previous iteration
+		entityTokensIter.Reset()
 
-		var (
-			entityIter  *iterator.Iterator
-			isEntity    bool
-			nextTextIdx int = textIdx
-		)
-		for entityIdx := range entityTokens {
-			// Prepare for generic iterator
-			entityElems := make(iterator.Elements, len(entityTokens[entityIdx]))
-			for i, v := range entityTokens[entityIdx] {
-				entityElems[i] = v
-			}
+		currTextPos := textIter.CurrPos()
 
-			entityIter = iterator.New(entityElems)
-			// For every entity token
-			for entityIter.Next() {
-				isEntity = textIter.CurrElem().(tokenize.Token) == entityIter.CurrElem().(tokenize.Token)
-				// Check if first text token matches the entity token
-				if !isEntity {
+		var isEntity bool
+
+		for entityTokensIter.Next() {
+			entityTokenIter := iterator.New(entityTokensIter.CurrElem())
+
+			// Compare every entity token with part of speech determianted token
+			for entityTokenIter.Next() {
+				if textIter.CurrElem() != entityTokenIter.CurrElem() {
+					isEntity = false
 					break
 				}
 
-				// Check for next text token
+				// Compare with next text token
 				textIter.Next()
 			}
 
 			if isEntity {
-				entityIter.Reset()
-				for entityIter.Next() {
-					determTokens = append(determTokens, entityIter.CurrElem().(tokenize.Token))
+				// Append entity without filtering
+				for entityTokenIter.Next() {
+					determTokens = append(determTokens, entityTokenIter.CurrElem())
 				}
 
-				// Skip about the tokenized entity length
-				nextTextIdx += entityIter.Len() - 1
-				// Entity can't occur twice
-				break
+				// If entity, skip about entity positions and cancel loop
+				textIter.SetPos(currTextPos + entityTokenIter.Len())
+				goto IS_ENTITY
 			}
 		}
 
-		textIter.SetPos(nextTextIdx)
+		// Reset state if no entity
+		// TODO!: Set pos sets init to true even its not
+		textIter.SetPos(currTextPos)
 
-		// Entity already added
-		if isEntity {
-			continue
-		}
-
-		if textIter.CurrElem().(tokenize.Token).PoS&dps.poS != 0 {
-			determTokens = append(determTokens, textIter.CurrElem().(tokenize.Token))
+		// Non-entity tokens
+		if textIter.CurrElem().PoS&dps.poS != 0 {
+			determTokens = append(determTokens, textIter.CurrElem())
 		}
 	}
 
-	return determTokens, nil
+	return determTokens
 }
