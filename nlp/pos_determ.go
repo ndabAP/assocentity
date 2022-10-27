@@ -27,7 +27,7 @@ func (dps NLPPoSDetermer) DetermPoS(textTokens []tokenize.Token, entityTokens []
 
 	for textIter.Next() {
 		currTextPos := textIter.CurrPos()
-		isEntity, entity := comp.TextWithEntity(textIter, entityTokensIter, comp.DirPos)
+		isEntity, entity := comp.TextWithEntities(textIter, entityTokensIter, comp.DirPos)
 		if isEntity {
 			textIter.SetPos(currTextPos + len(entity))
 			// Entity is always added

@@ -153,7 +153,7 @@ func TestTextWithEntity(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := comp.TextWithEntity(tt.args.textIter, tt.args.entityTokensIter, tt.args.dir)
+			got, got1 := comp.TextWithEntities(tt.args.textIter, tt.args.entityTokensIter, tt.args.dir)
 			if got != tt.want {
 				t.Errorf("TextWithEntity() got = %v, want %v", got, tt.want)
 			}

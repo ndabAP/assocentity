@@ -30,8 +30,8 @@ func TestAssocIntegrationSingleWordEntities(t *testing.T) {
 		t.SkipNow()
 	}
 
-	text := "Punchinello wanted Payne? He'd see the pain."
-	entities := []string{"Punchinello", "Payne"}
+	text := "Relax, Max. You're a nice guy."
+	entities := []string{"Max", "Max Payne"}
 
 	posDeterm := nlp.NewNLPPoSDetermer(tokenize.ANY)
 
@@ -40,14 +40,14 @@ func TestAssocIntegrationSingleWordEntities(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := map[string]float64{
-		"wanted": 1,
-		"?":      2,
-		"He":     3,
-		"'d":     4,
-		"see":    5,
-		"the":    6,
-		"pain":   7,
-		".":      8,
+		"Relax": 2,
+		",":     1,
+		".":     3.5,
+		"You":   2,
+		"'re":   3,
+		"a":     4,
+		"nice":  5,
+		"guy":   6,
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Do() = %v, want %v", got, want)

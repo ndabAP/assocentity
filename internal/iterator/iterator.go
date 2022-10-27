@@ -6,8 +6,6 @@ type Iterator[T any] struct {
 	elems []T
 	len   int
 	pos   int
-
-	init bool
 }
 
 // New returns a new iterator
@@ -16,40 +14,29 @@ func New[T any](elems []T) *Iterator[T] {
 		elems[0],
 		elems,
 		len(elems),
-		0,
-		true,
+		-1,
 	}
 }
 
 // Next sets the next element
 func (it *Iterator[T]) Next() bool {
-	// Delays the index
-	if it.init {
-		it.init = false
-		return true
-	}
-
 	// We increment before assigning since we used "init"
-	it.pos++
-	if it.pos >= it.len {
+	if it.pos+1 >= it.len {
 		return false
 	}
+
+	it.pos++
 	it.el = it.elems[it.pos]
 	return true
 }
 
 // Prev sets the previous element
 func (it *Iterator[T]) Prev() bool {
-	if it.init {
-		it.el = it.elems[0]
-		it.init = false
-		return true
+	if it.pos-1 < 0 {
+		return false
 	}
 
 	it.pos--
-	if it.pos < 0 {
-		return false
-	}
 	it.el = it.elems[it.pos]
 	return true
 }
@@ -60,9 +47,8 @@ func (it *Iterator[T]) Elems() []T {
 
 // Reset resets the iterator
 func (it *Iterator[T]) Reset() *Iterator[T] {
-	it.pos = 0
+	it.pos = -1
 	it.el = it.elems[0]
-	it.init = true
 	return it
 }
 
@@ -83,9 +69,11 @@ func (it *Iterator[T]) Len() int {
 
 // SetPos sets the position
 func (it *Iterator[T]) SetPos(pos int) *Iterator[T] {
-	if it.len > pos && pos >= 0 {
+	if it.len-1 > pos && pos >= 0 {
 		it.pos = pos
 		it.el = it.elems[it.pos]
 	}
 	return it
 }
+
+// TODO: Save(), Revert(). Revert iterator

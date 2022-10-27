@@ -8,22 +8,10 @@ import (
 	"github.com/ndabAP/assocentity/v8/tokenize"
 )
 
-// Algorithm:
-//
-// 	1. Tokenize text: [Without, Mona, 's, help]
-//	2. Tokenize entities: [[Max], [Max, Payne]]
-//	3. Remove part of speech:
-//	   [Vlad, was, right, ., There, are, no, choices] becomes without Verbs
-//	   [Vlad, right, ., There,  no, choices]
-// 	4. Iterate through part of speech removed text tokens
-//	4. a) If the current text token and further equals an entity, skip text
-//		  about entity positions
-//	   b) Iterate in positive direction through part of speech removed text
-//		  tokens
 func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, text string, entities []string) (map[string]float64, error) {
 	var (
-		assocEntities     = make(map[string]float64)
-		assocEntitiesVals = make(map[string][]float64)
+		assocTokens      = make(map[string]float64)
+		assocTokensAccum = make(map[string][]float64)
 
 		err error
 	)
@@ -31,7 +19,7 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 	// Tokenize text
 	textTokens, err := tokenizer.Tokenize(ctx, text)
 	if err != nil {
-		return assocEntities, err
+		return assocTokens, err
 	}
 
 	// Tokenize entites
@@ -39,7 +27,7 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 	for _, entity := range entities {
 		tokens, err := tokenizer.Tokenize(ctx, entity)
 		if err != nil {
-			return assocEntities, err
+			return assocTokens, err
 		}
 		entityTokens = append(entityTokens, tokens)
 	}
@@ -54,7 +42,7 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 	for determTokensIter.Next() {
 		// If the current token is an entity, we skip about the entity
 		currDetermTokensPos := determTokensIter.CurrPos()
-		isEntity, entity := comp.TextWithEntity(determTokensIter, entityTokensIter, comp.DirPos)
+		isEntity, entity := comp.TextWithEntities(determTokensIter, entityTokensIter, comp.DirPos)
 		if isEntity {
 			determTokensIter.SetPos(currDetermTokensPos + len(entity))
 		}
@@ -65,25 +53,24 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 		var entityDist float64
 
 		// Finds/counts entities in positive direction
-		posDirIter := determTokensIter
-		posDirIter.Reset().SetPos(currDetermTokensPos)
+		posDirIter := iterator.New(determTokensIter.Elems())
+		posDirIter.SetPos(currDetermTokensPos - 1)
 		// Finds/counts entities in negative direction
-		negDirIter := determTokensIter
-		negDirIter.Reset().SetPos(currDetermTokensPos)
+		negDirIter := iterator.New(determTokensIter.Elems())
+		negDirIter.SetPos(currDetermTokensPos)
 
 		// [I, was, (with), Max, Payne, here] -> true, 2, Max Payne
 		// [I, was, with, Max, Payne, (here)] -> false, 0, ""
 		for posDirIter.Next() {
-			currPosDirPos := negDirIter.CurrPos()
-			isEntity, entity := comp.TextWithEntity(posDirIter, entityTokensIter, comp.DirPos)
+			currPosDirPos := posDirIter.CurrPos()
+			isEntity, entity := comp.TextWithEntities(posDirIter, entityTokensIter, comp.DirPos)
 			if isEntity {
-				entityDist++
-
-				appendMap(assocEntitiesVals, posDirIter.CurrElem().Text, entityDist)
+				appendMap(assocTokensAccum, determTokensIter, entityDist)
 				// Skip about entity
-				posDirIter.SetPos(currPosDirPos + len(entity))
+				posDirIter.SetPos(currPosDirPos + (len(entity) - 1))
 			}
 
+			entityDist++
 		}
 
 		// Reset distance
@@ -93,22 +80,21 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 		// [I, was, (with), Max, Payne, here] -> false, 0, ""
 		for negDirIter.Prev() {
 			currNegDirPos := negDirIter.CurrPos()
-			isEntity, entity := comp.TextWithEntity(posDirIter, entityTokensIter, comp.DirNeg)
+			isEntity, entity := comp.TextWithEntities(negDirIter, entityTokensIter, comp.DirNeg)
 			if isEntity {
-				entityDist++
-
-				appendMap(assocEntitiesVals, negDirIter.CurrElem().Text, entityDist)
-				posDirIter.SetPos(currNegDirPos - len(entity))
+				appendMap(assocTokensAccum, determTokensIter, entityDist)
+				posDirIter.SetPos(currNegDirPos - (len(entity) - 1))
 			}
 
+			entityDist++
 		}
 	}
 
 	// Calculate the average distances
-	for token, dist := range assocEntitiesVals {
-		assocEntities[token] = avg(dist)
+	for token, dist := range assocTokensAccum {
+		assocTokens[token] = avg(dist)
 	}
-	return assocEntities, err
+	return assocTokens, err
 }
 
 // Returns the average of a float slice
@@ -121,6 +107,7 @@ func avg(xs []float64) float64 {
 }
 
 // Helper to append float to a map
-func appendMap(m map[string][]float64, k string, f float64) {
-	m[k] = append(m[k], f)
+func appendMap(m map[string][]float64, k *iterator.Iterator[tokenize.Token], f float64) {
+	text := k.CurrElem().Text
+	m[text] = append(m[text], f)
 }
