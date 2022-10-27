@@ -34,6 +34,6 @@ type Tokenizer interface {
 
 // Token represents a tokenized text unit
 type Token struct {
-	PoS   PoS    // Part of speech
-	Token string // Text
+	PoS  PoS    // Part of speech
+	Text string // Text
 }

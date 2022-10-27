@@ -1,6 +1,7 @@
 package nlp
 
 import (
+	"github.com/ndabAP/assocentity/v8/internal/comp"
 	"github.com/ndabAP/assocentity/v8/internal/iterator"
 	"github.com/ndabAP/assocentity/v8/tokenize"
 )
@@ -24,44 +25,14 @@ func (dps NLPPoSDetermer) DetermPoS(textTokens []tokenize.Token, entityTokens []
 	textIter := iterator.New(textTokens)
 	entityTokensIter := iterator.New(entityTokens)
 
-IS_ENTITY:
 	for textIter.Next() {
-		// Reset from previous iteration
-		entityTokensIter.Reset()
-
 		currTextPos := textIter.CurrPos()
 
-		var isEntity bool
-
-		for entityTokensIter.Next() {
-			entityTokenIter := iterator.New(entityTokensIter.CurrElem())
-
-			// Compare every entity token with part of speech determianted token
-			for entityTokenIter.Next() {
-				if textIter.CurrElem() != entityTokenIter.CurrElem() {
-					isEntity = false
-					break
-				}
-
-				// Compare with next text token
-				textIter.Next()
-			}
-
-			if isEntity {
-				// Append entity without filtering
-				for entityTokenIter.Next() {
-					determTokens = append(determTokens, entityTokenIter.CurrElem())
-				}
-
-				// If entity, skip about entity positions and cancel loop
-				textIter.SetPos(currTextPos + entityTokenIter.Len())
-				goto IS_ENTITY
-			}
+		isEntity, entity := comp.TextWithEntity(textIter, entityTokensIter, comp.PosDir)
+		if isEntity {
+			textIter.SetPos(currTextPos + len(entity))
+			determTokens = append(determTokens, entity...)
 		}
-
-		// Reset state if no entity
-		// TODO!: Set pos sets init to true even its not
-		textIter.SetPos(currTextPos)
 
 		// Non-entity tokens
 		if textIter.CurrElem().PoS&dps.poS != 0 {

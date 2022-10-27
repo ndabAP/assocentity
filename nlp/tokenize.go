@@ -59,8 +59,8 @@ func (nlp NLPTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.T
 	tokens := make([]tokenize.Token, 0)
 	for _, tok := range res.GetTokens() {
 		tokens = append(tokens, tokenize.Token{
-			PoS:   poSMap[tok.PartOfSpeech.Tag],
-			Token: tok.GetText().GetContent(),
+			PoS:  poSMap[tok.PartOfSpeech.Tag],
+			Text: tok.GetText().GetContent(),
 		})
 	}
 	return tokens, nil

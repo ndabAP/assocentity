@@ -25,7 +25,6 @@ func New[T any](elems []T) *Iterator[T] {
 func (it *Iterator[T]) Next() bool {
 	// Delays the index
 	if it.init {
-		it.el = it.elems[0]
 		it.init = false
 		return true
 	}
@@ -55,6 +54,10 @@ func (it *Iterator[T]) Prev() bool {
 	return true
 }
 
+func (it *Iterator[T]) Elems() []T {
+	return it.elems
+}
+
 // Reset resets the iterator
 func (it *Iterator[T]) Reset() {
 	it.pos = 0
@@ -78,14 +81,10 @@ func (it *Iterator[T]) Len() int {
 }
 
 // SetPos sets the position
-func (it *Iterator[T]) SetPos(pos int) bool {
+func (it *Iterator[T]) SetPos(pos int) *Iterator[T] {
 	if it.len > pos && pos >= 0 {
 		it.pos = pos
 		it.el = it.elems[it.pos]
-
-		if pos == 0 {
-			it.init = true
-		}
 	}
-	return it.len > pos && pos >= 0
+	return it
 }

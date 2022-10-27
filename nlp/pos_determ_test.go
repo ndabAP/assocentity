@@ -28,59 +28,133 @@ func TestNLPPoSDetermer_DetermPoS(t *testing.T) {
 		// 	},
 		// 	args: args{
 		// 		textTokens: []tokenize.Token{
-		// 			{PoS: tokenize.NOUN, Token: "Cold"},
-		// 			{PoS: tokenize.ADP, Token: "as"},
-		// 			{PoS: tokenize.DET, Token: "a"},
-		// 			{PoS: tokenize.NOUN, Token: "gun"},
+		// 			{PoS: tokenize.NOUN, Text: "Cold"},
+		// 			{PoS: tokenize.ADP, Text: "as"},
+		// 			{PoS: tokenize.DET, Text: "a"},
+		// 			{PoS: tokenize.NOUN, Text: "gun"},
 		// 		},
 		// 		entityTokens: [][]tokenize.Token{
 		// 			{
 		// 				{
-		// 					Token: "Max",
-		// 					PoS:   tokenize.NOUN,
+		// 					Text: "Max",
+		// 					PoS:  tokenize.NOUN,
 		// 				},
 		// 				{
-		// 					Token: "Payne",
-		// 					PoS:   tokenize.NOUN,
+		// 					Text: "Payne",
+		// 					PoS:  tokenize.NOUN,
 		// 				},
 		// 			},
 		// 		},
 		// 	},
 		// 	want: []tokenize.Token{
-		// 		{PoS: tokenize.NOUN, Token: "Cold"},
-		// 		{PoS: tokenize.ADP, Token: "as"},
-		// 		{PoS: tokenize.DET, Token: "a"},
-		// 		{PoS: tokenize.NOUN, Token: "gun"},
+		// 		{PoS: tokenize.NOUN, Text: "Cold"},
+		// 		{PoS: tokenize.ADP, Text: "as"},
+		// 		{PoS: tokenize.DET, Text: "a"},
+		// 		{PoS: tokenize.NOUN, Text: "gun"},
+		// 	},
+		// },
+		// {
+		// 	name: "noun",
+		// 	fields: fields{
+		// 		poS: tokenize.NOUN,
+		// 	},
+		// 	args: args{
+		// 		textTokens: []tokenize.Token{
+		// 			{PoS: tokenize.NOUN, Text: "Cold"},
+		// 			{PoS: tokenize.ADP, Text: "as"},
+		// 			{PoS: tokenize.DET, Text: "a"},
+		// 			{PoS: tokenize.NOUN, Text: "gun"},
+		// 		},
+		// 		entityTokens: [][]tokenize.Token{
+		// 			{
+		// 				{
+		// 					Text: "Max",
+		// 					PoS:  tokenize.NOUN,
+		// 				},
+		// 				{
+		// 					Text: "Payne",
+		// 					PoS:  tokenize.NOUN,
+		// 				},
+		// 			},
+		// 		},
+		// 	},
+		// 	want: []tokenize.Token{
+		// 		{PoS: tokenize.NOUN, Text: "Cold"},
+		// 		{PoS: tokenize.NOUN, Text: "gun"},
+		// 	},
+		// },
+		// {
+		// 	name: "noun, adposition",
+		// 	fields: fields{
+		// 		poS: tokenize.NOUN | tokenize.ADP,
+		// 	},
+		// 	args: args{
+		// 		textTokens: []tokenize.Token{
+		// 			{PoS: tokenize.NOUN, Text: "Cold"},
+		// 			{PoS: tokenize.ADP, Text: "as"},
+		// 			{PoS: tokenize.DET, Text: "a"},
+		// 			{PoS: tokenize.NOUN, Text: "gun"},
+		// 		},
+		// 		entityTokens: [][]tokenize.Token{
+		// 			{
+		// 				{
+		// 					Text: "Max",
+		// 					PoS:  tokenize.NOUN,
+		// 				},
+		// 				{
+		// 					Text: "Payne",
+		// 					PoS:  tokenize.NOUN,
+		// 				},
+		// 			},
+		// 		},
+		// 	},
+		// 	want: []tokenize.Token{
+		// 		{PoS: tokenize.NOUN, Text: "Cold"},
+		// 		{PoS: tokenize.ADP, Text: "as"},
+		// 		{PoS: tokenize.NOUN, Text: "gun"},
 		// 	},
 		// },
 		{
-			name: "noun",
+			name: "skip entity",
 			fields: fields{
-				poS: tokenize.NOUN,
+				poS: tokenize.VERB,
 			},
 			args: args{
 				textTokens: []tokenize.Token{
-					{PoS: tokenize.NOUN, Token: "Cold"},
-					{PoS: tokenize.ADP, Token: "as"},
-					{PoS: tokenize.DET, Token: "a"},
-					{PoS: tokenize.NOUN, Token: "gun"},
+					{PoS: tokenize.VERB, Text: "Relax"},
+					{PoS: tokenize.PUNCT, Text: ","},
+					{PoS: tokenize.NOUN, Text: "Max"},
+					{PoS: tokenize.PUNCT, Text: "."},
+					{PoS: tokenize.PRON, Text: "You"},
+					{PoS: tokenize.VERB, Text: "'re"},
+					{PoS: tokenize.DET, Text: "a"},
+					{PoS: tokenize.ADJ, Text: "nice"},
+					{PoS: tokenize.NOUN, Text: "guy"},
+					{PoS: tokenize.PUNCT, Text: "."},
 				},
 				entityTokens: [][]tokenize.Token{
 					{
 						{
-							Token: "Max",
-							PoS:   tokenize.NOUN,
+							Text: "Max",
+							PoS:  tokenize.NOUN,
 						},
 						{
-							Token: "Payne",
-							PoS:   tokenize.NOUN,
+							Text: "Payne",
+							PoS:  tokenize.NOUN,
+						},
+					},
+					{
+						{
+							Text: "Max",
+							PoS:  tokenize.NOUN,
 						},
 					},
 				},
 			},
 			want: []tokenize.Token{
-				{PoS: tokenize.NOUN, Token: "Cold"},
-				{PoS: tokenize.NOUN, Token: "gun"},
+				{PoS: tokenize.VERB, Text: "Relax"},
+				{PoS: tokenize.NOUN, Text: "Max"},
+				{PoS: tokenize.VERB, Text: "'re"},
 			},
 		},
 	}
