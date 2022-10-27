@@ -50,53 +50,57 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 	determTokensIter := iterator.New(determTokens)
 	entityTokensIter := iterator.New(entityTokens)
 
-	// Iterate through part of speech determinated text tokens to find the
-	// entity
+	// Iterate through part of speech determinated text tokens
 	for determTokensIter.Next() {
-		// Skip about entity positions, if entity
+		// If the current token is an entity, we skip about the entity
 		currDetermTokensPos := determTokensIter.CurrPos()
-		isEntity, entity := comp.TextWithEntity(determTokensIter, entityTokensIter, comp.PosDir)
+		isEntity, entity := comp.TextWithEntity(determTokensIter, entityTokensIter, comp.DirPos)
 		if isEntity {
 			determTokensIter.SetPos(currDetermTokensPos + len(entity))
 		}
 
+		// Now we can collect the actual distances
+
 		// Distance
 		var entityDist float64
 
-		// Iterate in positive and negative direction to find entity (distances)
 		// Finds/counts entities in positive direction
 		posDirIter := determTokensIter
+		posDirIter.Reset().SetPos(currDetermTokensPos)
 		// Finds/counts entities in negative direction
 		negDirIter := determTokensIter
+		negDirIter.Reset().SetPos(currDetermTokensPos)
 
 		// [I, was, (with), Max, Payne, here] -> true, 2, Max Payne
-		// [I, was, with, Max, Payne, (here)]
+		// [I, was, with, Max, Payne, (here)] -> false, 0, ""
 		for posDirIter.Next() {
 			currPosDirPos := negDirIter.CurrPos()
-			isEntity, entity := comp.TextWithEntity(posDirIter, entityTokensIter, comp.PosDir)
+			isEntity, entity := comp.TextWithEntity(posDirIter, entityTokensIter, comp.DirPos)
 			if isEntity {
+				entityDist++
+
 				appendMap(assocEntitiesVals, posDirIter.CurrElem().Text, entityDist)
 				// Skip about entity
 				posDirIter.SetPos(currPosDirPos + len(entity))
 			}
 
-			entityDist++
 		}
 
 		// Reset distance
 		entityDist = 0
 
 		// [I, was, with, Max, Payne, (here)] -> true, 1, Max Payne
-		// [I, was, (with), Max, Payne, here]
+		// [I, was, (with), Max, Payne, here] -> false, 0, ""
 		for negDirIter.Prev() {
 			currNegDirPos := negDirIter.CurrPos()
-			isEntity, entity := comp.TextWithEntity(posDirIter, entityTokensIter, comp.NegDir)
+			isEntity, entity := comp.TextWithEntity(posDirIter, entityTokensIter, comp.DirNeg)
 			if isEntity {
+				entityDist++
+
 				appendMap(assocEntitiesVals, negDirIter.CurrElem().Text, entityDist)
 				posDirIter.SetPos(currNegDirPos - len(entity))
 			}
 
-			entityDist++
 		}
 	}
 

@@ -8,11 +8,12 @@ import (
 type Direction int
 
 var (
-	PosDir Direction = 1
-	NegDir Direction = -1
+	DirPos Direction = 1
+	DirNeg Direction = -1
 )
 
-func TextWithEntity(textIter *iterator.Iterator[tokenize.Token], entityTokensIter *iterator.Iterator[[]tokenize.Token], dir Direction) (bool, []tokenize.Token) {
+// Checks if current text token is entity token
+func TextWithEntity(textIter *iterator.Iterator[tokenize.Token], entityTokensIter *iterator.Iterator[[]tokenize.Token], entityIterDir Direction) (bool, []tokenize.Token) {
 	// Reset iterators position after comparing
 	currTextPos := textIter.CurrPos()
 	defer textIter.SetPos(currTextPos)
@@ -23,8 +24,10 @@ func TextWithEntity(textIter *iterator.Iterator[tokenize.Token], entityTokensIte
 	for entityTokensIter.Next() {
 		entityIter := iterator.New(entityTokensIter.CurrElem())
 
-		switch dir {
-		case PosDir:
+		switch entityIterDir {
+
+		// ->
+		case DirPos:
 			for entityIter.Next() {
 				if textIter.CurrElem() != entityIter.CurrElem() {
 					// Check if first token matches the entity token
@@ -36,7 +39,8 @@ func TextWithEntity(textIter *iterator.Iterator[tokenize.Token], entityTokensIte
 				textIter.Next()
 			}
 
-		case NegDir:
+		// <-
+		case DirNeg:
 			for entityIter.Prev() {
 				if textIter.CurrElem() != entityIter.CurrElem() {
 					isEntity = false

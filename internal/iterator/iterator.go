@@ -59,10 +59,11 @@ func (it *Iterator[T]) Elems() []T {
 }
 
 // Reset resets the iterator
-func (it *Iterator[T]) Reset() {
+func (it *Iterator[T]) Reset() *Iterator[T] {
 	it.pos = 0
 	it.el = it.elems[0]
 	it.init = true
+	return it
 }
 
 // CurrPos returns the current position
