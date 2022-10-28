@@ -16,13 +16,15 @@ var (
 func TextWithEntities(textIter *iterator.Iterator[tokenize.Token], entityTokensIter *iterator.Iterator[[]tokenize.Token], entityIterDir Direction) (bool, []tokenize.Token) {
 	// Reset iterators position after comparing
 	currTextPos := textIter.CurrPos()
-	defer textIter.SetPos(currTextPos)
-	defer entityTokensIter.Reset()
 
 	entityTokensIter.Reset()
 
 	var isEntity bool = true
+
+NEXT_ENTITY_TOKEN:
 	for entityTokensIter.Next() {
+		isEntity = true
+
 		entityIter := iterator.New(entityTokensIter.CurrElem())
 
 		switch entityIterDir {
@@ -30,11 +32,12 @@ func TextWithEntities(textIter *iterator.Iterator[tokenize.Token], entityTokensI
 		// ->
 		case DirPos:
 			for entityIter.Next() {
-				// Check if text token matches the entity token and advance
-				// one token
-				if (textIter.CurrElem() != entityIter.CurrElem()) || !textIter.Next() {
+				textIter.Next()
+
+				// Check if text token matches the entity token
+				if !eqItersElems(textIter, entityIter) {
 					isEntity = false
-					break
+					goto NEXT_ENTITY_TOKEN
 				}
 			}
 
@@ -43,21 +46,26 @@ func TextWithEntities(textIter *iterator.Iterator[tokenize.Token], entityTokensI
 			// We scan backwards
 			entityIter.SetPos(entityIter.Len()) // [1, 2, 3, (4)]
 			for entityIter.Prev() {
-				if (textIter.CurrElem() != entityIter.CurrElem()) || !textIter.Prev() {
+				textIter.Prev()
+
+				if !eqItersElems(textIter, entityIter) {
 					isEntity = false
-					break
+					goto NEXT_ENTITY_TOKEN
 				}
 			}
 		}
+	}
 
-		if isEntity {
-			return true, entityTokensIter.CurrElem()
-		}
+	textIter.SetPos(currTextPos)
+	entityTokensIter.Reset()
+
+	if isEntity {
+		return true, entityTokensIter.CurrElem()
 	}
 
 	return false, []tokenize.Token{}
 }
 
-func Iters(x *iterator.Iterator[tokenize.Token], y *iterator.Iterator[tokenize.Token]) bool {
+func eqItersElems(x *iterator.Iterator[tokenize.Token], y *iterator.Iterator[tokenize.Token]) bool {
 	return x.CurrElem() == y.CurrElem()
 }

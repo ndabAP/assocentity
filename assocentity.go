@@ -70,7 +70,7 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 			if isEntity {
 				appendMap(assocTokensAccum, determTokensIter, entityDist)
 				// Skip about entity
-				posDirIter.SetPos(currPosDirPos + (len(entity) - 1))
+				posDirIter.SetPos(currPosDirPos + len(entity))
 			}
 		}
 
@@ -86,7 +86,7 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 			isEntity, entity := comp.TextWithEntities(negDirIter, entityTokensIter, comp.DirNeg)
 			if isEntity {
 				appendMap(assocTokensAccum, determTokensIter, entityDist)
-				posDirIter.SetPos(currNegDirPos - (len(entity) - 1))
+				posDirIter.SetPos(currNegDirPos - len(entity))
 			}
 		}
 	}

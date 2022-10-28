@@ -21,68 +21,68 @@ func TestTextWithEntity(t *testing.T) {
 		want  bool
 		want1 []tokenize.Token
 	}{
-		{
-			name: "no entity",
-			args: args{
-				textIter: iterator.New([]tokenize.Token{
-					{
-						PoS:  tokenize.ADP,
-						Text: "Without",
-					},
-					{
-						PoS:  tokenize.NOUN,
-						Text: "Mona",
-					},
-					{
-						PoS:  tokenize.PRT,
-						Text: "'s'",
-					},
-					{
-						PoS:  tokenize.NOUN,
-						Text: "help",
-					},
-					{
-						PoS:  tokenize.PUNCT,
-						Text: ",",
-					},
-					{
-						PoS:  tokenize.PRON,
-						Text: "I",
-					},
-					{
-						PoS:  tokenize.VERB,
-						Text: "'d'",
-					},
-					{
-						PoS:  tokenize.VERB,
-						Text: "be",
-					},
-					{
-						PoS:  tokenize.DET,
-						Text: "a",
-					},
-					{
-						PoS:  tokenize.ADJ,
-						Text: "dead",
-					},
-					{
-						PoS:  tokenize.NOUN,
-						Text: "man",
-					},
-				}),
-				entityTokensIter: iterator.New([][]tokenize.Token{
-					{
-						{
-							PoS:  tokenize.NOUN,
-							Text: "Alex",
-						},
-					},
-				}),
-				dir: comp.DirPos,
-			},
-			want:  false,
-			want1: make([]tokenize.Token, 0),
-		},
+		// {
+		// 	name: "no entity",
+		// 	args: args{
+		// 		textIter: iterator.New([]tokenize.Token{
+		// 			{
+		// 				PoS:  tokenize.ADP,
+		// 				Text: "Without",
+		// 			},
+		// 			{
+		// 				PoS:  tokenize.NOUN,
+		// 				Text: "Mona",
+		// 			},
+		// 			{
+		// 				PoS:  tokenize.PRT,
+		// 				Text: "'s'",
+		// 			},
+		// 			{
+		// 				PoS:  tokenize.NOUN,
+		// 				Text: "help",
+		// 			},
+		// 			{
+		// 				PoS:  tokenize.PUNCT,
+		// 				Text: ",",
+		// 			},
+		// 			{
+		// 				PoS:  tokenize.PRON,
+		// 				Text: "I",
+		// 			},
+		// 			{
+		// 				PoS:  tokenize.VERB,
+		// 				Text: "'d'",
+		// 			},
+		// 			{
+		// 				PoS:  tokenize.VERB,
+		// 				Text: "be",
+		// 			},
+		// 			{
+		// 				PoS:  tokenize.DET,
+		// 				Text: "a",
+		// 			},
+		// 			{
+		// 				PoS:  tokenize.ADJ,
+		// 				Text: "dead",
+		// 			},
+		// 			{
+		// 				PoS:  tokenize.NOUN,
+		// 				Text: "man",
+		// 			},
+		// 		}),
+		// 		entityTokensIter: iterator.New([][]tokenize.Token{
+		// 			{
+		// 				{
+		// 					PoS:  tokenize.NOUN,
+		// 					Text: "Alex",
+		// 				},
+		// 			},
+		// 		}),
+		// 		dir: comp.DirPos,
+		// 	},
+		// 	want:  false,
+		// 	want1: make([]tokenize.Token, 0),
+		// },
 		{
 			name: "entity",
 			args: args{

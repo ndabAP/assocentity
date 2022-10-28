@@ -1,6 +1,6 @@
 package iterator
 
-// Iterator represents a iterator
+// Iterator represents an iterator
 type Iterator[T any] struct {
 	el    T
 	elems []T

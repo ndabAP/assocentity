@@ -25,7 +25,7 @@ func init() {
 	nlpTokenizer = nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
 }
 
-func TestAssocIntegrationSingleWordEntities(t *testing.T) {
+func TestDoTwoEntities(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
@@ -48,6 +48,35 @@ func TestAssocIntegrationSingleWordEntities(t *testing.T) {
 		"a":     4,
 		"nice":  5,
 		"guy":   6,
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Do() = %v, want %v", got, want)
+	}
+}
+
+func TestDo2(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
+	}
+
+	text := "aa bb cc dd. b ff, gg, hh, bb, bb."
+	entities := []string{"bb", "b"}
+
+	posDeterm := nlp.NewNLPPoSDetermer(tokenize.ANY)
+
+	got, err := assocentity.Do(context.Background(), nlpTokenizer, posDeterm, text, entities)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]float64{
+		"aa": 2,
+		"cc": 1,
+		"dd": 4,
+		".":  2,
+		"ff": 3,
+		",":  4,
+		"gg": 5,
+		"hh": 6,
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Do() = %v, want %v", got, want)
