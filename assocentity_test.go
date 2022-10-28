@@ -42,7 +42,7 @@ func TestAssocIntegrationSingleWordEntities(t *testing.T) {
 	want := map[string]float64{
 		"Relax": 2,
 		",":     1,
-		".":     3.5,
+		".":     4,
 		"You":   2,
 		"'re":   3,
 		"a":     4,

@@ -42,9 +42,9 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 	for determTokensIter.Next() {
 		// If the current token is an entity, we skip about the entity
 		currDetermTokensPos := determTokensIter.CurrPos()
-		isEntity, entity := comp.TextWithEntities(determTokensIter, entityTokensIter, comp.DirPos)
+		isEntity, _ := comp.TextWithEntities(determTokensIter, entityTokensIter, comp.DirPos)
 		if isEntity {
-			determTokensIter.SetPos(currDetermTokensPos + len(entity))
+			continue
 		}
 
 		// Now we can collect the actual distances
@@ -52,9 +52,10 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 		// Distance
 		var entityDist float64
 
+		// TODO: Create once and store in pool
 		// Finds/counts entities in positive direction
 		posDirIter := iterator.New(determTokensIter.Elems())
-		posDirIter.SetPos(currDetermTokensPos - 1)
+		posDirIter.SetPos(currDetermTokensPos)
 		// Finds/counts entities in negative direction
 		negDirIter := iterator.New(determTokensIter.Elems())
 		negDirIter.SetPos(currDetermTokensPos)
@@ -62,6 +63,8 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 		// [I, was, (with), Max, Payne, here] -> true, 2, Max Payne
 		// [I, was, with, Max, Payne, (here)] -> false, 0, ""
 		for posDirIter.Next() {
+			entityDist++
+
 			currPosDirPos := posDirIter.CurrPos()
 			isEntity, entity := comp.TextWithEntities(posDirIter, entityTokensIter, comp.DirPos)
 			if isEntity {
@@ -69,8 +72,6 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 				// Skip about entity
 				posDirIter.SetPos(currPosDirPos + (len(entity) - 1))
 			}
-
-			entityDist++
 		}
 
 		// Reset distance
@@ -79,14 +80,14 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 		// [I, was, with, Max, Payne, (here)] -> true, 1, Max Payne
 		// [I, was, (with), Max, Payne, here] -> false, 0, ""
 		for negDirIter.Prev() {
+			entityDist++
+
 			currNegDirPos := negDirIter.CurrPos()
 			isEntity, entity := comp.TextWithEntities(negDirIter, entityTokensIter, comp.DirNeg)
 			if isEntity {
 				appendMap(assocTokensAccum, determTokensIter, entityDist)
 				posDirIter.SetPos(currNegDirPos - (len(entity) - 1))
 			}
-
-			entityDist++
 		}
 	}
 
