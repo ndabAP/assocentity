@@ -9,6 +9,7 @@ import (
 	"github.com/ndabAP/assocentity/v9/tokenize"
 )
 
+// Do return the average distance from entities to a given text.
 func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, text string, entities []string) (map[string]float64, error) {
 	var (
 		assocTokens      = make(map[string]float64)
@@ -64,7 +65,7 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 		for posDirIter.Next() {
 			isEntity, entity := comp.TextWithEntities(posDirIter, entityTokensIter, comp.DirPos)
 			if isEntity {
-				appendTextDist(assocTokensAccum, determTokensIter, posDirIter)
+				appendTokenDist(assocTokensAccum, determTokensIter, posDirIter)
 				// Skip about entity.
 				posDirIter.Foward(len(entity) - 1) // Next increments
 			}
@@ -75,7 +76,7 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 		for negDirIter.Prev() {
 			isEntity, entity := comp.TextWithEntities(negDirIter, entityTokensIter, comp.DirNeg)
 			if isEntity {
-				appendTextDist(assocTokensAccum, determTokensIter, negDirIter)
+				appendTokenDist(assocTokensAccum, determTokensIter, negDirIter)
 				negDirIter.Rewind(len(entity) - 1)
 			}
 		}
@@ -88,6 +89,13 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 	return assocTokens, err
 }
 
+// Helper to append float to a map
+func appendTokenDist(m map[string][]float64, k *iterator.Iterator[tokenize.Token], v *iterator.Iterator[tokenize.Token]) {
+	token := k.CurrElem().Text
+	dist := math.Abs(float64(v.CurrPos() - k.CurrPos()))
+	m[token] = append(m[token], dist)
+}
+
 // Returns the average of a float slice
 func avgFloat(xs []float64) float64 {
 	sum := 0.0
@@ -95,11 +103,4 @@ func avgFloat(xs []float64) float64 {
 		sum += x
 	}
 	return sum / float64(len(xs))
-}
-
-// Helper to append float to a map
-func appendTextDist(m map[string][]float64, k *iterator.Iterator[tokenize.Token], v *iterator.Iterator[tokenize.Token]) {
-	text := k.CurrElem().Text
-	distance := math.Abs(float64(v.CurrPos() - k.CurrPos()))
-	m[text] = append(m[text], distance)
 }

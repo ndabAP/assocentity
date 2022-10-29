@@ -21,99 +21,99 @@ func TestNLPPoSDetermer_DetermPoS(t *testing.T) {
 		args   args
 		want   []tokenize.Token
 	}{
-		// {
-		// 	name: "any",
-		// 	fields: fields{
-		// 		poS: tokenize.ANY,
-		// 	},
-		// 	args: args{
-		// 		textTokens: []tokenize.Token{
-		// 			{PoS: tokenize.NOUN, Text: "Cold"},
-		// 			{PoS: tokenize.ADP, Text: "as"},
-		// 			{PoS: tokenize.DET, Text: "a"},
-		// 			{PoS: tokenize.NOUN, Text: "gun"},
-		// 		},
-		// 		entityTokens: [][]tokenize.Token{
-		// 			{
-		// 				{
-		// 					Text: "Max",
-		// 					PoS:  tokenize.NOUN,
-		// 				},
-		// 				{
-		// 					Text: "Payne",
-		// 					PoS:  tokenize.NOUN,
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// 	want: []tokenize.Token{
-		// 		{PoS: tokenize.NOUN, Text: "Cold"},
-		// 		{PoS: tokenize.ADP, Text: "as"},
-		// 		{PoS: tokenize.DET, Text: "a"},
-		// 		{PoS: tokenize.NOUN, Text: "gun"},
-		// 	},
-		// },
-		// {
-		// 	name: "noun",
-		// 	fields: fields{
-		// 		poS: tokenize.NOUN,
-		// 	},
-		// 	args: args{
-		// 		textTokens: []tokenize.Token{
-		// 			{PoS: tokenize.NOUN, Text: "Cold"},
-		// 			{PoS: tokenize.ADP, Text: "as"},
-		// 			{PoS: tokenize.DET, Text: "a"},
-		// 			{PoS: tokenize.NOUN, Text: "gun"},
-		// 		},
-		// 		entityTokens: [][]tokenize.Token{
-		// 			{
-		// 				{
-		// 					Text: "Max",
-		// 					PoS:  tokenize.NOUN,
-		// 				},
-		// 				{
-		// 					Text: "Payne",
-		// 					PoS:  tokenize.NOUN,
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// 	want: []tokenize.Token{
-		// 		{PoS: tokenize.NOUN, Text: "Cold"},
-		// 		{PoS: tokenize.NOUN, Text: "gun"},
-		// 	},
-		// },
-		// {
-		// 	name: "noun, adposition",
-		// 	fields: fields{
-		// 		poS: tokenize.NOUN | tokenize.ADP,
-		// 	},
-		// 	args: args{
-		// 		textTokens: []tokenize.Token{
-		// 			{PoS: tokenize.NOUN, Text: "Cold"},
-		// 			{PoS: tokenize.ADP, Text: "as"},
-		// 			{PoS: tokenize.DET, Text: "a"},
-		// 			{PoS: tokenize.NOUN, Text: "gun"},
-		// 		},
-		// 		entityTokens: [][]tokenize.Token{
-		// 			{
-		// 				{
-		// 					Text: "Max",
-		// 					PoS:  tokenize.NOUN,
-		// 				},
-		// 				{
-		// 					Text: "Payne",
-		// 					PoS:  tokenize.NOUN,
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// 	want: []tokenize.Token{
-		// 		{PoS: tokenize.NOUN, Text: "Cold"},
-		// 		{PoS: tokenize.ADP, Text: "as"},
-		// 		{PoS: tokenize.NOUN, Text: "gun"},
-		// 	},
-		// },
+		{
+			name: "any",
+			fields: fields{
+				poS: tokenize.ANY,
+			},
+			args: args{
+				textTokens: []tokenize.Token{
+					{PoS: tokenize.NOUN, Text: "Cold"},
+					{PoS: tokenize.ADP, Text: "as"},
+					{PoS: tokenize.DET, Text: "a"},
+					{PoS: tokenize.NOUN, Text: "gun"},
+				},
+				entityTokens: [][]tokenize.Token{
+					{
+						{
+							Text: "Max",
+							PoS:  tokenize.NOUN,
+						},
+						{
+							Text: "Payne",
+							PoS:  tokenize.NOUN,
+						},
+					},
+				},
+			},
+			want: []tokenize.Token{
+				{PoS: tokenize.NOUN, Text: "Cold"},
+				{PoS: tokenize.ADP, Text: "as"},
+				{PoS: tokenize.DET, Text: "a"},
+				{PoS: tokenize.NOUN, Text: "gun"},
+			},
+		},
+		{
+			name: "noun",
+			fields: fields{
+				poS: tokenize.NOUN,
+			},
+			args: args{
+				textTokens: []tokenize.Token{
+					{PoS: tokenize.NOUN, Text: "Cold"},
+					{PoS: tokenize.ADP, Text: "as"},
+					{PoS: tokenize.DET, Text: "a"},
+					{PoS: tokenize.NOUN, Text: "gun"},
+				},
+				entityTokens: [][]tokenize.Token{
+					{
+						{
+							Text: "Max",
+							PoS:  tokenize.NOUN,
+						},
+						{
+							Text: "Payne",
+							PoS:  tokenize.NOUN,
+						},
+					},
+				},
+			},
+			want: []tokenize.Token{
+				{PoS: tokenize.NOUN, Text: "Cold"},
+				{PoS: tokenize.NOUN, Text: "gun"},
+			},
+		},
+		{
+			name: "noun, adposition",
+			fields: fields{
+				poS: tokenize.NOUN | tokenize.ADP,
+			},
+			args: args{
+				textTokens: []tokenize.Token{
+					{PoS: tokenize.NOUN, Text: "Cold"},
+					{PoS: tokenize.ADP, Text: "as"},
+					{PoS: tokenize.DET, Text: "a"},
+					{PoS: tokenize.NOUN, Text: "gun"},
+				},
+				entityTokens: [][]tokenize.Token{
+					{
+						{
+							Text: "Max",
+							PoS:  tokenize.NOUN,
+						},
+						{
+							Text: "Payne",
+							PoS:  tokenize.NOUN,
+						},
+					},
+				},
+			},
+			want: []tokenize.Token{
+				{PoS: tokenize.NOUN, Text: "Cold"},
+				{PoS: tokenize.ADP, Text: "as"},
+				{PoS: tokenize.NOUN, Text: "gun"},
+			},
+		},
 		{
 			name: "skip entity",
 			fields: fields{

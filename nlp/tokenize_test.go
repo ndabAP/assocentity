@@ -1,84 +1,82 @@
-package nlp
+package nlp_test
 
-// import (
-// 	"log"
-// 	"os"
-// 	"reflect"
-// 	"testing"
+import (
+	"context"
+	"log"
+	"os"
+	"reflect"
+	"testing"
 
-// 	"github.com/joho/godotenv"
-// )
+	"github.com/joho/godotenv"
+	"github.com/ndabAP/assocentity/v9/nlp"
+	"github.com/ndabAP/assocentity/v9/tokenize"
+)
 
-// var credentialsFile string
+var credentialsFile string
 
-// func TestNLP_tokenize(t *testing.T) {
-// 	if testing.Short() {
-// 		t.SkipNow()
-// 	}
+func TestNLP_tokenize(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
+	}
 
-// 	if err := godotenv.Load("../.env"); err != nil {
-// 		log.Fatal(err)
-// 	}
+	if err := godotenv.Load("../.env"); err != nil {
+		log.Fatal(err)
+	}
 
-// 	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
+	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
 
-// 	tests := []struct {
-// 		name    string
-// 		text    string
-// 		want    []Token
-// 		wantErr bool
-// 	}{
-// 		{
-// 			name: "six tokens",
-// 			text: "Punchinello was burning to get me",
-// 			want: []Token{
-// 				{
-// 					Token: "Punchinello",
-// 					PoS:   NOUN,
-// 				},
-// 				{
-// 					Token: "was",
-// 					PoS:   VERB,
-// 				},
-// 				{
-// 					Token: "burning",
-// 					PoS:   VERB,
-// 				},
-// 				{
-// 					Token: "to",
-// 					PoS:   PRT,
-// 				},
-// 				{
-// 					Token: "get",
-// 					PoS:   VERB,
-// 				},
-// 				{
-// 					Token: "me",
-// 					PoS:   PRON,
-// 				},
-// 			},
-// 			wantErr: false,
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			nlp, err := NewNLP(
-// 				credentialsFile,
-// 				AutoLang,
-// 			)
-// 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("NLP.NewNLP() error = %v, wantErr %v", err, tt.wantErr)
-// 				return
-// 			}
-
-// 			got, err := nlp.tokenize(tt.text)
-// 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("NLP.tokenize() error = %v, wantErr %v", err, tt.wantErr)
-// 				return
-// 			}
-// 			if !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("NLP.TokenitokenizezeText() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+	tests := []struct {
+		name    string
+		text    string
+		want    []tokenize.Token
+		wantErr bool
+	}{
+		{
+			name: "six tokens",
+			text: "Punchinello was burning to get me",
+			want: []tokenize.Token{
+				{
+					Text: "Punchinello",
+					PoS:  tokenize.NOUN,
+				},
+				{
+					Text: "was",
+					PoS:  tokenize.VERB,
+				},
+				{
+					Text: "burning",
+					PoS:  tokenize.VERB,
+				},
+				{
+					Text: "to",
+					PoS:  tokenize.PRT,
+				},
+				{
+					Text: "get",
+					PoS:  tokenize.VERB,
+				},
+				{
+					Text: "me",
+					PoS:  tokenize.PRON,
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			nlp := nlp.NewNLPTokenizer(
+				credentialsFile,
+				nlp.AutoLang,
+			)
+			got, err := nlp.Tokenize(context.Background(), tt.text)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NLP.tokenize() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NLP.TokenitokenizezeText() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

@@ -20,11 +20,9 @@ func New[T any](elems []T) *Iterator[T] {
 
 // Next sets the next element
 func (it *Iterator[T]) Next() bool {
-	// We increment before assigning since we used "init"
 	if it.pos+1 >= it.len {
 		return false
 	}
-
 	it.pos++
 	it.el = it.elems[it.pos]
 	return true
@@ -35,7 +33,6 @@ func (it *Iterator[T]) Prev() bool {
 	if it.pos-1 < 0 {
 		return false
 	}
-
 	it.pos--
 	it.el = it.elems[it.pos]
 	return true
@@ -74,12 +71,14 @@ func (it *Iterator[T]) SetPos(pos int) *Iterator[T] {
 	return it
 }
 
+// Rewind rewinds the iterator
 func (it *Iterator[T]) Rewind(pos int) *Iterator[T] {
 	it.pos -= pos
 	it.setEl()
 	return it
 }
 
+// Foward forwards the iterator
 func (it *Iterator[T]) Foward(pos int) *Iterator[T] {
 	it.pos += pos
 	it.setEl()
@@ -91,5 +90,3 @@ func (it *Iterator[T]) setEl() {
 		it.el = it.elems[it.pos]
 	}
 }
-
-// TODO: Save(), Revert(). Revert iterator
