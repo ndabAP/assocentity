@@ -70,6 +70,9 @@ func (it *Iterator[T]) Len() int {
 // SetPos sets the position
 func (it *Iterator[T]) SetPos(pos int) *Iterator[T] {
 	it.pos = pos
+	if len(it.elems)-1 > it.pos && it.pos >= 0 {
+		it.el = it.elems[it.pos]
+	}
 	return it
 }
 

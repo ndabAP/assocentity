@@ -17,11 +17,11 @@ func TextWithEntities(textIter *iterator.Iterator[tokenize.Token], entityTokensI
 	// Reset iterators position after comparing
 	currTextPos := textIter.CurrPos()
 
+	defer entityTokensIter.Reset()
 	entityTokensIter.Reset()
 
 	var isEntity bool = true
 
-NEXT_ENTITY_TOKEN:
 	for entityTokensIter.Next() {
 		isEntity = true
 
@@ -32,13 +32,12 @@ NEXT_ENTITY_TOKEN:
 		// ->
 		case DirPos:
 			for entityIter.Next() {
-				textIter.Next()
-
 				// Check if text token matches the entity token
 				if !eqItersElems(textIter, entityIter) {
 					isEntity = false
-					goto NEXT_ENTITY_TOKEN
 				}
+
+				textIter.Next()
 			}
 
 		// <-
@@ -46,22 +45,22 @@ NEXT_ENTITY_TOKEN:
 			// We scan backwards
 			entityIter.SetPos(entityIter.Len()) // [1, 2, 3, (4)]
 			for entityIter.Prev() {
-				textIter.Prev()
-
 				if !eqItersElems(textIter, entityIter) {
 					isEntity = false
-					goto NEXT_ENTITY_TOKEN
 				}
+
+				textIter.Prev()
 			}
+		}
+
+		textIter.SetPos(currTextPos)
+
+		if isEntity {
+			return true, entityTokensIter.CurrElem()
 		}
 	}
 
 	textIter.SetPos(currTextPos)
-	entityTokensIter.Reset()
-
-	if isEntity {
-		return true, entityTokensIter.CurrElem()
-	}
 
 	return false, []tokenize.Token{}
 }

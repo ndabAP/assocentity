@@ -42,8 +42,9 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 	for determTokensIter.Next() {
 		// If the current token is an entity, we skip about the entity
 		currDetermTokensPos := determTokensIter.CurrPos()
-		isEntity, _ := comp.TextWithEntities(determTokensIter, entityTokensIter, comp.DirPos)
+		isEntity, entity := comp.TextWithEntities(determTokensIter, entityTokensIter, comp.DirPos)
 		if isEntity {
+			determTokensIter.SetPos(currDetermTokensPos + len(entity) - 1)
 			continue
 		}
 
@@ -63,14 +64,15 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 		// [I, was, (with), Max, Payne, here] -> true, 2, Max Payne
 		// [I, was, with, Max, Payne, (here)] -> false, 0, ""
 		for posDirIter.Next() {
+			// Should we include the entities here or substract it?
 			entityDist++
 
 			currPosDirPos := posDirIter.CurrPos()
 			isEntity, entity := comp.TextWithEntities(posDirIter, entityTokensIter, comp.DirPos)
 			if isEntity {
 				appendMap(assocTokensAccum, determTokensIter, entityDist)
-				// Skip about entity
-				posDirIter.SetPos(currPosDirPos + len(entity))
+				// Skip about entity.
+				posDirIter.SetPos(currPosDirPos + len(entity) - 1) // Next increments
 			}
 		}
 
@@ -86,7 +88,7 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 			isEntity, entity := comp.TextWithEntities(negDirIter, entityTokensIter, comp.DirNeg)
 			if isEntity {
 				appendMap(assocTokensAccum, determTokensIter, entityDist)
-				posDirIter.SetPos(currNegDirPos - len(entity))
+				negDirIter.SetPos(currNegDirPos - len(entity) - 1)
 			}
 		}
 	}

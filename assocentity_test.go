@@ -25,7 +25,7 @@ func init() {
 	nlpTokenizer = nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
 }
 
-func TestDoTwoEntities(t *testing.T) {
+func TestDoSimple(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
@@ -54,13 +54,13 @@ func TestDoTwoEntities(t *testing.T) {
 	}
 }
 
-func TestDo2(t *testing.T) {
+func TestDoComplex(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
 
-	text := "aa bb cc dd. b ff, gg, hh, bb, bb."
-	entities := []string{"bb", "b"}
+	text := "ee ee aa bb cc dd. b ff, gg, hh, bb, bb. ii!"
+	entities := []string{"bb", "b", "ee ee"}
 
 	posDeterm := nlp.NewNLPPoSDetermer(tokenize.ANY)
 
@@ -69,14 +69,14 @@ func TestDo2(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := map[string]float64{
-		"aa": 2,
-		"cc": 1,
-		"dd": 4,
-		".":  2,
-		"ff": 3,
-		",":  4,
-		"gg": 5,
-		"hh": 6,
+		"dd": 6,
+		".":  5.857142857142857,
+		"ff": 4.5,
+		",":  4.375,
+		"gg": 4.5,
+		"hh": 4.5,
+		"bb": 8,
+		"cc": 6.5,
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Do() = %v, want %v", got, want)
