@@ -70,10 +70,26 @@ func (it *Iterator[T]) Len() int {
 // SetPos sets the position
 func (it *Iterator[T]) SetPos(pos int) *Iterator[T] {
 	it.pos = pos
+	it.setEl()
+	return it
+}
+
+func (it *Iterator[T]) Rewind(pos int) *Iterator[T] {
+	it.pos -= pos
+	it.setEl()
+	return it
+}
+
+func (it *Iterator[T]) Foward(pos int) *Iterator[T] {
+	it.pos += pos
+	it.setEl()
+	return it
+}
+
+func (it *Iterator[T]) setEl() {
 	if len(it.elems)-1 > it.pos && it.pos >= 0 {
 		it.el = it.elems[it.pos]
 	}
-	return it
 }
 
 // TODO: Save(), Revert(). Revert iterator

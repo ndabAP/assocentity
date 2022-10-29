@@ -44,7 +44,7 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 		currDetermTokensPos := determTokensIter.CurrPos()
 		isEntity, entity := comp.TextWithEntities(determTokensIter, entityTokensIter, comp.DirPos)
 		if isEntity {
-			determTokensIter.SetPos(currDetermTokensPos + len(entity) - 1)
+			determTokensIter.Foward(len(entity) - 1)
 			continue
 		}
 
@@ -67,12 +67,11 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 			// Should we include the entities here or substract it?
 			entityDist++
 
-			currPosDirPos := posDirIter.CurrPos()
 			isEntity, entity := comp.TextWithEntities(posDirIter, entityTokensIter, comp.DirPos)
 			if isEntity {
 				appendMap(assocTokensAccum, determTokensIter, entityDist)
 				// Skip about entity.
-				posDirIter.SetPos(currPosDirPos + len(entity) - 1) // Next increments
+				posDirIter.Foward(len(entity) - 1) // Next increments
 			}
 		}
 
@@ -84,11 +83,10 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 		for negDirIter.Prev() {
 			entityDist++
 
-			currNegDirPos := negDirIter.CurrPos()
 			isEntity, entity := comp.TextWithEntities(negDirIter, entityTokensIter, comp.DirNeg)
 			if isEntity {
 				appendMap(assocTokensAccum, determTokensIter, entityDist)
-				negDirIter.SetPos(currNegDirPos - len(entity) - 1)
+				negDirIter.Rewind(len(entity) - 1)
 			}
 		}
 	}
