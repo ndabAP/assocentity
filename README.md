@@ -12,7 +12,7 @@ Package assocentity returns the average distance from words to a given entity. *
 ## Installation
 
 ```bash
-$ go get github.com/ndabAP/assocentity/v8
+$ go get github.com/ndabAP/assocentity/v9
 ```
 
 ## Prerequisites
@@ -26,8 +26,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ndabAP/assocentity/v8/tokenize"
-	"github.com/ndabAP/assocentity/v8"
+	"github.com/ndabAP/assocentity/v9/tokenize"
+	"github.com/ndabAP/assocentity/v9"
 )
 
 const credentialsFile = "google_nlp_service_account.json"
@@ -51,7 +51,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(assocEntities) 
+	fmt.Println(assocEntities)
 	// map[tokenize.Token]float64{
 	//	tokenize.Token{PoS: tokenize.VERB, Token: "wanted"}: 1,
 	//	tokenize.Token{PoS: tokenize.PUNCT, Token: "?"}:     2,
@@ -79,7 +79,7 @@ The process is split into three parts. Two of them belong to the tokenization an
 
 #### Tokenization
 
-Googles Cloud Natural Language API is the default tokenizer and will split the words and after that this library assigns the part of speech to the tokens. No additional checking should be done here. For this step, it's nessecary to sign-up for a service account key. 
+Googles Cloud Natural Language API is the default tokenizer and will split the words and after that this library assigns the part of speech to the tokens. No additional checking should be done here. For this step, it's nessecary to sign-up for a service account key.
 
 A simpler, offline solution would be using Gos native `strings.Fields` method.
 

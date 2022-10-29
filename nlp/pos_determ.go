@@ -1,9 +1,9 @@
 package nlp
 
 import (
-	"github.com/ndabAP/assocentity/v8/internal/comp"
-	"github.com/ndabAP/assocentity/v8/internal/iterator"
-	"github.com/ndabAP/assocentity/v8/tokenize"
+	"github.com/ndabAP/assocentity/v9/internal/comp"
+	"github.com/ndabAP/assocentity/v9/internal/iterator"
+	"github.com/ndabAP/assocentity/v9/tokenize"
 )
 
 // NLPPoSDetermer represents the default part of speech determinator

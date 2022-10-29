@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/joho/godotenv"
-	"github.com/ndabAP/assocentity/v8"
-	"github.com/ndabAP/assocentity/v8/nlp"
-	"github.com/ndabAP/assocentity/v8/tokenize"
+	"github.com/ndabAP/assocentity/v9"
+	"github.com/ndabAP/assocentity/v9/nlp"
+	"github.com/ndabAP/assocentity/v9/tokenize"
 )
 
 var nlpTokenizer nlp.NLPTokenizer

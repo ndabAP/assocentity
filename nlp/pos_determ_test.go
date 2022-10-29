@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ndabAP/assocentity/v8/tokenize"
+	"github.com/ndabAP/assocentity/v9/tokenize"
 )
 
 func TestNLPPoSDetermer_DetermPoS(t *testing.T) {

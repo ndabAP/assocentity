@@ -2,10 +2,11 @@ package assocentity
 
 import (
 	"context"
+	"math"
 
-	"github.com/ndabAP/assocentity/v8/internal/comp"
-	"github.com/ndabAP/assocentity/v8/internal/iterator"
-	"github.com/ndabAP/assocentity/v8/tokenize"
+	"github.com/ndabAP/assocentity/v9/internal/comp"
+	"github.com/ndabAP/assocentity/v9/internal/iterator"
+	"github.com/ndabAP/assocentity/v9/tokenize"
 )
 
 func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, text string, entities []string) (map[string]float64, error) {
@@ -50,9 +51,6 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 
 		// Now we can collect the actual distances
 
-		// Distance
-		var entityDist float64
-
 		// TODO: Create once and store in pool
 		// Finds/counts entities in positive direction
 		posDirIter := iterator.New(determTokensIter.Elems())
@@ -64,28 +62,20 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 		// [I, was, (with), Max, Payne, here] -> true, 2, Max Payne
 		// [I, was, with, Max, Payne, (here)] -> false, 0, ""
 		for posDirIter.Next() {
-			// Should we include the entities here or substract it?
-			entityDist++
-
 			isEntity, entity := comp.TextWithEntities(posDirIter, entityTokensIter, comp.DirPos)
 			if isEntity {
-				appendMap(assocTokensAccum, determTokensIter, entityDist)
+				appendTextDist(assocTokensAccum, determTokensIter, posDirIter)
 				// Skip about entity.
 				posDirIter.Foward(len(entity) - 1) // Next increments
 			}
 		}
 
-		// Reset distance
-		entityDist = 0
-
 		// [I, was, with, Max, Payne, (here)] -> true, 1, Max Payne
 		// [I, was, (with), Max, Payne, here] -> false, 0, ""
 		for negDirIter.Prev() {
-			entityDist++
-
 			isEntity, entity := comp.TextWithEntities(negDirIter, entityTokensIter, comp.DirNeg)
 			if isEntity {
-				appendMap(assocTokensAccum, determTokensIter, entityDist)
+				appendTextDist(assocTokensAccum, determTokensIter, negDirIter)
 				negDirIter.Rewind(len(entity) - 1)
 			}
 		}
@@ -93,13 +83,13 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 
 	// Calculate the average distances
 	for token, dist := range assocTokensAccum {
-		assocTokens[token] = avg(dist)
+		assocTokens[token] = avgFloat(dist)
 	}
 	return assocTokens, err
 }
 
 // Returns the average of a float slice
-func avg(xs []float64) float64 {
+func avgFloat(xs []float64) float64 {
 	sum := 0.0
 	for _, x := range xs {
 		sum += x
@@ -108,7 +98,8 @@ func avg(xs []float64) float64 {
 }
 
 // Helper to append float to a map
-func appendMap(m map[string][]float64, k *iterator.Iterator[tokenize.Token], f float64) {
+func appendTextDist(m map[string][]float64, k *iterator.Iterator[tokenize.Token], v *iterator.Iterator[tokenize.Token]) {
 	text := k.CurrElem().Text
-	m[text] = append(m[text], f)
+	distance := math.Abs(float64(v.CurrPos() - k.CurrPos()))
+	m[text] = append(m[text], distance)
 }
