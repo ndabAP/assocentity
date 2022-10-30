@@ -45,9 +45,9 @@ func main() {
 	nlpTok := nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
 
 	// Allow any part of speech
-	posDeterm := tokenize.NewNLPPoSDetermer(tokenize.ANY)
+	posDeterm := nlp.NewNLPPoSDetermer(tokenize.ANY)
 
-    // Do calculates the average distances
+    	// Do calculates the average distances
 	ctx := context.Background()
 	assocEntities, err := assocentity.Do(ctx, nlpTok, posDeterm, text, entities)
 	if err != nil {
@@ -186,7 +186,7 @@ interface methods and returns a `map` with the tokens and distances.
 ## Projects using assocentity
 
 - [entityscrape](https://github.com/ndabAP/entityscrape) - Distance between word
-types (default: adjectives) in news articles and persons
+  types (default: adjectives) in news articles and persons
 
 ## Author
 
