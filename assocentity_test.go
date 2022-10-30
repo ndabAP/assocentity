@@ -13,7 +13,7 @@ import (
 	"github.com/ndabAP/assocentity/v9/tokenize"
 )
 
-var nlpTokenizer nlp.NLPTokenizer
+var nlpTokenizer tokenize.Tokenizer
 
 func init() {
 	err := godotenv.Load()
@@ -84,17 +84,72 @@ func TestDoSimple2(t *testing.T) {
 	}
 }
 
-func TestDoComplex(t *testing.T) {
-	if testing.Short() {
-		t.SkipNow()
-	}
+type testTokenizer int
 
+// Hack to simulate different tokenization responses
+var tokenizeCall int
+
+func (tt testTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.Token, error) {
+	tokenizeCall++
+
+	switch tokenizeCall {
+	case 1:
+		// Mock date: 10-30-2022
+		return []tokenize.Token{
+			{PoS: tokenize.NOUN, Text: "ee"},
+			{PoS: tokenize.NOUN, Text: "ee"},
+			{PoS: tokenize.NOUN, Text: "aa"},
+			{PoS: tokenize.NOUN, Text: "bb"},
+			{PoS: tokenize.NOUN, Text: "cc"},
+			{PoS: tokenize.NOUN, Text: "dd"},
+			{PoS: tokenize.PUNCT, Text: "."},
+			{PoS: tokenize.NOUN, Text: "b"},
+			{PoS: tokenize.NOUN, Text: "ff"},
+			{PoS: tokenize.PUNCT, Text: ","},
+			{PoS: tokenize.X, Text: "gg"},
+			{PoS: tokenize.PUNCT, Text: ","},
+			{PoS: tokenize.NOUN, Text: "hh"},
+			{PoS: tokenize.PUNCT, Text: ","},
+			{PoS: tokenize.NOUN, Text: "bb"},
+			{PoS: tokenize.PUNCT, Text: ","},
+			{PoS: tokenize.NOUN, Text: "bb"},
+			{PoS: tokenize.PUNCT, Text: "."},
+			{PoS: tokenize.NOUN, Text: "ii"},
+			{PoS: tokenize.PUNCT, Text: "!"},
+		}, nil
+	case 2:
+		return []tokenize.Token{
+			{PoS: tokenize.NOUN, Text: "ee"},
+			{PoS: tokenize.NOUN, Text: "ee"},
+		}, nil
+	case 3:
+		return []tokenize.Token{
+			{PoS: tokenize.NOUN, Text: "bb"},
+		}, nil
+	case 4:
+		return []tokenize.Token{
+			{PoS: tokenize.NOUN, Text: "b"},
+		}, nil
+	case 5:
+		return []tokenize.Token{
+			{PoS: tokenize.NOUN, Text: "bb"},
+		}, nil
+	// 6
+	default:
+		return []tokenize.Token{
+			{PoS: tokenize.NOUN, Text: "bb"},
+		}, nil
+	}
+}
+
+func TestDoComplex(t *testing.T) {
 	text := "ee ee aa bb cc dd. b ff, gg, hh, bb, bb. ii!"
 	entities := []string{"bb", "b", "ee ee"}
 
 	posDeterm := nlp.NewNLPPoSDetermer(tokenize.ANY)
 
-	got, err := assocentity.Do(context.Background(), nlpTokenizer, posDeterm, text, entities)
+	var tTokenizer testTokenizer
+	got, err := assocentity.Do(context.Background(), tTokenizer, posDeterm, text, entities)
 	if err != nil {
 		t.Fatal(err)
 	}

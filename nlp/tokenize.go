@@ -41,7 +41,7 @@ type NLPTokenizer struct {
 }
 
 // NewNLPTokenizer returns a new NLP instance
-func NewNLPTokenizer(credentialsFilename string, lang Lang) NLPTokenizer {
+func NewNLPTokenizer(credentialsFilename string, lang Lang) tokenize.Tokenizer {
 	return NLPTokenizer{
 		credsFilename: credentialsFilename,
 		lang:          lang,
