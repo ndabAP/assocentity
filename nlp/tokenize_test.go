@@ -14,7 +14,7 @@ import (
 
 var credentialsFile string
 
-func TestNLP_tokenize(t *testing.T) {
+func TestTokenize(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}

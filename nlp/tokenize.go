@@ -55,7 +55,6 @@ func (nlp NLPTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.T
 		return nil, err
 	}
 
-	// Holds the tokens text
 	tokens := make([]tokenize.Token, 0)
 	for _, tok := range res.GetTokens() {
 		tokens = append(tokens, tokenize.Token{
@@ -79,7 +78,8 @@ func (nlp NLPTokenizer) req(ctx context.Context, text string) (*languagepb.Annot
 		},
 		Type: languagepb.Document_PLAIN_TEXT,
 	}
-	if nlp.lang != "auto" {
+	// Set desired language if not auto
+	if nlp.lang != AutoLang {
 		doc.Language = string(nlp.lang)
 	}
 

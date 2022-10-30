@@ -12,7 +12,7 @@ type NLPPoSDetermer struct{ poS tokenize.PoS }
 // NewNLPPoSDetermer returns a new default part of speech determinator
 func NewNLPPoSDetermer(poS tokenize.PoS) NLPPoSDetermer { return NLPPoSDetermer{poS} }
 
-// DetermPoS deterimantes if a part of speech tag should be deleted. It appends
+// DetermPoS deterimantes if a part of speech tag should be kept. It appends
 // entities without filtering
 func (dps NLPPoSDetermer) DetermPoS(textTokens []tokenize.Token, entityTokens [][]tokenize.Token) []tokenize.Token {
 	// If any part of speech, no need to determinate
@@ -30,7 +30,7 @@ func (dps NLPPoSDetermer) DetermPoS(textTokens []tokenize.Token, entityTokens []
 		isEntity, entity := comp.TextWithEntities(textIter, entityTokensIter, comp.DirPos)
 		if isEntity {
 			textIter.SetPos(currTextPos + len(entity))
-			// Entity is always added
+			// Entity is always kept
 			determTokens = append(determTokens, entity...)
 		}
 

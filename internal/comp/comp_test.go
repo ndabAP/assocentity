@@ -84,7 +84,7 @@ func TestTextWithEntity(t *testing.T) {
 			want1: make([]tokenize.Token, 0),
 		},
 		{
-			name: "entity",
+			name: "one entity",
 			args: args{
 				textIter: iterator.New([]tokenize.Token{
 					{
@@ -147,6 +147,53 @@ func TestTextWithEntity(t *testing.T) {
 				{
 					PoS:  tokenize.NOUN,
 					Text: "Mona",
+				},
+			},
+		},
+		{
+			name: "one two tokens long entity",
+			args: args{
+				textIter: iterator.New([]tokenize.Token{
+					{
+						PoS:  tokenize.ANY,
+						Text: "a",
+					},
+					{
+						PoS:  tokenize.ANY,
+						Text: "a",
+					},
+					{
+						PoS:  tokenize.ANY,
+						Text: "b",
+					},
+					{
+						PoS:  tokenize.ANY,
+						Text: "b",
+					},
+				}).SetPos(2),
+				entityTokensIter: iterator.New([][]tokenize.Token{
+					{
+						tokenize.Token{
+							PoS:  tokenize.ANY,
+							Text: "b",
+						},
+						tokenize.Token{
+							PoS:  tokenize.ANY,
+							Text: "b",
+						},
+					},
+				}),
+				dir: comp.DirPos,
+			},
+			want: true,
+			want1: []tokenize.Token{
+				{
+					PoS:  tokenize.ANY,
+					Text: "b",
+				},
+				{
+					PoS:  tokenize.ANY,
+					Text: "b",
 				},
 			},
 		},
