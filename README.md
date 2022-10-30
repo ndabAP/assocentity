@@ -1,13 +1,14 @@
 # assocentity
 
-Package assocentity returns the average distance from words to a given entity. **Important**: At the moment, it's not recommend to use special characters for entities.
+Package assocentity returns the average distance from tokens to given entities.
+**Important**: If you use the provided NLP tokenizer, you can't use special
+characters in entities due its nature of tokenization.
 
 ## Features
 
 - Interfere at every step
-- pass aliases to entity
-- provides a default tokenizer
-- powered by Googles Cloud Natural Language API
+- Pass aliases to entity
+- Provides a default NLP tokenizer
 
 ## Installation
 
@@ -23,11 +24,13 @@ Sign-up for a Cloud Natural Language API service account key and download the ge
 
 ```go
 import (
+	"context"
 	"fmt"
 	"log"
 
-	"github.com/ndabAP/assocentity/v9/tokenize"
 	"github.com/ndabAP/assocentity/v9"
+	"github.com/ndabAP/assocentity/v9/nlp"
+	"github.com/ndabAP/assocentity/v9/tokenize"
 )
 
 const credentialsFile = "google_nlp_service_account.json"
@@ -37,30 +40,29 @@ func main() {
 	entities := []string{"Punchinello", "Payne"}
 
 	// Create a NLP instance
-	nlp, err := tokenize.NewNLP(credentialsFile, tokenize.AutoLang)
-	if err != nil {
-		log.Fatal(err)
-	}
+	nlpTokenizer := nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
 
 	// Allow any part of speech
-	psd := tokenize.NewPoSDetermer(tokenize.ANY)
+	posDeterm := tokenize.NewNLPPoSDetermer(tokenize.ANY)
 
-    	// Do calculates the average distances
-	assocEntities, err := assocentity.Do(nlp, psd, text, entities)
+
+    // Do calculates the average distances
+	ctx := context.Background()
+	assocEntities, err := assocentity.Do(nlpTokenizer, posDeterm, text, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Println(assocEntities)
-	// map[tokenize.Token]float64{
-	//	tokenize.Token{PoS: tokenize.VERB, Token: "wanted"}: 1,
-	//	tokenize.Token{PoS: tokenize.PUNCT, Token: "?"}:     2,
-	//	tokenize.Token{PoS: tokenize.PRON, Token: "He"}:     3,
-	//	tokenize.Token{PoS: tokenize.VERB, Token: "'d"}:     4,
-	//	tokenize.Token{PoS: tokenize.VERB, Token: "see"}:    5,
-	//	tokenize.Token{PoS: tokenize.DET, Token: "the"}:     6,
-	//	tokenize.Token{PoS: tokenize.NOUN, Token: "pain"}:   7,
-	//	tokenize.Token{PoS: tokenize.PUNCT, Token: "."}:     8,
+	// map[string]float64{
+	// 	"wanted": 1,
+	// 	"?":      2,
+	// 	"He":     3,
+	// 	"'d":     4,
+	// 	"see":    5,
+	// 	"the":    6,
+	// 	"pain":   7,
+	// 	".":      8,
 	// }
 }
 ```
@@ -100,19 +102,17 @@ There are two steps to interfere the tokenization process. To interfere, the int
 Interface to implement:
 
 ```go
-// Tokenizer tokenizes a text
 type Tokenizer interface {
-	Tokenize(text string) ([]Token, error)
+	Tokenize(ctx context.Context, text string) ([]Token, error)
 }
 ```
 
 While `Token` is of type:
 
 ```go
-// Token represents a tokenized text unit
 type Token struct {
-	PoS   int
-	Token string
+	PoS   PoS
+	Text string
 }
 ```
 
@@ -127,27 +127,27 @@ The result from `Tokenize` could be:
 ```go
 res := []Token{
 	{
-		Token: "Punchinello",
+		Text: "Punchinello",
 		PoS:   tokenize.NOUN,
 	},
 	{
-		Token: "was",
+		Text: "was",
 		PoS:   tokenize.VERB,
 	},
 	{
-		Token: "burning",
+		Text: "burning",
 		PoS:   tokenize.VERB,
 	},
 	{
-		Token: "to",
+		Text: "to",
 		PoS:   tokenize.PRT,
 	},
 	{
-		Token: "get",
+		Text: "get",
 		PoS:   tokenize.VERB,
 	},
 	{
-		Token: "me",
+		Text: "me",
 		PoS:   tokenize.PRON,
 	},
 }
@@ -158,9 +158,8 @@ res := []Token{
 Interface to implement:
 
 ```go
-// PoSDetermer determinates if part of speech tags should be kept
 type PoSDetermer interface {
-	Determ(tokenizedText []Token, tokenizedEntities [][]Token) ([]Token, error)
+	DetermPoS(textTokens []Token, entitiesTokens [][]Token) []Token
 }
 ```
 

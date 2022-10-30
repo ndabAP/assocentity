@@ -52,7 +52,6 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 
 		// Now we can collect the actual distances
 
-		// TODO: Create once and store in pool
 		// Finds/counts entities in positive direction
 		posDirIter := iterator.New(determTokensIter.Elems())
 		posDirIter.SetPos(currDetermTokensPos)
