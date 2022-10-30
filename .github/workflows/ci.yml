@@ -1,39 +1,23 @@
-on: [push, pull_request]
-name: tests
-env:
-  GO111MODULE: on
+name: Build, test
+
+on: [push]
 
 jobs:
-  test:
-    strategy:
-      matrix:
-        go-version: [1.x, 1.13.x, 1.14.x]
-        platform: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.platform }}
-
+  build:
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/setup-go@v1
-      with:
-        go-version: ${{ matrix.go-version }}
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-    - name: Cache go modules
-      uses: actions/cache@v1
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
-        restore-keys: ${{ runner.os }}-go-
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
 
-    - name: Run go fmt
-      if: runner.os != 'Windows'
-      run: diff -u <(echo -n) <(gofmt -d -s .)
+      - name: Build
+        run: go build -v ./...
 
-    - name: Ensure go generate produces a zero diff
-      shell: bash
-      run:  go generate -x ./... && git diff --exit-code; code=$?; git checkout -- .; (exit $code)
+      - name: Vet
+        run: go vet ./...
 
-    - name: Run go vet
-      run: go vet ./...
-
-    - name: Run go test
-      run: go test ./... -short
+      - name: Test
+        run: go test ./... -short

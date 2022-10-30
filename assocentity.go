@@ -1,212 +1,105 @@
 package assocentity
 
 import (
+	"context"
 	"math"
 
-	"github.com/ndabAP/assocentity/v8/internal/iterator"
-	"github.com/ndabAP/assocentity/v8/tokenize"
+	"github.com/ndabAP/assocentity/v9/internal/comp"
+	"github.com/ndabAP/assocentity/v9/internal/iterator"
+	"github.com/ndabAP/assocentity/v9/tokenize"
 )
 
-type direction int
+// Do return the average distance from entities to a text
+func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, text string, entities []string) (map[string]float64, error) {
+	var (
+		assocTokens      = make(map[string]float64)
+		assocTokensAccum = make(map[string][]float64)
 
-var (
-	posDir direction = 1
-	negDir direction = -1
-)
+		err error
+	)
 
-// Do returns the entity distances
-func Do(tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, text string, entities []string) (map[tokenize.Token]float64, error) {
-	tokenizedText, err := tokenizer.Tokenize(text)
+	// Tokenize text
+	textTokens, err := tokenizer.Tokenize(ctx, text)
 	if err != nil {
-		return map[tokenize.Token]float64{}, err
+		return assocTokens, err
 	}
 
-	var tokenizedEntity [][]tokenize.Token
+	// Tokenize entites
+	var entityTokens [][]tokenize.Token
 	for _, entity := range entities {
-		tokenized, err := tokenizer.Tokenize(entity)
+		tokens, err := tokenizer.Tokenize(ctx, entity)
 		if err != nil {
-			return map[tokenize.Token]float64{}, err
+			return assocTokens, err
 		}
-
-		tokenizedEntity = append(tokenizedEntity, tokenized)
+		entityTokens = append(entityTokens, tokens)
 	}
 
-	determTok, err := psd.Determ(tokenizedText, tokenizedEntity)
-	if err != nil {
-		return map[tokenize.Token]float64{}, err
-	}
+	// Determinate part of speech
+	determTokens := psd.DetermPoS(textTokens, entityTokens)
 
-	var distAccum = make(map[tokenize.Token][]float64)
+	determTokensIter := iterator.New(determTokens)
+	entityTokensIter := iterator.New(entityTokens)
 
-	// Prepare for generic iterator
-	di := make(iterator.Elements, len(determTok))
-	for i, v := range determTok {
-		di[i] = v
-	}
-
-	determTokTraverser := iterator.New(di)
-	for determTokTraverser.Next() {
-		determTokIdx := determTokTraverser.CurrPos()
-
-		var (
-			isEntity        bool
-			entityTraverser *iterator.Iterator
-		)
-		for entityIdx := range tokenizedEntity {
-			// Prepare for generic iterator
-			e := make(iterator.Elements, len(tokenizedEntity[entityIdx]))
-			for i, v := range tokenizedEntity[entityIdx] {
-				e[i] = v
-			}
-
-			entityTraverser = iterator.New(e)
-			for entityTraverser.Next() {
-				isEntity = determTokTraverser.CurrElem().(tokenize.Token) == entityTraverser.CurrElem().(tokenize.Token)
-				// Check if first token matches the entity token
-				if !isEntity {
-					break
-				}
-
-				// Check for next token
-				determTokTraverser.Next()
-			}
-
-			if isEntity {
-				break
-			}
-		}
-
+	// Iterate through part of speech determinated text tokens
+	for determTokensIter.Next() {
+		// If the current text token is an entity, we skip about the entity
+		currDetermTokensPos := determTokensIter.CurrPos()
+		isEntity, entity := comp.TextWithEntities(determTokensIter, entityTokensIter, comp.DirPos)
 		if isEntity {
-			// Skip about entity positions
-			determTokTraverser.SetPos(determTokIdx + entityTraverser.Len() - 1)
-
+			determTokensIter.Foward(len(entity) - 1)
 			continue
 		}
 
-		var dist float64
+		// Now we can collect the actual distances
 
-		// Reset because mutated
-		determTokTraverser.SetPos(determTokIdx)
+		// Finds/counts entities in positive direction
+		posDirIter := iterator.New(determTokensIter.Elems())
+		posDirIter.SetPos(currDetermTokensPos)
+		// Finds/counts entities in negative direction
+		negDirIter := iterator.New(determTokensIter.Elems())
+		negDirIter.SetPos(currDetermTokensPos)
 
-		// Iterate positive direction
-		posTraverser := iterator.New(di)
-		posTraverser.SetPos(determTokIdx)
-		for posTraverser.Next() {
-			posTraverserIdx := posTraverser.CurrPos()
-
-			ok, len := entityChecker(posTraverser, tokenizedEntity, posDir)
-			if ok {
-				distAccum[determTokTraverser.CurrElem().(tokenize.Token)] = append(distAccum[determTokTraverser.CurrElem().(tokenize.Token)], dist)
-
-				// Skip about entity
-				posTraverser.SetPos(posTraverserIdx + len - 1)
+		// [I, was, (with), Max, Payne, here] -> true, 2, Max Payne
+		// [I, was, with, Max, Payne, (here)] -> false, 0, ""
+		for posDirIter.Next() {
+			isEntity, entity := comp.TextWithEntities(posDirIter, entityTokensIter, comp.DirPos)
+			if isEntity {
+				appendTokenDist(assocTokensAccum, determTokensIter, posDirIter)
+				// Skip about entity.
+				posDirIter.Foward(len(entity) - 1) // Next increments
 			}
-
-			dist++
-
-			if ok {
-				continue
-			}
-
-			// Reset because entityChecker is mutating
-			posTraverser.SetPos(posTraverserIdx)
 		}
 
-		// Iterate negative direction
-		dist = 0
-		negTraverser := iterator.New(di)
-		negTraverser.SetPos(determTokIdx)
-		for negTraverser.Prev() {
-			negTraverserIdx := negTraverser.CurrPos()
-
-			ok, len := entityChecker(negTraverser, tokenizedEntity, negDir)
-			if ok {
-				distAccum[determTokTraverser.CurrElem().(tokenize.Token)] = append(distAccum[determTokTraverser.CurrElem().(tokenize.Token)], dist)
-
-				// Skip about entity
-				negTraverser.SetPos(negTraverserIdx - len + 1)
+		// [I, was, with, Max, Payne, (here)] -> true, 1, Max Payne
+		// [I, was, (with), Max, Payne, here] -> false, 0, ""
+		for negDirIter.Prev() {
+			isEntity, entity := comp.TextWithEntities(negDirIter, entityTokensIter, comp.DirNeg)
+			if isEntity {
+				appendTokenDist(assocTokensAccum, determTokensIter, negDirIter)
+				negDirIter.Rewind(len(entity) - 1)
 			}
-
-			dist++
-
-			if ok {
-				continue
-			}
-
-			// Reset because entityChecker is mutating
-			negTraverser.SetPos(negTraverserIdx)
 		}
 	}
 
-	assocEntities := make(map[tokenize.Token]float64)
-	// Calculate the distances
-	for elem, dist := range distAccum {
-		assocEntities[elem] = avg(dist)
+	// Calculate the average distances
+	for token, dist := range assocTokensAccum {
+		assocTokens[token] = avgFloat(dist)
 	}
-
-	return assocEntities, nil
+	return assocTokens, err
 }
 
-// Iterates through entity tokens and returns true if found and positions to skip
-func entityChecker(determTokTraverser *iterator.Iterator, entityTokens [][]tokenize.Token, dir direction) (bool, int) {
-	var (
-		isEntity        bool
-		entityTraverser *iterator.Iterator
-	)
-	for entityIdx := range entityTokens {
-		// Prepare for generic iterator
-		e := make(iterator.Elements, len(entityTokens[entityIdx]))
-		for i, v := range entityTokens[entityIdx] {
-			e[i] = v
-		}
-
-		entityTraverser = iterator.New(e)
-		if dir == posDir {
-			// Positive direction
-			for entityTraverser.Next() {
-				isEntity = determTokTraverser.CurrElem().(tokenize.Token).Token == entityTraverser.CurrElem().(tokenize.Token).Token
-				// Check if first token matches the entity token
-				if !isEntity {
-					break
-				}
-
-				// Check for next token
-				determTokTraverser.Next()
-			}
-		} else if dir == negDir {
-			// Negative direction
-			entityTraverser.SetPos(entityTraverser.Len() - 1)
-			for entityTraverser.Prev() {
-				isEntity = determTokTraverser.CurrElem().(tokenize.Token).Token == entityTraverser.CurrElem().(tokenize.Token).Token
-				// Check if first token matches the entity token
-				if !isEntity {
-					break
-				}
-
-				// Check for next token
-				determTokTraverser.Prev()
-			}
-		}
-
-		if isEntity {
-			return isEntity, entityTraverser.Len()
-		}
-	}
-
-	return isEntity, entityTraverser.Len()
+// Helper to append float to a map
+func appendTokenDist(m map[string][]float64, k *iterator.Iterator[tokenize.Token], v *iterator.Iterator[tokenize.Token]) {
+	token := k.CurrElem().Text
+	dist := math.Abs(float64(v.CurrPos() - k.CurrPos()))
+	m[token] = append(m[token], dist)
 }
 
 // Returns the average of a float slice
-func avg(xs []float64) float64 {
-	total := 0.0
-	for _, v := range xs {
-		total += v
+func avgFloat(xs []float64) float64 {
+	sum := 0.0
+	for _, x := range xs {
+		sum += x
 	}
-
-	return round(total / float64(len(xs)))
-}
-
-// Rounds to nearest 0.5
-func round(x float64) float64 {
-	return math.Round(x/0.5) * 0.5
+	return sum / float64(len(xs))
 }

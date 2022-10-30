@@ -1,250 +1,176 @@
-package assocentity
+package assocentity_test
 
 import (
+	"context"
 	"log"
 	"os"
 	"reflect"
 	"testing"
 
 	"github.com/joho/godotenv"
-	"github.com/ndabAP/assocentity/v8/tokenize"
+	"github.com/ndabAP/assocentity/v9"
+	"github.com/ndabAP/assocentity/v9/nlp"
+	"github.com/ndabAP/assocentity/v9/tokenize"
 )
 
-var credentialsFile string
-
-func NewNLP(lang tokenize.Lang) *tokenize.NLP {
-	nlp, err := tokenize.NewNLP(credentialsFile, lang)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return nlp
-}
-
-func TestAssocIntegrationSingleWordEntities(t *testing.T) {
+func TestDoSimple1(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
 
-	if err := godotenv.Load(); err != nil {
-		log.Fatal(err)
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("error loading .env file")
 	}
 
-	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
+	credentialsFile := os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
+	nlpTokenizer := nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
+
+	text := "Relax, Max. You're a nice guy."
+	entities := []string{"Max", "Max Payne"}
+
+	posDeterm := nlp.NewNLPPoSDetermer(tokenize.ANY)
+
+	got, err := assocentity.Do(context.Background(), nlpTokenizer, posDeterm, text, entities)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]float64{
+		"Relax": 2,
+		",":     1,
+		".":     4,
+		"You":   2,
+		"'re":   3,
+		"a":     4,
+		"nice":  5,
+		"guy":   6,
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Do() = %v, want %v", got, want)
+	}
+}
+
+func TestDoSimple2(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
+	}
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("error loading .env file")
+	}
+
+	credentialsFile := os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
+	nlpTokenizer := nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
 
 	text := "Punchinello wanted Payne? He'd see the pain."
 	entities := []string{"Punchinello", "Payne"}
 
-	nlp := NewNLP("en")
-	dps := tokenize.NewPoSDetermer(tokenize.ANY)
+	dps := nlp.NewNLPPoSDetermer(tokenize.ANY)
 
-	got, err := Do(nlp, dps, text, entities)
+	got, err := assocentity.Do(context.Background(), nlpTokenizer, dps, text, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	want := map[tokenize.Token]float64{
-		{PoS: tokenize.VERB, Token: "wanted"}: 1,
-		{PoS: tokenize.PUNCT, Token: "?"}:     2,
-		{PoS: tokenize.PRON, Token: "He"}:     3,
-		{PoS: tokenize.VERB, Token: "'d"}:     4,
-		{PoS: tokenize.VERB, Token: "see"}:    5,
-		{PoS: tokenize.DET, Token: "the"}:     6,
-		{PoS: tokenize.NOUN, Token: "pain"}:   7,
-		{PoS: tokenize.PUNCT, Token: "."}:     8,
+	want := map[string]float64{
+		"wanted": 1,
+		"?":      2,
+		"He":     3,
+		"'d":     4,
+		"see":    5,
+		"the":    6,
+		"pain":   7,
+		".":      8,
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Assoc() = %v, want %v", got, want)
 	}
 }
 
-func TestAssocIntegrationSingleWordEntitiesEnglishLanguage(t *testing.T) {
-	if testing.Short() {
-		t.SkipNow()
-	}
+func TestDoComplex(t *testing.T) {
+	text := "ee ee aa bb cc dd. b ff, gg, hh, bb, bb. ii!"
+	entities := []string{"bb", "b", "ee ee"}
 
-	if err := godotenv.Load(); err != nil {
-		log.Fatal(err)
-	}
+	posDeterm := nlp.NewNLPPoSDetermer(tokenize.ANY)
 
-	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
-
-	text := "Punchinello wanted Payne? He'd see the pain."
-	entities := []string{"Punchinello", "Payne"}
-
-	nlp := NewNLP("en")
-	dps := tokenize.NewPoSDetermer(tokenize.ANY)
-
-	got, err := Do(nlp, dps, text, entities)
+	var tTokenizer testTokenizer
+	got, err := assocentity.Do(context.Background(), tTokenizer, posDeterm, text, entities)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
-
-	want := map[tokenize.Token]float64{
-		{PoS: tokenize.VERB, Token: "wanted"}: 1,
-		{PoS: tokenize.PUNCT, Token: "?"}:     2,
-		{PoS: tokenize.PRON, Token: "He"}:     3,
-		{PoS: tokenize.VERB, Token: "'d"}:     4,
-		{PoS: tokenize.VERB, Token: "see"}:    5,
-		{PoS: tokenize.DET, Token: "the"}:     6,
-		{PoS: tokenize.NOUN, Token: "pain"}:   7,
-		{PoS: tokenize.PUNCT, Token: "."}:     8,
+	want := map[string]float64{
+		"aa": 6.6,
+		",":  6.3,
+		"!":  10.8,
+		"cc": 5.8,
+		"dd": 5.6,
+		".":  7.1,
+		"ff": 5.4,
+		"gg": 5.8,
+		"hh": 6.2,
+		"ii": 9.8,
 	}
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("Assoc() = %v, want %v", got, want)
+		t.Fatalf("Do() = %v, want %v", got, want)
 	}
 }
 
-func TestAssocIntegrationMultiWordEntities(t *testing.T) {
-	if testing.Short() {
-		t.SkipNow()
-	}
+// Mock tokenization
+type testTokenizer int
 
-	if err := godotenv.Load(); err != nil {
-		log.Fatal(err)
-	}
+// Hack to simulate different tokenization response steps
+var tokCall int
 
-	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
+// Mock date: 10-30-2022
+func (tt testTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.Token, error) {
+	tokCall++
 
-	text := "Max Payne, this is Deputy Chief Jim Bravura from the NYPD."
-	entities := []string{"Max Payne", "Jim Bravura"}
-
-	nlp := NewNLP("en")
-	dps := tokenize.NewPoSDetermer(tokenize.ANY)
-
-	got, err := Do(nlp, dps, text, entities)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	want := map[tokenize.Token]float64{
-		{PoS: tokenize.PUNCT, Token: ","}:     3,
-		{PoS: tokenize.DET, Token: "this"}:    3,
-		{PoS: tokenize.VERB, Token: "is"}:     3,
-		{PoS: tokenize.NOUN, Token: "Deputy"}: 3,
-		{PoS: tokenize.NOUN, Token: "Chief"}:  3,
-		{PoS: tokenize.ADP, Token: "from"}:    4,
-		{PoS: tokenize.DET, Token: "the"}:     5,
-		{PoS: tokenize.NOUN, Token: "NYPD"}:   6,
-		{PoS: tokenize.PUNCT, Token: "."}:     7,
-	}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("Assoc() = %v, want %v", got, want)
-	}
-}
-
-func TestAssocIntegrationDefinedPartOfSpeech(t *testing.T) {
-	if testing.Short() {
-		t.SkipNow()
-	}
-
-	if err := godotenv.Load(); err != nil {
-		log.Fatal(err)
-	}
-
-	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
-
-	text := `"The things that I want", by Max Payne.`
-	entities := []string{"Max Payne"}
-
-	nlp := NewNLP("en")
-	dps := tokenize.NewPoSDetermer(tokenize.DET | tokenize.VERB | tokenize.PUNCT)
-
-	got, err := Do(nlp, dps, text, entities)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	want := map[tokenize.Token]float64{
-		{PoS: tokenize.PUNCT, Token: `"`}:   4,
-		{PoS: tokenize.DET, Token: "The"}:   5,
-		{PoS: tokenize.DET, Token: "that"}:  4,
-		{PoS: tokenize.VERB, Token: "want"}: 3,
-		{PoS: tokenize.PUNCT, Token: ","}:   1,
-		{PoS: tokenize.PUNCT, Token: "."}:   1,
-	}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("Assoc() = %v, want %v", got, want)
-	}
-}
-
-// Create a custom NLP instance
-type nlpTest struct{}
-
-// Second iteration is always for entites
-var iterations int
-
-func (n *nlpTest) Tokenize(text string) ([]tokenize.Token, error) {
-	if iterations == 0 {
-		iterations++
-
+	switch tokCall {
+	case 1:
 		return []tokenize.Token{
-			{
-				Token: "Punchinello",
-				PoS:   tokenize.NOUN,
-			},
-			{
-				Token: "was",
-				PoS:   tokenize.VERB,
-			},
-			{
-				Token: "burning",
-				PoS:   tokenize.VERB,
-			},
-			{
-				Token: "to",
-				PoS:   tokenize.PRT,
-			},
-			{
-				Token: "get",
-				PoS:   tokenize.VERB,
-			},
-			{
-				Token: "me",
-				PoS:   tokenize.PRON,
-			},
+			{PoS: tokenize.NOUN, Text: "ee"},
+			{PoS: tokenize.NOUN, Text: "ee"},
+			{PoS: tokenize.NOUN, Text: "aa"},
+			{PoS: tokenize.NOUN, Text: "bb"},
+			{PoS: tokenize.NOUN, Text: "cc"},
+			{PoS: tokenize.NOUN, Text: "dd"},
+			{PoS: tokenize.PUNCT, Text: "."},
+			{PoS: tokenize.NOUN, Text: "b"},
+			{PoS: tokenize.NOUN, Text: "ff"},
+			{PoS: tokenize.PUNCT, Text: ","},
+			{PoS: tokenize.X, Text: "gg"},
+			{PoS: tokenize.PUNCT, Text: ","},
+			{PoS: tokenize.NOUN, Text: "hh"},
+			{PoS: tokenize.PUNCT, Text: ","},
+			{PoS: tokenize.NOUN, Text: "bb"},
+			{PoS: tokenize.PUNCT, Text: ","},
+			{PoS: tokenize.NOUN, Text: "bb"},
+			{PoS: tokenize.PUNCT, Text: "."},
+			{PoS: tokenize.NOUN, Text: "ii"},
+			{PoS: tokenize.PUNCT, Text: "!"},
 		}, nil
-	}
-
-	return []tokenize.Token{
-		{
-			Token: "Punchinello",
-			PoS:   tokenize.NOUN,
-		},
-	}, nil
-
-}
-
-func TestAssocIntegrationSingleWordEntitiesShort(t *testing.T) {
-	text := "Punchinello was burning to get me"
-	entities := []string{"Punchinello"}
-
-	dps := tokenize.NewPoSDetermer(tokenize.ANY)
-
-	got, err := Do(&nlpTest{}, dps, text, entities)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	want := map[tokenize.Token]float64{
-		{PoS: tokenize.VERB, Token: "was"}:     1,
-		{PoS: tokenize.VERB, Token: "burning"}: 2,
-		{PoS: tokenize.PRT, Token: "to"}:       3,
-		{PoS: tokenize.VERB, Token: "get"}:     4,
-		{PoS: tokenize.PRON, Token: "me"}:      5,
-	}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("Assoc() = %v, want %v", got, want)
-	}
-}
-
-func BenchmarkAssoc(b *testing.B) {
-	text := "Punchinello was burning to get me"
-	entities := []string{"Punchinello"}
-
-	dps := tokenize.NewPoSDetermer(tokenize.ANY)
-
-	for n := 0; n < b.N; n++ {
-		Do(&nlpTest{}, dps, text, entities)
+	case 2:
+		return []tokenize.Token{
+			{PoS: tokenize.NOUN, Text: "ee"},
+			{PoS: tokenize.NOUN, Text: "ee"},
+		}, nil
+	case 3:
+		return []tokenize.Token{
+			{PoS: tokenize.NOUN, Text: "bb"},
+		}, nil
+	case 4:
+		return []tokenize.Token{
+			{PoS: tokenize.NOUN, Text: "b"},
+		}, nil
+	case 5:
+		return []tokenize.Token{
+			{PoS: tokenize.NOUN, Text: "bb"},
+		}, nil
+	// 6
+	default:
+		return []tokenize.Token{
+			{PoS: tokenize.NOUN, Text: "bb"},
+		}, nil
 	}
 }

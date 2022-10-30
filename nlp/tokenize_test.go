@@ -1,17 +1,18 @@
-package tokenize
+package nlp_test
 
 import (
+	"context"
 	"log"
 	"os"
 	"reflect"
 	"testing"
 
 	"github.com/joho/godotenv"
+	"github.com/ndabAP/assocentity/v9/nlp"
+	"github.com/ndabAP/assocentity/v9/tokenize"
 )
 
-var credentialsFile string
-
-func TestNLP_tokenize(t *testing.T) {
+func TestTokenize(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
@@ -20,41 +21,41 @@ func TestNLP_tokenize(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
+	credentialsFile := os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
 
 	tests := []struct {
 		name    string
 		text    string
-		want    []Token
+		want    []tokenize.Token
 		wantErr bool
 	}{
 		{
 			name: "six tokens",
 			text: "Punchinello was burning to get me",
-			want: []Token{
+			want: []tokenize.Token{
 				{
-					Token: "Punchinello",
-					PoS:   NOUN,
+					Text: "Punchinello",
+					PoS:  tokenize.NOUN,
 				},
 				{
-					Token: "was",
-					PoS:   VERB,
+					Text: "was",
+					PoS:  tokenize.VERB,
 				},
 				{
-					Token: "burning",
-					PoS:   VERB,
+					Text: "burning",
+					PoS:  tokenize.VERB,
 				},
 				{
-					Token: "to",
-					PoS:   PRT,
+					Text: "to",
+					PoS:  tokenize.PRT,
 				},
 				{
-					Token: "get",
-					PoS:   VERB,
+					Text: "get",
+					PoS:  tokenize.VERB,
 				},
 				{
-					Token: "me",
-					PoS:   PRON,
+					Text: "me",
+					PoS:  tokenize.PRON,
 				},
 			},
 			wantErr: false,
@@ -62,16 +63,11 @@ func TestNLP_tokenize(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			nlp, err := NewNLP(
+			nlp := nlp.NewNLPTokenizer(
 				credentialsFile,
-				AutoLang,
+				nlp.AutoLang,
 			)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("NLP.NewNLP() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-
-			got, err := nlp.tokenize(tt.text)
+			got, err := nlp.Tokenize(context.Background(), tt.text)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NLP.tokenize() error = %v, wantErr %v", err, tt.wantErr)
 				return

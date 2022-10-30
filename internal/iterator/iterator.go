@@ -1,93 +1,81 @@
 package iterator
 
-// Element represents a slice element
-type Element interface{}
-
-// Elements represents a slice
-type Elements []Element
-
-// Iterator represents a iterator
-type Iterator struct {
-	slice []Element
+type Iterator[T any] struct {
+	el    T
+	elems []T
+	len   int
 	pos   int
-	el    Element
-	init  bool
 }
 
-// New returns a new iterator
-func New(slice []Element) *Iterator {
-	return &Iterator{
-		slice,
-		0,
-		slice[0],
-		true,
+func New[T any](elems []T) *Iterator[T] {
+	return &Iterator[T]{
+		elems[0],
+		elems,
+		len(elems),
+		-1,
 	}
 }
 
-// Next sets the next element
-func (g *Iterator) Next() bool {
-	if g.init {
-		g.init = false
-
-		return true
-	}
-
-	if g.pos+1 > g.Len()-1 {
+func (it *Iterator[T]) Next() bool {
+	if it.pos+1 >= it.len {
 		return false
 	}
-
-	g.pos++
-	g.el = g.slice[g.pos]
-
+	it.pos++
+	it.el = it.elems[it.pos]
 	return true
 }
 
-// Prev sets the previous element
-func (g *Iterator) Prev() bool {
-	if g.init {
-		g.init = false
-
-		return true
-	}
-
-	if g.pos-1 < 0 {
+func (it *Iterator[T]) Prev() bool {
+	if it.pos-1 < 0 {
 		return false
 	}
-
-	g.pos--
-	g.el = g.slice[g.pos]
-
+	it.pos--
+	it.el = it.elems[it.pos]
 	return true
 }
 
-// Reset resets the iterator
-func (g *Iterator) Reset() {
-	g.pos = 0
-	g.el = g.slice[0]
-	g.init = true
+func (it *Iterator[T]) Elems() []T {
+	return it.elems
 }
 
-// CurrPos returns the current position
-func (g *Iterator) CurrPos() int {
-	return g.pos
+func (it *Iterator[T]) Reset() *Iterator[T] {
+	it.pos = -1
+	it.el = it.elems[0]
+	return it
 }
 
-// CurrElem returns the current element
-func (g *Iterator) CurrElem() Element {
-	return g.el
+func (it *Iterator[T]) CurrPos() int {
+	return it.pos
 }
 
-// Len returns the length
-func (g *Iterator) Len() int {
-	return len(g.slice)
+func (it *Iterator[T]) CurrElem() T {
+	return it.el
 }
 
-// SetPos sets the position
-func (g *Iterator) SetPos(pos int) bool {
-	if g.Len() > pos {
-		g.pos = pos
-		g.el = g.slice[pos]
+func (it *Iterator[T]) Len() int {
+	return it.len
+}
+
+func (it *Iterator[T]) SetPos(pos int) *Iterator[T] {
+	it.pos = pos
+	it.setEl()
+	return it
+}
+
+func (it *Iterator[T]) Rewind(pos int) *Iterator[T] {
+	it.pos -= pos
+	it.setEl()
+	return it
+}
+
+func (it *Iterator[T]) Foward(pos int) *Iterator[T] {
+	it.pos += pos
+	it.setEl()
+	return it
+}
+
+func (it *Iterator[T]) setEl() {
+	if len(it.elems)-1 > it.pos && it.pos >= 0 {
+		it.el = it.elems[it.pos]
 	}
-
-	return g.Len() > pos
 }
