@@ -9,7 +9,7 @@ import (
 	"github.com/ndabAP/assocentity/v9/tokenize"
 )
 
-// Do return the average distance from entities to a given text.
+// Do return the average distance from entities to a text
 func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, text string, entities []string) (map[string]float64, error) {
 	var (
 		assocTokens      = make(map[string]float64)
@@ -42,7 +42,7 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 
 	// Iterate through part of speech determinated text tokens
 	for determTokensIter.Next() {
-		// If the current token is an entity, we skip about the entity
+		// If the current text token is an entity, we skip about the entity
 		currDetermTokensPos := determTokensIter.CurrPos()
 		isEntity, entity := comp.TextWithEntities(determTokensIter, entityTokensIter, comp.DirPos)
 		if isEntity {

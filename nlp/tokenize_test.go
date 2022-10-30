@@ -12,8 +12,6 @@ import (
 	"github.com/ndabAP/assocentity/v9/tokenize"
 )
 
-var credentialsFile string
-
 func TestTokenize(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
@@ -23,7 +21,7 @@ func TestTokenize(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	credentialsFile = os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
+	credentialsFile := os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
 
 	tests := []struct {
 		name    string

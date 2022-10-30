@@ -34,13 +34,13 @@ type Lang string
 // AutoLang tries to automatically recognize the language
 var AutoLang Lang = "auto"
 
-// NLPTokenizer tokenizes a text using NLPTokenizer
+// NLPTokenizer tokenizes a text using Google NLP
 type NLPTokenizer struct {
 	credsFilename string
 	lang          Lang
 }
 
-// NewNLPTokenizer returns a new NLP instance
+// NewNLPTokenizer returns a new NLP tokenizer instance
 func NewNLPTokenizer(credentialsFilename string, lang Lang) tokenize.Tokenizer {
 	return NLPTokenizer{
 		credsFilename: credentialsFilename,
@@ -65,7 +65,7 @@ func (nlp NLPTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.T
 	return tokens, nil
 }
 
-// req sends a request to the Google NLP server
+// req sends a request to the Google server
 func (nlp NLPTokenizer) req(ctx context.Context, text string) (*languagepb.AnnotateTextResponse, error) {
 	client, err := language.NewClient(ctx, option.WithCredentialsFile(nlp.credsFilename))
 	if err != nil {

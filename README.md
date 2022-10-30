@@ -18,7 +18,9 @@ $ go get github.com/ndabAP/assocentity/v9
 
 ## Prerequisites
 
-Sign-up for a Cloud Natural Language API service account key and download the generated JSON file. This equals the `credentialsFile` at the example below. You should never commit that file.
+Sign-up for a Cloud Natural Language API service account key and download the
+generated JSON file. This equals the `credentialsFile` at the example below.
+You should never commit that file.
 
 ## Usage
 
@@ -40,15 +42,14 @@ func main() {
 	entities := []string{"Punchinello", "Payne"}
 
 	// Create a NLP instance
-	nlpTokenizer := nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
+	nlpTok := nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
 
 	// Allow any part of speech
 	posDeterm := tokenize.NewNLPPoSDetermer(tokenize.ANY)
 
-
     // Do calculates the average distances
 	ctx := context.Background()
-	assocEntities, err := assocentity.Do(nlpTokenizer, posDeterm, text, entities)
+	assocEntities, err := assocentity.Do(ctx, nlpTok, posDeterm, text, entities)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,25 +70,32 @@ func main() {
 
 ## In-Depth
 
-Section procedure explains the process from a non-technical perspective and API helps to interfere the applications process.
+Section procedure explains the process from a non-technical perspective and API
+helps to interfere the applications process.
 
 ### Procedure
 
-The process is split into three parts. Two of them belong to the tokenization and one calculates the average distance between words and entities.
+The process is split into three parts. Two of them belong to the tokenization
+and one calculates the average distance between words and entities.
 
-1. **Tokenization**. Splits the words and assigns part of speech to the token
+1. **Tokenization**. Splits the tokens and assigns part of speech
 2. **Part of speech determination**. Keeps only the wanted part of speeches
 3. **Calculating the average**. Main function that does the actual work
 
 #### Tokenization
 
-Googles Cloud Natural Language API is the default tokenizer and will split the words and after that this library assigns the part of speech to the tokens. No additional checking should be done here. For this step, it's nessecary to sign-up for a service account key.
+Googles Cloud Natural Language API is the default tokenizer and will split the
+tokens, and after that this it assigns the part of speech to the tokens. No
+additional checking should be done here. For this step, it's nessecary to
+sign-up for a service account key.
 
 A simpler, offline solution would be using Gos native `strings.Fields` method.
 
 #### Part of speech determination
 
-It's possible to only allow certain part of speeches, e. g. only nouns and verbs. Also the entities should stay included. Therefore, this step is separated so it could be more optimized.
+It's possible to only allow certain part of speeches, e. g. only nouns and
+verbs. Also the entities must stay included. Therefore, this step is separated
+so it could be more optimized.
 
 #### Calculating the average
 
@@ -95,7 +103,9 @@ Finally, the average distances get calculated with the given predecessors.
 
 ### API
 
-There are two steps to interfere the tokenization process. To interfere, the interfaces have to be implemented. The last takes interfaces from the other steps. For a non-technical explanation, read the procedure section.
+There are two steps to interfere into the tokenization process. You just need to
+implement the interfaces. `Do` takes interfaces all calls their methods. For a
+non-technical explanation, read the procedure section.
 
 #### Tokenization
 
@@ -111,8 +121,8 @@ While `Token` is of type:
 
 ```go
 type Token struct {
-	PoS   PoS
-	Text string
+	PoS  PoS    // Part of speech
+	Text string // Text
 }
 ```
 
@@ -122,33 +132,33 @@ So, for example given this text:
 text := "Punchinello was burning to get me"
 ```
 
-The result from `Tokenize` could be:
+The result from `Tokenize` would be:
 
 ```go
-res := []Token{
+[]Token{
 	{
 		Text: "Punchinello",
-		PoS:   tokenize.NOUN,
+		PoS:  tokenize.NOUN,
 	},
 	{
 		Text: "was",
-		PoS:   tokenize.VERB,
+		PoS:  tokenize.VERB,
 	},
 	{
 		Text: "burning",
-		PoS:   tokenize.VERB,
+		PoS:  tokenize.VERB,
 	},
 	{
 		Text: "to",
-		PoS:   tokenize.PRT,
+		PoS:  tokenize.PRT,
 	},
 	{
 		Text: "get",
-		PoS:   tokenize.VERB,
+		PoS:  tokenize.VERB,
 	},
 	{
 		Text: "me",
-		PoS:   tokenize.PRON,
+		PoS:  tokenize.PRON,
 	},
 }
 ```
@@ -163,15 +173,20 @@ type PoSDetermer interface {
 }
 ```
 
-We want to preserve the part of speech information. Therefore, we return `Token` here instead of `string`. This makes it possible to keep the real distances between tokens.
+We want to preserve the part of speech information. Therefore, we return `Token`
+here instead of `string`. This makes it possible to keep the real distances
+between tokens, e. g.
 
 #### Calculating the average
 
-This step can't be changed. It takes a `Tokenizer`, `PoSDetermer`, text as `string` and entities in a form of `[][]string`. The method will call all the necessary implemented methods automatically and returns a `map` with the tokens and distances.
+This step can't be changed. It takes a `Tokenizer`, `PoSDetermer`, text as
+`string` and entities in a form of `[][]string`. The method will call all the
+interface methods and returns a `map` with the tokens and distances.
 
 ## Projects using assocentity
 
-- [entityscrape](https://github.com/ndabAP/entityscrape) - Distance between word types (default: adjectives) in news articles and persons
+- [entityscrape](https://github.com/ndabAP/entityscrape) - Distance between word
+types (default: adjectives) in news articles and persons
 
 ## Author
 
