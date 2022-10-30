@@ -13,22 +13,18 @@ import (
 	"github.com/ndabAP/assocentity/v9/tokenize"
 )
 
-var nlpTokenizer tokenize.Tokenizer
+func TestDoSimple1(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
+	}
 
-func init() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("error loading .env file")
 	}
 
 	credentialsFile := os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
-	nlpTokenizer = nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
-}
-
-func TestDoSimple1(t *testing.T) {
-	if testing.Short() {
-		t.SkipNow()
-	}
+	nlpTokenizer := nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
 
 	text := "Relax, Max. You're a nice guy."
 	entities := []string{"Max", "Max Payne"}
@@ -59,6 +55,14 @@ func TestDoSimple2(t *testing.T) {
 		t.SkipNow()
 	}
 
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("error loading .env file")
+	}
+
+	credentialsFile := os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
+	nlpTokenizer := nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
+
 	text := "Punchinello wanted Payne? He'd see the pain."
 	entities := []string{"Punchinello", "Payne"}
 
@@ -84,17 +88,46 @@ func TestDoSimple2(t *testing.T) {
 	}
 }
 
+func TestDoComplex(t *testing.T) {
+	text := "ee ee aa bb cc dd. b ff, gg, hh, bb, bb. ii!"
+	entities := []string{"bb", "b", "ee ee"}
+
+	posDeterm := nlp.NewNLPPoSDetermer(tokenize.ANY)
+
+	var tTokenizer testTokenizer
+	got, err := assocentity.Do(context.Background(), tTokenizer, posDeterm, text, entities)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]float64{
+		"aa": 6.6,
+		",":  6.3,
+		"!":  10.8,
+		"cc": 5.8,
+		"dd": 5.6,
+		".":  7.1,
+		"ff": 5.4,
+		"gg": 5.8,
+		"hh": 6.2,
+		"ii": 9.8,
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Do() = %v, want %v", got, want)
+	}
+}
+
+// Mock tokenization
 type testTokenizer int
 
-// Hack to simulate different tokenization responses
-var tokenizeCall int
+// Hack to simulate different tokenization response steps
+var tokCall int
 
+// Mock date: 10-30-2022
 func (tt testTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.Token, error) {
-	tokenizeCall++
+	tokCall++
 
-	switch tokenizeCall {
+	switch tokCall {
 	case 1:
-		// Mock date: 10-30-2022
 		return []tokenize.Token{
 			{PoS: tokenize.NOUN, Text: "ee"},
 			{PoS: tokenize.NOUN, Text: "ee"},
@@ -139,33 +172,5 @@ func (tt testTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.T
 		return []tokenize.Token{
 			{PoS: tokenize.NOUN, Text: "bb"},
 		}, nil
-	}
-}
-
-func TestDoComplex(t *testing.T) {
-	text := "ee ee aa bb cc dd. b ff, gg, hh, bb, bb. ii!"
-	entities := []string{"bb", "b", "ee ee"}
-
-	posDeterm := nlp.NewNLPPoSDetermer(tokenize.ANY)
-
-	var tTokenizer testTokenizer
-	got, err := assocentity.Do(context.Background(), tTokenizer, posDeterm, text, entities)
-	if err != nil {
-		t.Fatal(err)
-	}
-	want := map[string]float64{
-		"aa": 6.6,
-		",":  6.3,
-		"!":  10.8,
-		"cc": 5.8,
-		"dd": 5.6,
-		".":  7.1,
-		"ff": 5.4,
-		"gg": 5.8,
-		"hh": 6.2,
-		"ii": 9.8,
-	}
-	if !reflect.DeepEqual(got, want) {
-		t.Fatalf("Do() = %v, want %v", got, want)
 	}
 }
