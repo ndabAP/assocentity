@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"io/ioutil"
 	"log"
@@ -64,9 +65,17 @@ func main() {
 	flag.Parse()
 
 	// Stdin
+	f, err := os.Stdin.Stat()
+	if err != nil {
+		printUsageAndExit(err)
+	}
+	if f.Size() == 0 {
+		printUsageAndExit(errors.New("missing stdin"))
+	}
+
 	textBytes, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
-		printUsageAndPanic(err)
+		printUsageAndExit(err)
 	}
 
 	// assocentity
@@ -87,7 +96,7 @@ func main() {
 	entities := strings.Split(*entitiesF, ",")
 	assocEntities, err := assocentity.Do(ctx, nlpTok, posDeterm, text, entities)
 	if err != nil {
-		printUsageAndPanic(err)
+		printUsageAndExit(err)
 	}
 
 	logger.Println(assocEntities)
@@ -102,10 +111,12 @@ func parsePoS(posArr []string) (pos tokenize.PoS) {
 	return
 }
 
-func printUsageAndPanic(err error) {
+func printUsageAndExit(err error) {
 	logger.SetOutput(os.Stderr)
-	logger.Println(err)
+	logger.Println("assocentitiy:", err)
+	logger.Println()
 
+	logger.Println("Usage:")
 	flag.PrintDefaults()
 	os.Exit(1)
 }
