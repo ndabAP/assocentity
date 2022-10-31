@@ -47,7 +47,7 @@ func main() {
 	// Allow any part of speech
 	posDeterm := nlp.NewNLPPoSDetermer(tokenize.ANY)
 
-    	// Do calculates the average distances
+	// Do calculates the average distances
 	ctx := context.Background()
 	assocEntities, err := assocentity.Do(ctx, nlpTok, posDeterm, text, entities)
 	if err != nil {
@@ -56,22 +56,22 @@ func main() {
 
 	fmt.Println(assocEntities)
 	// map[string]float64{
-	// 	"wanted": 1,
-	// 	"?":      2,
-	// 	"He":     3,
-	// 	"'d":     4,
-	// 	"see":    5,
-	// 	"the":    6,
-	// 	"pain":   7,
-	// 	".":      8,
+	// 	"wanted": 1, // [1, 1]
+	// 	"?":      2, // [1, 3]
+	// 	"He":     3, // [1, 1]
+	// 	"'d":     4, // [3, 5]
+	// 	"see":    5, // [4, 6]
+	// 	"the":    6, // [5, 7]
+	// 	"pain":   7, // [6, 8]
+	// 	".":      8, // [7, 9]
 	// }
 }
 ```
 
 ## In-Depth
 
-Section procedure explains the process from a non-technical perspective and API
-helps to interfere the applications process.
+Section procedure explains the process from a non-technical perspective while
+API exaplains how to influence the program for developers.
 
 ### Procedure
 
@@ -104,7 +104,7 @@ Finally, the average distances get calculated with the given predecessors.
 ### API
 
 There are two steps to interfere into the tokenization process. You just need to
-implement the interfaces. `Do` takes interfaces all calls their methods. For a
+implement the interfaces. `Do` takes interfaces and calls their methods. For a
 non-technical explanation, read the procedure section.
 
 #### Tokenization

@@ -64,18 +64,12 @@ func main() {
 	)
 	flag.Parse()
 
-	// Stdin
-	f, err := os.Stdin.Stat()
-	if err != nil {
-		printUsageAndExit(err)
-	}
-	if f.Size() == 0 {
-		printUsageAndExit(errors.New("missing stdin"))
-	}
-
 	textBytes, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
 		printUsageAndExit(err)
+	}
+	if len(textBytes) == 0 {
+		printUsageAndExit(errors.New("missing text"))
 	}
 
 	// assocentity
