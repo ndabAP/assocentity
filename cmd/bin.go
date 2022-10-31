@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/csv"
-	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -20,7 +19,6 @@ var logger = log.Default()
 
 func init() {
 	log.SetFlags(0)
-	log.SetPrefix("assocentitiy: ")
 
 	logger.SetOutput(os.Stderr)
 }
@@ -43,9 +41,6 @@ var poSMap = map[string]tokenize.PoS{
 }
 
 var (
-	errMissingText     = errors.New("missing text")
-	errMissingEntities = errors.New("missing entities")
-
 	gogSvcLocF = flag.String(
 		"gog-svc-loc",
 		"",
@@ -70,7 +65,7 @@ func main() {
 
 	textBytes, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
-		printUsageAndFail(err)
+		printAndFail(err)
 	}
 
 	// assocentity
@@ -87,24 +82,25 @@ func main() {
 	text := string(textBytes)
 	entities := strings.Split(*entitiesF, ",")
 
+	defer func() {
+		if r := recover(); r != nil {
+			printAndFail(r)
+		}
+	}()
 	assocEntities, err := assocentity.Do(ctx, nlpTok, posDeterm, text, entities)
 	if err != nil {
-		printUsageAndFail(err)
+		printAndFail(err)
 	}
 
-	printAssocEntities(assocEntities)
-}
-
-func printAssocEntities(assocEntities map[string]float64) {
+	// Write CSV to stdout
 	w := csv.NewWriter(os.Stdout)
-	defer w.Flush()
-
 	for token, dist := range assocEntities {
 		record := []string{
 			token, fmt.Sprintf("%v", dist),
 		}
 		w.Write(record)
 	}
+	w.Flush()
 }
 
 func parsePoS(posArr []string) (pos tokenize.PoS) {
@@ -117,11 +113,12 @@ func parsePoS(posArr []string) (pos tokenize.PoS) {
 	return
 }
 
-func printUsageAndFail(err error) {
-	logger.Println(err)
+func printAndFail(reason any) {
+	logger.Println(reason)
 	logger.Println()
 
 	logger.Println("Usage:")
+	logger.Println()
 	flag.PrintDefaults()
 	os.Exit(1)
 }
