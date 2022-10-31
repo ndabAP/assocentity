@@ -183,6 +183,12 @@ This step can't be changed. It takes a `Tokenizer`, `PoSDetermer`, text as
 `string` and entities in a form of `[][]string`. The method will call all the
 interface methods and returns a `map` with the tokens and distances.
 
+## CLI
+
+```bash
+echo "Relax, Max. You're a nice guy." | ./bin/assocentity -gog-svc-loc=/home/max/.config/assocentity/assocentity.json -entities="Max Payne,Payne,Max"
+```
+
 ## Projects using assocentity
 
 - [entityscrape](https://github.com/ndabAP/entityscrape) - Distance between word
