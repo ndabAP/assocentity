@@ -8,7 +8,8 @@ characters in entities due its nature of tokenization.
 
 - Interfere at every step
 - Pass aliases to entity
-- Provides a default NLP tokenizer
+- Provides a default NLP 
+- CLI version available
 
 ## Installation
 
@@ -68,7 +69,7 @@ func main() {
 }
 ```
 
-## In-Depth
+## In-depth
 
 Section procedure explains the process from a non-technical perspective while
 API exaplains how to influence the program for developers.
@@ -103,9 +104,9 @@ Finally, the average distances get calculated with the given predecessors.
 
 ### API
 
-There are two steps to interfere into the tokenization process. You just need to
-implement the interfaces. `Do` takes interfaces and calls their methods. For a
-non-technical explanation, read the procedure section.
+There are two possibilities to interfere into the tokenization process. You 
+just need to implement the interfaces. `Do` takes the interfaces and calls 
+their methods. For a non-technical explanation, read the procedure section.
 
 #### Tokenization
 
