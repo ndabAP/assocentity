@@ -25,7 +25,7 @@ func TestNavigation(t *testing.T) {
 		t.Errorf("CurrElem() got = %v, want = %v", it.CurrElem(), testElems[0])
 	}
 
-	it.Foward(1)
+	it.Forward(1)
 	if it.CurrElem() != testElems[1] {
 		t.Errorf("CurrElem() got = %v, want = %v", it.CurrElem(), testElems[1])
 	}

@@ -68,7 +68,7 @@ func (it *Iterator[T]) Rewind(pos int) *Iterator[T] {
 	return it
 }
 
-func (it *Iterator[T]) Foward(pos int) *Iterator[T] {
+func (it *Iterator[T]) Forward(pos int) *Iterator[T] {
 	it.pos += pos
 	it.setEl()
 	return it

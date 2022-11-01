@@ -9,11 +9,11 @@ import (
 	"github.com/ndabAP/assocentity/v9/tokenize"
 )
 
-// Do return the average distance from entities to a text
+// Do returns the average distance from entities to a text consisting of token
 func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, text string, entities []string) (map[string]float64, error) {
 	var (
-		assocTokens      = make(map[string]float64)
-		assocTokensAccum = make(map[string][]float64)
+		assocEntities      = make(map[string]float64)
+		assocEntitiesAccum = make(map[string][]float64)
 
 		err error
 	)
@@ -21,7 +21,7 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 	// Tokenize text
 	textTokens, err := tokenizer.Tokenize(ctx, text)
 	if err != nil {
-		return assocTokens, err
+		return assocEntities, err
 	}
 
 	// Tokenize entites
@@ -29,7 +29,7 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 	for _, entity := range entities {
 		tokens, err := tokenizer.Tokenize(ctx, entity)
 		if err != nil {
-			return assocTokens, err
+			return assocEntities, err
 		}
 		entityTokens = append(entityTokens, tokens)
 	}
@@ -46,7 +46,7 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 		currDetermTokensPos := determTokensIter.CurrPos()
 		isEntity, entity := comp.TextWithEntities(determTokensIter, entityTokensIter, comp.DirPos)
 		if isEntity {
-			determTokensIter.Foward(len(entity) - 1)
+			determTokensIter.Forward(len(entity) - 1)
 			continue
 		}
 
@@ -59,33 +59,33 @@ func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDeter
 		negDirIter := iterator.New(determTokensIter.Elems())
 		negDirIter.SetPos(currDetermTokensPos)
 
-		// [I, was, (with), Max, Payne, here] -> true, 2, Max Payne
-		// [I, was, with, Max, Payne, (here)] -> false, 0, ""
+		// [I, was, (with), Max, Payne, here] -> true, Max Payne
+		// [I, was, with, Max, Payne, (here)] -> false, ""
 		for posDirIter.Next() {
 			isEntity, entity := comp.TextWithEntities(posDirIter, entityTokensIter, comp.DirPos)
 			if isEntity {
-				appendTokenDist(assocTokensAccum, determTokensIter, posDirIter)
+				appendTokenDist(assocEntitiesAccum, determTokensIter, posDirIter)
 				// Skip about entity.
-				posDirIter.Foward(len(entity) - 1) // Next increments
+				posDirIter.Forward(len(entity) - 1) // Next increments
 			}
 		}
 
-		// [I, was, with, Max, Payne, (here)] -> true, 1, Max Payne
-		// [I, was, (with), Max, Payne, here] -> false, 0, ""
+		// [I, was, with, Max, Payne, (here)] -> true, Max Payne
+		// [I, was, (with), Max, Payne, here] -> false, ""
 		for negDirIter.Prev() {
 			isEntity, entity := comp.TextWithEntities(negDirIter, entityTokensIter, comp.DirNeg)
 			if isEntity {
-				appendTokenDist(assocTokensAccum, determTokensIter, negDirIter)
+				appendTokenDist(assocEntitiesAccum, determTokensIter, negDirIter)
 				negDirIter.Rewind(len(entity) - 1)
 			}
 		}
 	}
 
 	// Calculate the average distances
-	for token, dist := range assocTokensAccum {
-		assocTokens[token] = avgFloat(dist)
+	for token, dist := range assocEntitiesAccum {
+		assocEntities[token] = avgFloat(dist)
 	}
-	return assocTokens, err
+	return assocEntities, err
 }
 
 // Helper to append float to a map

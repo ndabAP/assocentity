@@ -120,13 +120,13 @@ func TestDoComplex(t *testing.T) {
 type testTokenizer int
 
 // Hack to simulate different tokenization response steps
-var tokCall int
+var calls int
 
 // Mock date: 10-30-2022
 func (tt testTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.Token, error) {
-	tokCall++
+	calls++
 
-	switch tokCall {
+	switch calls {
 	case 1:
 		return []tokenize.Token{
 			{PoS: tokenize.NOUN, Text: "ee"},
@@ -150,23 +150,28 @@ func (tt testTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.T
 			{PoS: tokenize.NOUN, Text: "ii"},
 			{PoS: tokenize.PUNCT, Text: "!"},
 		}, nil
+
 	case 2:
 		return []tokenize.Token{
 			{PoS: tokenize.NOUN, Text: "ee"},
 			{PoS: tokenize.NOUN, Text: "ee"},
 		}, nil
+
 	case 3:
 		return []tokenize.Token{
 			{PoS: tokenize.NOUN, Text: "bb"},
 		}, nil
+
 	case 4:
 		return []tokenize.Token{
 			{PoS: tokenize.NOUN, Text: "b"},
 		}, nil
+
 	case 5:
 		return []tokenize.Token{
 			{PoS: tokenize.NOUN, Text: "bb"},
 		}, nil
+
 	// 6
 	default:
 		return []tokenize.Token{

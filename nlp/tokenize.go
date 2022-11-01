@@ -52,7 +52,7 @@ func NewNLPTokenizer(credentialsFilename string, lang Lang) tokenize.Tokenizer {
 func (nlp NLPTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.Token, error) {
 	res, err := nlp.req(ctx, text)
 	if err != nil {
-		return nil, err
+		return []tokenize.Token{}, err
 	}
 
 	tokens := make([]tokenize.Token, 0)
@@ -69,7 +69,7 @@ func (nlp NLPTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.T
 func (nlp NLPTokenizer) req(ctx context.Context, text string) (*languagepb.AnnotateTextResponse, error) {
 	client, err := language.NewClient(ctx, option.WithCredentialsFile(nlp.credsFilename))
 	if err != nil {
-		return nil, err
+		return &languagepb.AnnotateTextResponse{}, err
 	}
 
 	doc := &languagepb.Document{
