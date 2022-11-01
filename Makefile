@@ -30,4 +30,4 @@ $(DARWIN):
 	env GOOS=darwin GOARCH=amd64 go build -v -o bin/$(DARWIN) -ldflags="-s -w -X main.version=$(VERSION)" ./cmd/main.go
 
 clean:
-	rm -f $(WINDOWS) $(LINUX) $(DARWIN)
+	rm -f bin/*
