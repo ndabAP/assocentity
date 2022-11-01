@@ -5,7 +5,7 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -59,13 +59,14 @@ var (
 )
 
 func main() {
+	// Should we set a timeout?
 	ctx := context.TODO()
 
 	flag.Parse()
 
-	textBytes, err := ioutil.ReadAll(os.Stdin)
+	textBytes, err := io.ReadAll(os.Stdin)
 	if err != nil {
-		printAndFail(err)
+		printHelpAndFail(err)
 	}
 
 	// assocentity
@@ -82,14 +83,15 @@ func main() {
 	text := string(textBytes)
 	entities := strings.Split(*entitiesF, ",")
 
+	// Recover to provide an unified response
 	defer func() {
 		if r := recover(); r != nil {
-			printAndFail(r)
+			printHelpAndFail(r)
 		}
 	}()
 	assocEntities, err := assocentity.Do(ctx, nlpTok, posDeterm, text, entities)
 	if err != nil {
-		printAndFail(err)
+		printHelpAndFail(err)
 	}
 
 	// Write CSV to stdout
@@ -103,6 +105,7 @@ func main() {
 	w.Flush()
 }
 
+// ["1", "3", "2", "5"] -> 11
 func parsePoS(posArr []string) (pos tokenize.PoS) {
 	for _, p := range posArr {
 		if p, ok := poSMap[p]; ok {
@@ -113,7 +116,7 @@ func parsePoS(posArr []string) (pos tokenize.PoS) {
 	return
 }
 
-func printAndFail(reason any) {
+func printHelpAndFail(reason any) {
 	logger.Println(reason)
 	logger.Println()
 

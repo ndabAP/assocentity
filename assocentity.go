@@ -9,7 +9,7 @@ import (
 	"github.com/ndabAP/assocentity/v9/tokenize"
 )
 
-// Do return the average distance from entities to a text
+// Do returns the average distance from entities to a text consisting of token
 func Do(ctx context.Context, tokenizer tokenize.Tokenizer, psd tokenize.PoSDetermer, text string, entities []string) (map[string]float64, error) {
 	var (
 		assocEntities      = make(map[string]float64)
