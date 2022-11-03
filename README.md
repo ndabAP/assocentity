@@ -7,9 +7,9 @@ characters in entities due its nature of tokenization.
 ## Features
 
 - Tokenization customization
-- Aliases to entity
+- Entity aliases
 - Default NLP tokenizer (by Google)
-- Includes CLI version
+- Multi-OS CLI version
 
 ## Installation
 
