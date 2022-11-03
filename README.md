@@ -6,10 +6,10 @@ characters in entities due its nature of tokenization.
 
 ## Features
 
-- Interfere at every step
-- Pass aliases to entity
-- Provides a default NLP 
-- CLI version available
+- Tokenization customization
+- Aliases to entity
+- Default NLP tokenizer (by Google)
+- Includes CLI version
 
 ## Installation
 
@@ -71,13 +71,13 @@ func main() {
 
 ## In-depth
 
-Section procedure explains the process from a non-technical perspective while
-API exaplains how to influence the program for developers.
+Section "General workflow" explains the process from a non-technical perspective
+while section API is dedicated to developers.
 
-### Procedure
+### General workflow
 
-The process is split into three parts. Two of them belong to the tokenization
-and one calculates the average distance between words and entities.
+The process is split into three parts. Two of them belong to tokenization and
+one calculates the average distance between words and entities.
 
 1. **Tokenization**. Splits the tokens and assigns part of speech
 2. **Part of speech determination**. Keeps only the wanted part of speeches
@@ -86,11 +86,12 @@ and one calculates the average distance between words and entities.
 #### Tokenization
 
 Googles Cloud Natural Language API is the default tokenizer and will split the
-tokens, and after that this it assigns the part of speech to the tokens. No
-additional checking should be done here. For this step, it's nessecary to
-sign-up for a service account key.
+tokens, and after that assigns the part of speech to the tokens. No additional
+checking should be done here. Note: For this step, it's nessecary to sign-up for
+a service account key.
 
-A simpler, offline solution would be using Gos native `strings.Fields` method.
+A simpler, offline solution would be using Gos native `strings.Fields` method as
+tokenizer.
 
 #### Part of speech determination
 
@@ -104,8 +105,8 @@ Finally, the average distances get calculated with the given predecessors.
 
 ### API
 
-There are two possibilities to interfere into the tokenization process. You 
-just need to implement the interfaces. `Do` takes the interfaces and calls 
+There are two possibilities to interfere into the tokenization process. You
+just need to implement the interfaces. `Do` takes the interfaces and calls
 their methods. For a non-technical explanation, read the procedure section.
 
 #### Tokenization
@@ -186,9 +187,9 @@ interface methods and returns a `map` with the tokens and distances.
 
 ## CLI
 
-There is also a terminal version for either Windows, Mac or Linux (only 64-bit
-support) if you don't have Go available. The CLI expects the text as stdin and
-you can pass the following flags:
+There is also a terminal version for either Windows, Mac (Darwin) or Linux
+(only with 64-bit support) if you don't have Go available. The application
+expects the text as stdin and accepts following flags:
 
 | Flag          | Description                                                                               | Type     | Default |
 | ------------- | ----------------------------------------------------------------------------------------- | -------- | ------- |
@@ -202,7 +203,7 @@ Example:
 echo "Relax, Max. You're a nice guy." | ./bin/assocentity_linux_amd64_v9.0.1-7-gdfeb0f1-dirty -gog-svc-loc=/home/max/.config/assocentity/google-service.json -entities="Max Payne,Payne,Max"
 ```
 
-The CLI version writes the average distances as CSV to stdout.
+The application writes the result as CSV formatted `string` to stdout.
 
 ## Projects using assocentity
 
