@@ -189,7 +189,7 @@ interface methods and returns a `map` with the tokens and distances.
 
 There is also a terminal version for either Windows, Mac (Darwin) or Linux
 (only with 64-bit support) if you don't have Go available. The application
-expects the text as stdin and accepts following flags:
+expects the text as stdin and accepts the following flags:
 
 | Flag          | Description                                                                               | Type     | Default |
 | ------------- | ----------------------------------------------------------------------------------------- | -------- | ------- |
