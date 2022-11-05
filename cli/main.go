@@ -21,6 +21,8 @@ func init() {
 	log.SetFlags(0)
 
 	logger.SetOutput(os.Stderr)
+
+	flag.Parse()
 }
 
 var (
@@ -80,7 +82,6 @@ var (
 var ctx = context.Background()
 
 func main() {
-	flag.Parse()
 
 	// Read text as stdin
 	textBytes, err := io.ReadAll(os.Stdin)
@@ -115,13 +116,14 @@ func main() {
 
 	// Write CSV to stdout
 	w := csv.NewWriter(os.Stdout)
+	defer w.Flush()
 	for token, dist := range assocEntities {
 		record := []string{
+			// Text, part of speech, distance
 			token.Text, poSMapIds[token.PoS], fmt.Sprintf("%v", dist),
 		}
 		w.Write(record)
 	}
-	w.Flush()
 }
 
 // ["1", "3", "2", "5"] -> 11
