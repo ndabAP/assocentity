@@ -23,22 +23,40 @@ func init() {
 	logger.SetOutput(os.Stderr)
 }
 
-var poSMap = map[string]tokenize.PoS{
-	"any":     tokenize.ANY,
-	"adj":     tokenize.ADJ,
-	"adv":     tokenize.ADV,
-	"affix":   tokenize.AFFIX,
-	"conj":    tokenize.CONJ,
-	"det":     tokenize.DET,
-	"noun":    tokenize.NOUN,
-	"num":     tokenize.NUM,
-	"pron":    tokenize.PRON,
-	"prt":     tokenize.PRT,
-	"punct":   tokenize.PUNCT,
-	"unknown": tokenize.UNKN,
-	"verb":    tokenize.VERB,
-	"x":       tokenize.X,
-}
+var (
+	poSMap = map[string]tokenize.PoS{
+		"any":     tokenize.ANY,
+		"adj":     tokenize.ADJ,
+		"adv":     tokenize.ADV,
+		"affix":   tokenize.AFFIX,
+		"conj":    tokenize.CONJ,
+		"det":     tokenize.DET,
+		"noun":    tokenize.NOUN,
+		"num":     tokenize.NUM,
+		"pron":    tokenize.PRON,
+		"prt":     tokenize.PRT,
+		"punct":   tokenize.PUNCT,
+		"unknown": tokenize.UNKN,
+		"verb":    tokenize.VERB,
+		"x":       tokenize.X,
+	}
+	poSMapIds = map[tokenize.PoS]string{
+		tokenize.UNKN:  "UNKNOWN",
+		tokenize.ADJ:   "ADJ",
+		tokenize.ADP:   "ADP",
+		tokenize.ADV:   "ADV",
+		tokenize.CONJ:  "CONJ",
+		tokenize.DET:   "DET",
+		tokenize.NOUN:  "NOUN",
+		tokenize.NUM:   "NUM",
+		tokenize.PRON:  "PRON",
+		tokenize.PRT:   "PRT",
+		tokenize.PUNCT: "PUNCT",
+		tokenize.VERB:  "VERB",
+		tokenize.X:     "X",
+		tokenize.AFFIX: "AFFIX",
+	}
+)
 
 var (
 	gogSvcLocF = flag.String(
@@ -99,7 +117,7 @@ func main() {
 	w := csv.NewWriter(os.Stdout)
 	for token, dist := range assocEntities {
 		record := []string{
-			token, fmt.Sprintf("%v", dist),
+			token.Text, poSMapIds[token.PoS], fmt.Sprintf("%v", dist),
 		}
 		w.Write(record)
 	}

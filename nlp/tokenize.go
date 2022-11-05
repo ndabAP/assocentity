@@ -10,7 +10,7 @@ import (
 )
 
 // Use map to be independent from library
-var poSMap = map[languagepb.PartOfSpeech_Tag]tokenize.PoS{
+var poSMapTypes = map[languagepb.PartOfSpeech_Tag]tokenize.PoS{
 	languagepb.PartOfSpeech_ADJ:     tokenize.ADJ,
 	languagepb.PartOfSpeech_ADP:     tokenize.ADP,
 	languagepb.PartOfSpeech_ADV:     tokenize.ADV,
@@ -58,7 +58,7 @@ func (nlp NLPTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.T
 	tokens := make([]tokenize.Token, 0)
 	for _, tok := range res.GetTokens() {
 		tokens = append(tokens, tokenize.Token{
-			PoS:  poSMap[tok.PartOfSpeech.Tag],
+			PoS:  poSMapTypes[tok.PartOfSpeech.Tag],
 			Text: tok.GetText().GetContent(),
 		})
 	}

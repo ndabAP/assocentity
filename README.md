@@ -29,7 +29,6 @@ You should never commit that file.
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/ndabAP/assocentity/v9"
 	"github.com/ndabAP/assocentity/v9/nlp"
@@ -42,7 +41,7 @@ func main() {
 	text := "Punchinello wanted Payne? He'd see the pain."
 	entities := []string{"Punchinello", "Payne"}
 
-	// Create a NLP instance
+	// Create a Google NLP instance
 	nlpTok := nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
 
 	// Allow any part of speech
@@ -52,19 +51,43 @@ func main() {
 	ctx := context.Background()
 	assocEntities, err := assocentity.Do(ctx, nlpTok, posDeterm, text, entities)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	fmt.Println(assocEntities)
-	// map[string]float64{
-	// 	"wanted": 1, // [1, 1]
-	// 	"?":      2, // [1, 3]
-	// 	"He":     3, // [1, 1]
-	// 	"'d":     4, // [3, 5]
-	// 	"see":    5, // [4, 6]
-	// 	"the":    6, // [5, 7]
-	// 	"pain":   7, // [6, 8]
-	// 	".":      8, // [7, 9]
+	// map[tokenize.Token]float64{
+	// 	{
+	// 		PoS:  tokenize.VERB,
+	// 		Text: "wanted",
+	// 	}: 1,
+	// 	{
+	// 		PoS:  tokenize.PUNCT,
+	// 		Text: "?",
+	// 	}: 2,
+	// 	{
+	// 		PoS:  tokenize.PRON,
+	// 		Text: "He",
+	// 	}: 3,
+	// 	{
+	// 		PoS:  tokenize.VERB,
+	// 		Text: "'d",
+	// 	}: 4,
+	// 	{
+	// 		PoS:  tokenize.VERB,
+	// 		Text: "see",
+	// 	}: 5,
+	// 	{
+	// 		PoS:  tokenize.DET,
+	// 		Text: "the",
+	// 	}: 6,
+	// 	{
+	// 		PoS:  tokenize.NOUN,
+	// 		Text: "pain",
+	// 	}: 7,
+	// 	{
+	// 		PoS:  tokenize.PUNCT,
+	// 		Text: ".",
+	// 	}: 8,
 	// }
 }
 ```
@@ -187,8 +210,8 @@ interface methods and returns a `map` with the tokens and distances.
 
 ## CLI
 
-There is also a terminal version for either Windows, Mac (Darwin) or Linux
-(only with 64-bit support) if you don't have Go available. The application
+There is also a terminal version available for either Windows, Mac (Darwin) or
+Linux (only with 64-bit support) if you don't have Go available. The application
 expects the text as stdin and accepts the following flags:
 
 | Flag          | Description                                                                               | Type     | Default |
