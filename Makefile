@@ -6,7 +6,7 @@ DARWIN=$(EXECUTABLE)_darwin_amd64_$(VERSION)
 
 .PHONY: all test clean
 
-all: test build
+all: test clean build
 
 test:
 	go test ./... -short
