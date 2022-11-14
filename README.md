@@ -1,8 +1,9 @@
 # assocentity
 
-Package assocentity returns the average distance from tokens to given entities.
-**Important**: If you use the provided NLP tokenizer, you can't use special
-characters in entities due its nature of tokenization.
+Package assocentity is a social science tool to return the average distance 
+from tokens to given entities. **Important**: If you use the provided NLP 
+tokenizer, you can't use special characters in entities due its nature of 
+tokenization. You must use your own tokenizer.
 
 ## Features
 
