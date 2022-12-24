@@ -23,6 +23,13 @@ Sign-up for a Cloud Natural Language API service account key and download the
 generated JSON file. This equals the `credentialsFile` at the example below.
 You should never commit that file.
 
+## Example
+
+We would like to find out which adjectives are how close to a certain public
+person. Let's take George W. Bush and 1,000 NBC news articles as an example.
+"George Bush" is the entity and synonyms are "George W. Bush" and "Bush" and so
+on. The text is each of the 1,000 NBC news articles.
+
 ## Usage
 
 ```go
