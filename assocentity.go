@@ -46,6 +46,10 @@ func Do(
 	determTokensIter := iterator.New(determTokens)
 	entityTokensIter := iterator.New(entityTokens)
 
+	// Iterators to search for entities in positive and negative direction
+	posDirIter := iterator.New(determTokensIter.Elems())
+	negDirIter := iterator.New(determTokensIter.Elems())
+
 	// Iterate through part of speech determinated text tokens
 	for determTokensIter.Next() {
 		// If the current text token is an entity, we skip about the entity
@@ -59,7 +63,6 @@ func Do(
 		// Now we can collect the actual distances
 
 		// Finds/counts entities in positive direction
-		posDirIter := iterator.New(determTokensIter.Elems())
 		posDirIter.SetPos(currDetermTokensPos)
 		// [I, was, (with), Max, Payne, here] -> true, Max Payne
 		// [I, was, with, Max, Payne, (here)] -> false, ""
@@ -73,7 +76,6 @@ func Do(
 		}
 
 		// Finds/counts entities in negative direction
-		negDirIter := iterator.New(determTokensIter.Elems())
 		negDirIter.SetPos(currDetermTokensPos)
 		// [I, was, with, Max, Payne, (here)] -> true, Max Payne
 		// [I, was, (with), Max, Payne, here] -> false, ""
