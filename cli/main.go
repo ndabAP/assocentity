@@ -82,7 +82,6 @@ var (
 var ctx = context.Background()
 
 func main() {
-
 	// Read text as stdin
 	textBytes, err := io.ReadAll(os.Stdin)
 	if err != nil {
@@ -122,7 +121,9 @@ func main() {
 			// Text, part of speech, distance
 			token.Text, poSMapIds[token.PoS], fmt.Sprintf("%v", dist),
 		}
-		w.Write(record)
+		if err := w.Write(record); err != nil {
+			printHelpAndFail(err)
+		}
 	}
 }
 
