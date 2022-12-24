@@ -1,8 +1,8 @@
 # assocentity
 
-Package assocentity is a social science tool to return the average distance 
-from tokens to given entities. **Important**: If you use the provided NLP 
-tokenizer, you can't use special characters in entities due its nature of 
+Package assocentity is a social science tool to return the average distance
+from tokens to given entities. **Important**: If you use the provided NLP
+tokenizer, you can't use special characters in entities due its nature of
 tokenization. You must use your own tokenizer.
 
 ## Features
@@ -15,7 +15,7 @@ tokenization. You must use your own tokenizer.
 ## Installation
 
 ```bash
-$ go get github.com/ndabAP/assocentity/v10
+$ go get github.com/ndabAP/assocentity/v11
 ```
 
 ## Prerequisites
@@ -38,9 +38,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ndabAP/assocentity/v10"
-	"github.com/ndabAP/assocentity/v10/nlp"
-	"github.com/ndabAP/assocentity/v10/tokenize"
+	"github.com/ndabAP/assocentity/v11"
+	"github.com/ndabAP/assocentity/v11/nlp"
+	"github.com/ndabAP/assocentity/v11/tokenize"
 )
 
 const credentialsFile = "google_nlp_service_account.json"
@@ -231,7 +231,7 @@ expects the text as stdin and accepts the following flags:
 Example:
 
 ```bash
-echo "Relax, Max. You're a nice guy." | ./bin/assocentity_linux_amd64_v10.0.1-7-gdfeb0f1-dirty -gog-svc-loc=/home/max/.config/assocentity/google-service.json -entities="Max Payne,Payne,Max"
+echo "Relax, Max. You're a nice guy." | ./bin/assocentity_linux_amd64_v11.0.1-7-gdfeb0f1-dirty -gog-svc-loc=/home/max/.config/assocentity/google-service.json -entities="Max Payne,Payne,Max"
 ```
 
 The application writes the result as CSV formatted `string` to stdout.

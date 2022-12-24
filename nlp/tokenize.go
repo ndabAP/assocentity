@@ -4,7 +4,7 @@ import (
 	"context"
 
 	language "cloud.google.com/go/language/apiv1"
-	"github.com/ndabAP/assocentity/v10/tokenize"
+	"github.com/ndabAP/assocentity/v11/tokenize"
 	"google.golang.org/api/option"
 	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
 )

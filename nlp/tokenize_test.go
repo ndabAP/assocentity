@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/joho/godotenv"
-	"github.com/ndabAP/assocentity/v10/nlp"
-	"github.com/ndabAP/assocentity/v10/tokenize"
+	"github.com/ndabAP/assocentity/v11/nlp"
+	"github.com/ndabAP/assocentity/v11/tokenize"
 )
 
 func TestTokenize(t *testing.T) {

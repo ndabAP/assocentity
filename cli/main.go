@@ -10,9 +10,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ndabAP/assocentity/v10"
-	"github.com/ndabAP/assocentity/v10/nlp"
-	"github.com/ndabAP/assocentity/v10/tokenize"
+	"github.com/ndabAP/assocentity/v11"
+	"github.com/ndabAP/assocentity/v11/nlp"
+	"github.com/ndabAP/assocentity/v11/tokenize"
 )
 
 var logger = log.Default()
