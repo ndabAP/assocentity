@@ -9,6 +9,33 @@ import (
 	"github.com/ndabAP/assocentity/v11/tokenize"
 )
 
+func Dos(
+	ctx context.Context,
+	tokenizer tokenize.Tokenizer,
+	psd tokenize.PoSDetermer,
+	texts []string,
+	entities []string,
+) (map[tokenize.Token]float64, error) {
+	assocentities := make(map[tokenize.Token]float64)
+	assocentitiesAccum := make(map[tokenize.Token][]float64)
+	for _, text := range texts {
+		assocentity, err := Do(ctx, tokenizer, psd, text, entities)
+		if err != nil {
+			return assocentity, err
+		}
+
+		for tok, dist := range assocentity {
+			assocentitiesAccum[tok] = append(assocentitiesAccum[tok], dist)
+		}
+	}
+
+	for tok, dists := range assocentitiesAccum {
+		assocentities[tok] = avgFloat(dists)
+	}
+
+	return assocentities, nil
+}
+
 // Do returns the average distance from entities to a text consisting of token
 func Do(
 	ctx context.Context,

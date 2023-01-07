@@ -2,6 +2,7 @@ package tokenize
 
 import (
 	"context"
+	"encoding/json"
 )
 
 // Part of speech
@@ -36,4 +37,58 @@ type Tokenizer interface {
 type Token struct {
 	PoS  PoS    // Part of speech
 	Text string // Text
+}
+
+var (
+	poSMap = map[string]PoS{
+		"any":     ANY,
+		"adj":     ADJ,
+		"adv":     ADV,
+		"affix":   AFFIX,
+		"conj":    CONJ,
+		"det":     DET,
+		"noun":    NOUN,
+		"num":     NUM,
+		"pron":    PRON,
+		"prt":     PRT,
+		"punct":   PUNCT,
+		"unknown": UNKN,
+		"verb":    VERB,
+		"x":       X,
+	}
+	poSMapIds = map[PoS]string{
+		UNKN:  "UNKNOWN",
+		ADJ:   "ADJ",
+		ADP:   "ADP",
+		ADV:   "ADV",
+		CONJ:  "CONJ",
+		DET:   "DET",
+		NOUN:  "NOUN",
+		NUM:   "NUM",
+		PRON:  "PRON",
+		PRT:   "PRT",
+		PUNCT: "PUNCT",
+		VERB:  "VERB",
+		X:     "X",
+		AFFIX: "AFFIX",
+	}
+)
+
+func (tok Token) MarshalJSON() ([]byte, error) {
+	type custTok struct {
+		PoS  string `json:"pos"`
+		Text string `json:"text"`
+	}
+
+	if pos, ok := poSMapIds[tok.PoS]; ok {
+		return json.Marshal(&custTok{
+			PoS:  pos,
+			Text: tok.Text,
+		})
+	}
+
+	return json.Marshal(&custTok{
+		PoS:  "UNKNOWN",
+		Text: tok.Text,
+	})
 }
