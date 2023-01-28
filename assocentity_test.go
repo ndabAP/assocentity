@@ -1,249 +1,160 @@
-package assocentity_test
+package assocentity
 
 import (
 	"context"
-	"log"
-	"os"
 	"reflect"
+	"strings"
 	"testing"
 
-	"github.com/joho/godotenv"
-	"github.com/ndabAP/assocentity/v11"
-	"github.com/ndabAP/assocentity/v11/nlp"
 	"github.com/ndabAP/assocentity/v11/tokenize"
 )
 
-func TestDoWired(t *testing.T) {
-	if testing.Short() {
-		t.SkipNow()
+type whiteSpaceTokenizer int
+
+func (t whiteSpaceTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.Token, error) {
+	spl := strings.Split(text, " ")
+	tokens := make([]tokenize.Token, 0)
+	for _, s := range spl {
+		tokens = append(tokens, tokenize.Token{
+			PoS:  tokenize.UNKN,
+			Text: s,
+		})
 	}
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("error loading .env file")
-	}
-
-	credentialsFile := os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
-	nlpTokenizer := nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
-
-	t.Run("rand1", func(t *testing.T) {
-		text := "Relax, Max. You're a nice guy."
-		entities := []string{"Max", "Max Payne"}
-
-		posDeterm := nlp.NewNLPPoSDetermer(tokenize.ANY)
-
-		got, err := assocentity.Do(context.Background(), nlpTokenizer, posDeterm, text, entities)
-		if err != nil {
-			t.Fatal(err)
-		}
-		want := map[tokenize.Token]float64{
-			{
-				PoS:  tokenize.VERB,
-				Text: "Relax",
-			}: 2,
-			{
-				PoS:  tokenize.PUNCT,
-				Text: ",",
-			}: 1,
-			{
-				PoS:  tokenize.PUNCT,
-				Text: ".",
-			}: 4,
-			{
-				PoS:  tokenize.PRON,
-				Text: "You",
-			}: 2,
-			{
-				PoS:  tokenize.VERB,
-				Text: "'re",
-			}: 3,
-			{
-				PoS:  tokenize.DET,
-				Text: "a",
-			}: 4,
-			{
-				PoS:  tokenize.ADJ,
-				Text: "nice",
-			}: 5,
-			{
-				PoS:  tokenize.NOUN,
-				Text: "guy",
-			}: 6,
-		}
-		if !reflect.DeepEqual(got, want) {
-			t.Fatalf("Do() = %v, want %v", got, want)
-		}
-	})
-
-	t.Run("rand2", func(t *testing.T) {
-		text := "Punchinello wanted Payne? He'd see the pain."
-		entities := []string{"Punchinello", "Payne"}
-
-		dps := nlp.NewNLPPoSDetermer(tokenize.ANY)
-
-		got, err := assocentity.Do(context.Background(), nlpTokenizer, dps, text, entities)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		want := map[tokenize.Token]float64{
-			{
-				PoS:  tokenize.VERB,
-				Text: "wanted",
-			}: 1,
-			{
-				PoS:  tokenize.PUNCT,
-				Text: "?",
-			}: 2,
-			{
-				PoS:  tokenize.PRON,
-				Text: "He",
-			}: 3,
-			{
-				PoS:  tokenize.VERB,
-				Text: "'d",
-			}: 4,
-			{
-				PoS:  tokenize.VERB,
-				Text: "see",
-			}: 5,
-			{
-				PoS:  tokenize.DET,
-				Text: "the",
-			}: 6,
-			{
-				PoS:  tokenize.NOUN,
-				Text: "pain",
-			}: 7,
-			{
-				PoS:  tokenize.PUNCT,
-				Text: ".",
-			}: 8,
-		}
-		if !reflect.DeepEqual(got, want) {
-			t.Errorf("Assoc() = %v, want %v", got, want)
-		}
-	})
+	return tokens, nil
 }
 
-func TestDoWireless(t *testing.T) {
-	text := "ee ee aa bb cc dd. b ff, gg, hh, bb, bb. ii!"
-	entities := []string{"bb", "b", "ee ee"}
-
-	posDeterm := nlp.NewNLPPoSDetermer(tokenize.ANY)
-
-	var tTokenizer testTokenizer
-	got, err := assocentity.Do(context.Background(), tTokenizer, posDeterm, text, entities)
-	if err != nil {
-		t.Fatal(err)
+func TestMeanN(t *testing.T) {
+	type args struct {
+		ctx       context.Context
+		tokenizer tokenize.Tokenizer
+		poS       tokenize.PoS
+		texts     []string
+		entities  []string
 	}
-	want := map[tokenize.Token]float64{
+	tests := []struct {
+		args    args
+		want    map[tokenize.Token]float64
+		wantErr bool
+	}{
 		{
-			PoS:  tokenize.NOUN,
-			Text: "aa",
-		}: 6.6,
-		{
-			PoS:  tokenize.PUNCT,
-			Text: ",",
-		}: 6.3,
-		{
-			PoS:  tokenize.PUNCT,
-			Text: "!",
-		}: 10.8,
-		{
-			PoS:  tokenize.NOUN,
-			Text: "cc",
-		}: 5.8,
-		{
-			PoS:  tokenize.NOUN,
-			Text: "dd",
-		}: 5.6,
-		{
-			PoS:  tokenize.PUNCT,
-			Text: ".",
-		}: 7.1,
-		{
-			PoS:  tokenize.NOUN,
-			Text: "ff",
-		}: 5.4,
-		{
-			PoS:  tokenize.X,
-			Text: "gg",
-		}: 5.8,
-		{
-			PoS:  tokenize.NOUN,
-			Text: "hh",
-		}: 6.2,
-		{
-			PoS:  tokenize.NOUN,
-			Text: "ii",
-		}: 9.8,
+			args: args{
+				ctx:       context.Background(),
+				tokenizer: new(whiteSpaceTokenizer),
+				poS:       tokenize.ANY,
+				texts: []string{
+					"AA B $ CCC ++",
+					"$ E ++ AA $ B",
+				},
+				entities: []string{"$", "++"},
+			},
+			want: map[tokenize.Token]float64{
+				{
+					PoS:  tokenize.UNKN,
+					Text: "AA",
+				}: 2.2,
+				{
+					PoS:  tokenize.UNKN,
+					Text: "B",
+				}: 2.6,
+				{
+					PoS:  tokenize.UNKN,
+					Text: "CCC",
+				}: 1,
+				{
+					PoS:  tokenize.UNKN,
+					Text: "E",
+				}: 1.6666666666666667,
+			},
+		},
 	}
-	if !reflect.DeepEqual(got, want) {
-		t.Fatalf("Do() = %v, want %v", got, want)
+	for _, tt := range tests {
+		t.Run("", func(t *testing.T) {
+			got, err := MeanN(tt.args.ctx, tt.args.tokenizer, tt.args.poS, tt.args.texts, tt.args.entities)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("MeanN() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MeanN() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 
-// Mock tokenization
-type testTokenizer int
+type concreteTokenizer int
 
-// Hack to simulate different tokenization response steps
-var calls int
+func (t concreteTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.Token, error) {
+	spl := strings.Split(text, " ")
+	tokens := make([]tokenize.Token, 0)
+	for _, s := range spl {
+		var poS tokenize.PoS
+		switch s {
+		case "English":
+			poS = tokenize.NOUN
 
-// Mock date: 10-30-2022
-func (tt testTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.Token, error) {
-	calls++
+		case ".":
+			poS = tokenize.PUNCT
 
-	switch calls {
-	case 1:
-		return []tokenize.Token{
-			{PoS: tokenize.NOUN, Text: "ee"},
-			{PoS: tokenize.NOUN, Text: "ee"},
-			{PoS: tokenize.NOUN, Text: "aa"},
-			{PoS: tokenize.NOUN, Text: "bb"},
-			{PoS: tokenize.NOUN, Text: "cc"},
-			{PoS: tokenize.NOUN, Text: "dd"},
-			{PoS: tokenize.PUNCT, Text: "."},
-			{PoS: tokenize.NOUN, Text: "b"},
-			{PoS: tokenize.NOUN, Text: "ff"},
-			{PoS: tokenize.PUNCT, Text: ","},
-			{PoS: tokenize.X, Text: "gg"},
-			{PoS: tokenize.PUNCT, Text: ","},
-			{PoS: tokenize.NOUN, Text: "hh"},
-			{PoS: tokenize.PUNCT, Text: ","},
-			{PoS: tokenize.NOUN, Text: "bb"},
-			{PoS: tokenize.PUNCT, Text: ","},
-			{PoS: tokenize.NOUN, Text: "bb"},
-			{PoS: tokenize.PUNCT, Text: "."},
-			{PoS: tokenize.NOUN, Text: "ii"},
-			{PoS: tokenize.PUNCT, Text: "!"},
-		}, nil
+		case "run":
+			poS = tokenize.VERB
 
-	case 2:
-		return []tokenize.Token{
-			{PoS: tokenize.NOUN, Text: "ee"},
-			{PoS: tokenize.NOUN, Text: "ee"},
-		}, nil
+		default:
+			continue
+		}
 
-	case 3:
-		return []tokenize.Token{
-			{PoS: tokenize.NOUN, Text: "bb"},
-		}, nil
+		tokens = append(tokens, tokenize.Token{
+			PoS:  poS,
+			Text: s,
+		})
+	}
 
-	case 4:
-		return []tokenize.Token{
-			{PoS: tokenize.NOUN, Text: "b"},
-		}, nil
+	return tokens, nil
+}
 
-	case 5:
-		return []tokenize.Token{
-			{PoS: tokenize.NOUN, Text: "bb"},
-		}, nil
-
-	// 6
-	default:
-		return []tokenize.Token{
-			{PoS: tokenize.NOUN, Text: "bb"},
-		}, nil
+func Test_dist(t *testing.T) {
+	type args struct {
+		ctx       context.Context
+		tokenizer tokenize.Tokenizer
+		poS       tokenize.PoS
+		text      string
+		entities  []string
+	}
+	tests := []struct {
+		args    args
+		want    map[tokenize.Token][]float64
+		wantErr bool
+	}{
+		{
+			args: args{
+				ctx:       context.Background(),
+				tokenizer: new(concreteTokenizer),
+				poS:       tokenize.NOUN | tokenize.PUNCT | tokenize.VERB,
+				text:      "English x . x xx run",
+				entities:  []string{"run"},
+			},
+			want: map[tokenize.Token][]float64{
+				{
+					PoS:  tokenize.NOUN,
+					Text: "English",
+				}: {2},
+				{
+					PoS:  tokenize.PUNCT,
+					Text: ".",
+				}: {1},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run("", func(t *testing.T) {
+			got, err := dist(tt.args.ctx, tt.args.tokenizer, tt.args.poS, tt.args.text, tt.args.entities)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("dist() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("dist() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

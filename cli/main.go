@@ -19,52 +19,20 @@ var logger = log.Default()
 
 func init() {
 	log.SetFlags(0)
-
 	logger.SetOutput(os.Stderr)
-
 	flag.Parse()
 }
-
-var (
-	poSMap = map[string]tokenize.PoS{
-		"any":     tokenize.ANY,
-		"adj":     tokenize.ADJ,
-		"adv":     tokenize.ADV,
-		"affix":   tokenize.AFFIX,
-		"conj":    tokenize.CONJ,
-		"det":     tokenize.DET,
-		"noun":    tokenize.NOUN,
-		"num":     tokenize.NUM,
-		"pron":    tokenize.PRON,
-		"prt":     tokenize.PRT,
-		"punct":   tokenize.PUNCT,
-		"unknown": tokenize.UNKN,
-		"verb":    tokenize.VERB,
-		"x":       tokenize.X,
-	}
-	poSMapIds = map[tokenize.PoS]string{
-		tokenize.UNKN:  "UNKNOWN",
-		tokenize.ADJ:   "ADJ",
-		tokenize.ADP:   "ADP",
-		tokenize.ADV:   "ADV",
-		tokenize.CONJ:  "CONJ",
-		tokenize.DET:   "DET",
-		tokenize.NOUN:  "NOUN",
-		tokenize.NUM:   "NUM",
-		tokenize.PRON:  "PRON",
-		tokenize.PRT:   "PRT",
-		tokenize.PUNCT: "PUNCT",
-		tokenize.VERB:  "VERB",
-		tokenize.X:     "X",
-		tokenize.AFFIX: "AFFIX",
-	}
-)
 
 var (
 	gogSvcLocF = flag.String(
 		"gog-svc-loc",
 		"",
 		"Google Clouds NLP JSON service account file, example: -gog-svc-loc=\"~/gog-svc-loc.json\"",
+	)
+	opF = flag.String(
+		"op",
+		"mean",
+		"Operation",
 	)
 	posF = flag.String(
 		"pos",
@@ -74,7 +42,7 @@ var (
 	entitiesF = flag.String(
 		"entities",
 		"",
-		"Define entities to be searched within input, example: -entities=\"Max Payne, Payne\"",
+		"Define entities to be searched within input, example: -entities=\"Max Payne,Payne\"",
 	)
 )
 
@@ -85,7 +53,7 @@ func main() {
 	// Read text as stdin
 	textBytes, err := io.ReadAll(os.Stdin)
 	if err != nil {
-		printHelpAndFail(err)
+		printUsageAndFail(err)
 	}
 
 	// assocentity
@@ -95,8 +63,7 @@ func main() {
 	// Set part of speech
 	posArr := strings.Split(*posF, ",")
 	// Parse part of speech flag and use PoS type
-	pos := parsePoS(posArr)
-	posDeterm := nlp.NewNLPPoSDetermer(pos)
+	poS := parsePoS(posArr)
 
 	// Prepare text and entities
 	text := string(textBytes)
@@ -105,24 +72,28 @@ func main() {
 	// Recover to provide an unified API response
 	defer func() {
 		if r := recover(); r != nil {
-			printHelpAndFail(r)
+			printUsageAndFail(r)
 		}
 	}()
-	assocEntities, err := assocentity.Do(ctx, nlpTok, posDeterm, text, entities)
-	if err != nil {
-		printHelpAndFail(err)
-	}
 
-	// Write CSV to stdout
-	w := csv.NewWriter(os.Stdout)
-	defer w.Flush()
-	for token, dist := range assocEntities {
-		record := []string{
-			// Text, part of speech, distance
-			token.Text, poSMapIds[token.PoS], fmt.Sprintf("%v", dist),
+	switch *opF {
+	case "mean":
+		mean, err := assocentity.Mean(ctx, nlpTok, poS, text, entities)
+		if err != nil {
+			printUsageAndFail(err)
 		}
-		if err := w.Write(record); err != nil {
-			printHelpAndFail(err)
+
+		// Write CSV to stdout
+		w := csv.NewWriter(os.Stdout)
+		defer w.Flush()
+		for token, dist := range mean {
+			record := []string{
+				// Text, part of speech, distance
+				token.Text, tokenize.PoSMapIds[token.PoS], fmt.Sprintf("%v", dist),
+			}
+			if err := w.Write(record); err != nil {
+				printUsageAndFail(err)
+			}
 		}
 	}
 }
@@ -130,7 +101,7 @@ func main() {
 // ["1", "3", "2", "5"] -> 11
 func parsePoS(posArr []string) (pos tokenize.PoS) {
 	for _, p := range posArr {
-		if p, ok := poSMap[p]; ok {
+		if p, ok := tokenize.PoSMap[p]; ok {
 			// Add bits
 			pos += p
 		}
@@ -138,7 +109,7 @@ func parsePoS(posArr []string) (pos tokenize.PoS) {
 	return
 }
 
-func printHelpAndFail(reason any) {
+func printUsageAndFail(reason any) {
 	logger.Println(reason)
 	logger.Println()
 

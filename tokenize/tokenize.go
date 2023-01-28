@@ -2,7 +2,6 @@ package tokenize
 
 import (
 	"context"
-	"encoding/json"
 )
 
 // Part of speech
@@ -40,7 +39,7 @@ type Token struct {
 }
 
 var (
-	poSMap = map[string]PoS{
+	PoSMap = map[string]PoS{
 		"any":     ANY,
 		"adj":     ADJ,
 		"adv":     ADV,
@@ -56,7 +55,7 @@ var (
 		"verb":    VERB,
 		"x":       X,
 	}
-	poSMapIds = map[PoS]string{
+	PoSMapIds = map[PoS]string{
 		UNKN:  "UNKNOWN",
 		ADJ:   "ADJ",
 		ADP:   "ADP",
@@ -73,22 +72,3 @@ var (
 		AFFIX: "AFFIX",
 	}
 )
-
-func (tok Token) MarshalJSON() ([]byte, error) {
-	type custTok struct {
-		PoS  string `json:"pos"`
-		Text string `json:"text"`
-	}
-
-	if pos, ok := poSMapIds[tok.PoS]; ok {
-		return json.Marshal(&custTok{
-			PoS:  pos,
-			Text: tok.Text,
-		})
-	}
-
-	return json.Marshal(&custTok{
-		PoS:  "UNKNOWN",
-		Text: tok.Text,
-	})
-}

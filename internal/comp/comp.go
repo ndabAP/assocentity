@@ -58,10 +58,10 @@ func TextWithEntities(textIter *iterator.Iterator[tokenize.Token], entityTokensI
 
 		if isEntity {
 			return true, entityTokensIter.CurrElem()
-		} else {
-			// Reset to compare with next entity tokens
-			textIter.SetPos(currTextPos)
 		}
+
+		// Reset to compare with next entity tokens
+		textIter.SetPos(currTextPos)
 	}
 
 	return false, []tokenize.Token{}

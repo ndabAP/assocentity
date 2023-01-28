@@ -1,4 +1,4 @@
-package nlp
+package pos
 
 import (
 	"github.com/ndabAP/assocentity/v11/internal/comp"
@@ -6,15 +6,15 @@ import (
 	"github.com/ndabAP/assocentity/v11/tokenize"
 )
 
-// NLPPoSDetermer represents the default part of speech determinator
-type NLPPoSDetermer struct{ poS tokenize.PoS }
+// poSDetermer represents the default part of speech determinator
+type poSDetermer struct{ poS tokenize.PoS }
 
-// NewNLPPoSDetermer returns a new default part of speech determinator
-func NewNLPPoSDetermer(poS tokenize.PoS) NLPPoSDetermer { return NLPPoSDetermer{poS} }
+// NewPoSDetermer returns a new default part of speech determinator
+func NewPoSDetermer(poS tokenize.PoS) poSDetermer { return poSDetermer{poS} }
 
 // DetermPoS deterimantes if a part of speech tag should be kept. It always
 // appends entities
-func (dps NLPPoSDetermer) DetermPoS(textTokens []tokenize.Token, entityTokens [][]tokenize.Token) []tokenize.Token {
+func (dps poSDetermer) DetermPoS(textTokens []tokenize.Token, entityTokens [][]tokenize.Token) []tokenize.Token {
 	// If any part of speech, no need to determinate
 	if dps.poS == tokenize.ANY {
 		return textTokens
@@ -32,6 +32,7 @@ func (dps NLPPoSDetermer) DetermPoS(textTokens []tokenize.Token, entityTokens []
 			textIter.SetPos(currTextPos + len(entity))
 			// Entity is always kept
 			determTokens = append(determTokens, entity...)
+			continue
 		}
 
 		// Non-entity tokens

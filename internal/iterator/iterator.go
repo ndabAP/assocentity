@@ -34,10 +34,6 @@ func (it *Iterator[T]) Prev() bool {
 	return true
 }
 
-func (it *Iterator[T]) Elems() []T {
-	return it.elems
-}
-
 func (it *Iterator[T]) Reset() *Iterator[T] {
 	it.pos = -1
 	it.el = it.elems[0]

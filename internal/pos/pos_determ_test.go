@@ -1,4 +1,4 @@
-package nlp
+package pos
 
 import (
 	"reflect"
@@ -160,7 +160,7 @@ func TestNLPPoSDetermer_DetermPoS(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			dps := NLPPoSDetermer{
+			dps := poSDetermer{
 				poS: tt.fields.poS,
 			}
 			if got := dps.DetermPoS(tt.args.textTokens, tt.args.entityTokens); !reflect.DeepEqual(got, tt.want) {
