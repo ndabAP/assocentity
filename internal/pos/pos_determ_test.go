@@ -4,10 +4,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ndabAP/assocentity/v11/tokenize"
+	"github.com/ndabAP/assocentity/v12/tokenize"
 )
 
-func TestNLPPoSDetermer_DetermPoS(t *testing.T) {
+func TestPoSDetermer_DetermPoS(t *testing.T) {
 	type fields struct {
 		poS tokenize.PoS
 	}

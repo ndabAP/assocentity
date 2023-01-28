@@ -4,12 +4,13 @@ import (
 	"context"
 	"math"
 
-	"github.com/ndabAP/assocentity/v11/internal/comp"
-	"github.com/ndabAP/assocentity/v11/internal/iterator"
-	"github.com/ndabAP/assocentity/v11/internal/pos"
-	"github.com/ndabAP/assocentity/v11/tokenize"
+	"github.com/ndabAP/assocentity/v12/internal/comp"
+	"github.com/ndabAP/assocentity/v12/internal/iterator"
+	"github.com/ndabAP/assocentity/v12/internal/pos"
+	"github.com/ndabAP/assocentity/v12/tokenize"
 )
 
+// Mean returns the average distance from entities to a slice of texts
 func MeanN(
 	ctx context.Context,
 	tokenizer tokenize.Tokenizer,
@@ -38,7 +39,7 @@ func MeanN(
 	return mean, nil
 }
 
-// Mean returns the average distance from entities to a text consisting of token
+// Mean returns the average distance from entities to a text
 func Mean(
 	ctx context.Context,
 	tokenizer tokenize.Tokenizer,
@@ -59,11 +60,9 @@ func Mean(
 	return mean, err
 }
 
-// func CountA amount of hits
+// func CountA
 
-// func TopN top n closed tokens
-
-// func Closest top 1 most closest frequent
+// func TopN
 
 func dist(
 	ctx context.Context,
@@ -101,7 +100,7 @@ func dist(
 
 	determTokensIter := iterator.New(determTokens)
 
-	// Iterators to search for entities in positive and negative direction
+	// Search for entities in positive and negative direction
 	posDirIter := iterator.New(determTokens)
 	negDirIter := iterator.New(determTokens)
 

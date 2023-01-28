@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ndabAP/assocentity/v11/tokenize"
+	"github.com/ndabAP/assocentity/v12/tokenize"
 )
 
 type whiteSpaceTokenizer int

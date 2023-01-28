@@ -2,15 +2,16 @@ package nlp
 
 import (
 	"context"
+	"errors"
 
 	language "cloud.google.com/go/language/apiv1"
-	"github.com/ndabAP/assocentity/v11/tokenize"
+	"github.com/ndabAP/assocentity/v12/tokenize"
 	"google.golang.org/api/option"
 	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
 )
 
 // Use map to be independent from library
-var poSMapTypes = map[languagepb.PartOfSpeech_Tag]tokenize.PoS{
+var poSMap = map[languagepb.PartOfSpeech_Tag]tokenize.PoS{
 	languagepb.PartOfSpeech_ADJ:     tokenize.ADJ,
 	languagepb.PartOfSpeech_ADP:     tokenize.ADP,
 	languagepb.PartOfSpeech_ADV:     tokenize.ADV,
@@ -27,21 +28,17 @@ var poSMapTypes = map[languagepb.PartOfSpeech_Tag]tokenize.PoS{
 	languagepb.PartOfSpeech_X:       tokenize.X,
 }
 
-// Lang defines the language used to examine the text. Both ISO and BCP-47
-// language codes are accepted
-type Lang string
-
 // AutoLang tries to automatically recognize the language
-var AutoLang Lang = "auto"
+var AutoLang string = "auto"
 
 // NLPTokenizer tokenizes a text using Google NLP
 type NLPTokenizer struct {
 	credsFilename string
-	lang          Lang
+	lang          string
 }
 
 // NewNLPTokenizer returns a new NLP tokenizer instance
-func NewNLPTokenizer(credentialsFilename string, lang Lang) tokenize.Tokenizer {
+func NewNLPTokenizer(credentialsFilename string, lang string) tokenize.Tokenizer {
 	return NLPTokenizer{
 		credsFilename: credentialsFilename,
 		lang:          lang,
@@ -57,8 +54,12 @@ func (nlp NLPTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.T
 
 	tokens := make([]tokenize.Token, 0)
 	for _, tok := range res.GetTokens() {
+		if _, ok := poSMap[tok.PartOfSpeech.Tag]; !ok {
+			return tokens, errors.New("can't find pos match")
+		}
+
 		tokens = append(tokens, tokenize.Token{
-			PoS:  poSMapTypes[tok.PartOfSpeech.Tag],
+			PoS:  poSMap[tok.PartOfSpeech.Tag],
 			Text: tok.GetText().GetContent(),
 		})
 	}
@@ -80,7 +81,7 @@ func (nlp NLPTokenizer) req(ctx context.Context, text string) (*languagepb.Annot
 	}
 	// Set desired language if not auto
 	if nlp.lang != AutoLang {
-		doc.Language = string(nlp.lang)
+		doc.Language = nlp.lang
 	}
 
 	return client.AnnotateText(ctx, &languagepb.AnnotateTextRequest{

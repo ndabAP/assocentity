@@ -39,6 +39,7 @@ type Token struct {
 }
 
 var (
+	// PoSMap maps pos strings to types
 	PoSMap = map[string]PoS{
 		"any":     ANY,
 		"adj":     ADJ,
@@ -55,7 +56,9 @@ var (
 		"verb":    VERB,
 		"x":       X,
 	}
-	PoSMapIds = map[PoS]string{
+
+	// PoSMap maps pos types to strings
+	PoSMapStr = map[PoS]string{
 		UNKN:  "UNKNOWN",
 		ADJ:   "ADJ",
 		ADP:   "ADP",

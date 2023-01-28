@@ -1,9 +1,9 @@
 package pos
 
 import (
-	"github.com/ndabAP/assocentity/v11/internal/comp"
-	"github.com/ndabAP/assocentity/v11/internal/iterator"
-	"github.com/ndabAP/assocentity/v11/tokenize"
+	"github.com/ndabAP/assocentity/v12/internal/comp"
+	"github.com/ndabAP/assocentity/v12/internal/iterator"
+	"github.com/ndabAP/assocentity/v12/tokenize"
 )
 
 // poSDetermer represents the default part of speech determinator

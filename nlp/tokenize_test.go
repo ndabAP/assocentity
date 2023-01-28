@@ -2,14 +2,13 @@ package nlp_test
 
 import (
 	"context"
-	"log"
 	"os"
 	"reflect"
 	"testing"
 
 	"github.com/joho/godotenv"
-	"github.com/ndabAP/assocentity/v11/nlp"
-	"github.com/ndabAP/assocentity/v11/tokenize"
+	"github.com/ndabAP/assocentity/v12/nlp"
+	"github.com/ndabAP/assocentity/v12/tokenize"
 )
 
 func TestTokenize(t *testing.T) {
@@ -18,19 +17,17 @@ func TestTokenize(t *testing.T) {
 	}
 
 	if err := godotenv.Load("../.env"); err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	credentialsFile := os.Getenv("GOOGLE_NLP_SERVICE_ACCOUNT_FILE_LOCATION")
 
 	tests := []struct {
-		name    string
 		text    string
 		want    []tokenize.Token
 		wantErr bool
 	}{
 		{
-			name: "six tokens",
 			text: "Punchinello was burning to get me",
 			want: []tokenize.Token{
 				{
@@ -62,7 +59,7 @@ func TestTokenize(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run("", func(t *testing.T) {
 			nlp := nlp.NewNLPTokenizer(
 				credentialsFile,
 				nlp.AutoLang,

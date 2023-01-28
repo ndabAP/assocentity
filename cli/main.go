@@ -10,9 +10,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ndabAP/assocentity/v11"
-	"github.com/ndabAP/assocentity/v11/nlp"
-	"github.com/ndabAP/assocentity/v11/tokenize"
+	"github.com/ndabAP/assocentity/v12"
+	"github.com/ndabAP/assocentity/v12/nlp"
+	"github.com/ndabAP/assocentity/v12/tokenize"
 )
 
 var logger = log.Default()
@@ -32,7 +32,7 @@ var (
 	opF = flag.String(
 		"op",
 		"mean",
-		"Operation",
+		"Operation to execute",
 	)
 	posF = flag.String(
 		"pos",
@@ -89,7 +89,7 @@ func main() {
 		for token, dist := range mean {
 			record := []string{
 				// Text, part of speech, distance
-				token.Text, tokenize.PoSMapIds[token.PoS], fmt.Sprintf("%v", dist),
+				token.Text, tokenize.PoSMapStr[token.PoS], fmt.Sprintf("%v", dist),
 			}
 			if err := w.Write(record); err != nil {
 				printUsageAndFail(err)

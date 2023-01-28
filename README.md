@@ -1,9 +1,7 @@
 # assocentity
 
-Package assocentity is a social science tool to return the average distance
-from tokens to given entities. **Important**: If you use the provided NLP
-tokenizer, you can't use special characters in entities due its nature of
-tokenization. You must use your own tokenizer.
+Package assocentity is a social science tool to analyze the relative distance
+from tokens to entities.
 
 ## Features
 
@@ -15,134 +13,77 @@ tokenization. You must use your own tokenizer.
 ## Installation
 
 ```bash
-$ go get github.com/ndabAP/assocentity/v11
+$ go get github.com/ndabAP/assocentity/v12
 ```
 
 ## Prerequisites
 
-Sign-up for a Cloud Natural Language API service account key and download the
-generated JSON file. This equals the `credentialsFile` at the example below.
-You should never commit that file.
+If you want to analyze human readable texts you can use the provided Natural
+Language tokenizer (powered by Google). To do so, sign-up for a Cloud Natural
+Language API service account key and download the generated JSON file. This
+equals the `credentialsFile` at the example below. You should never commit that
+file.
+
+A possible offline tokenizer would be a white space tokenizer. You also might
+use a parser depending on your purposes.
 
 ## Example
 
-We would like to find out which adjectives are how close to a certain public
-person. Let's take George W. Bush and 1,000 NBC news articles as an example.
-"George Bush" is the entity and synonyms are "George W. Bush" and "Bush" and so
-on. The text is each of the 1,000 NBC news articles.
-
-## Usage
+We would like to find out which adjectives are how close in average to a certain
+public person. Let's take George W. Bush and 1,000 NBC news articles as an
+example. "George Bush" is the entity and synonyms are "George W. Bush" and
+"Bush" and so on. The text is each of the 1,000 NBC news articles.
 
 ```go
-import (
-	"context"
-	"fmt"
+// Declare the texts and entities
+texts := []string{
+	"Former Presidents Barack Obama, Bill Clinton and ...",
+	"At the pentagon on the afternoon of 9/11, ...",
+	"Tony Blair moved swiftly to place his relationship with ...",
+}
+entities := []string{
+	"Goerge W. Bush",
+	"Goerge Walker Bush",
+	"Goerge Bush",
+	"Bush",
+}
 
-	"github.com/ndabAP/assocentity/v11"
-	"github.com/ndabAP/assocentity/v11/nlp"
-	"github.com/ndabAP/assocentity/v11/tokenize"
-)
+// Instantiate the NLP tokenizer (powered by Google)
+nlpTok := nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
 
-const credentialsFile = "google_nlp_service_account.json"
-
-func main() {
-	text := "Punchinello wanted Payne? He'd see the pain."
-	entities := []string{"Punchinello", "Payne"}
-
-	// Create a Google NLP instance
-	nlpTok := nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
-
-	// Allow any part of speech
-	posDeterm := nlp.NewNLPPoSDetermer(tokenize.ANY)
-
-	// Do calculates the average distances
-	ctx := context.Background()
-	assocEntities, err := assocentity.Do(ctx, nlpTok, posDeterm, text, entities)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(assocEntities)
-	// map[tokenize.Token]float64{
-	// 	{
-	// 		PoS:  tokenize.VERB,
-	// 		Text: "wanted",
-	// 	}: 1,
-	// 	{
-	// 		PoS:  tokenize.PUNCT,
-	// 		Text: "?",
-	// 	}: 2,
-	// 	{
-	// 		PoS:  tokenize.PRON,
-	// 		Text: "He",
-	// 	}: 3,
-	// 	{
-	// 		PoS:  tokenize.VERB,
-	// 		Text: "'d",
-	// 	}: 4,
-	// 	{
-	// 		PoS:  tokenize.VERB,
-	// 		Text: "see",
-	// 	}: 5,
-	// 	{
-	// 		PoS:  tokenize.DET,
-	// 		Text: "the",
-	// 	}: 6,
-	// 	{
-	// 		PoS:  tokenize.NOUN,
-	// 		Text: "pain",
-	// 	}: 7,
-	// 	{
-	// 		PoS:  tokenize.PUNCT,
-	// 		Text: ".",
-	// 	}: 8,
-	// }
+// Get the mean distances to adjectives
+ctx := context.TODO()
+meanN, err := assocentity.MeanN(ctx, nlpTok, tokenize.ADJ, texts, entities)
+if err != nil {
+	panic(err)
 }
 ```
 
-## In-depth
-
-Section "General workflow" explains the process from a non-technical perspective
-while section API is dedicated to developers.
-
-### General workflow
-
-The process is split into three parts. Two of them belong to tokenization and
-one calculates the average distance between words and entities.
-
-1. **Tokenization**. Splits the tokens and assigns part of speech
-2. **Part of speech determination**. Keeps only the wanted part of speeches
-3. **Calculating the average**. Main function that does the actual work
-
-#### Tokenization
-
-Googles Cloud Natural Language API is the default tokenizer and will split the
-tokens, and after that assigns the part of speech to the tokens. No additional
-checking should be done here. Note: For this step, it's nessecary to sign-up for
-a service account key.
-
-A simpler, offline solution would be using Gos native `strings.Fields` method as
-tokenizer.
-
-#### Part of speech determination
-
-It's possible to only allow certain part of speeches, e. g. only nouns and
-verbs. Also the entities must stay included. Therefore, this step is separated
-so it could be more optimized.
-
-#### Calculating the average
-
-Finally, the average distances get calculated with the given predecessors.
-
 ### API
 
-There are two possibilities to interfere into the tokenization process. You
-just need to implement the interfaces. `Do` takes the interfaces and calls
-their methods. For a non-technical explanation, read the procedure section.
+#### `Mean`
 
-#### Tokenization
+```go
+ctx := context.TODO()
+mean, err := assocentity.Mean(ctx, nlpTok, tokenize.ANY, text, entities)
+if err != nil {
+	panic(err)
+}
+```
 
-Interface to implement:
+#### `MeanN`
+
+```go
+ctx := context.TODO()
+meanN, err := assocentity.MeanN(ctx, nlpTok, tokenize.ANY, texts, entities)
+if err != nil {
+	panic(err)
+}
+```
+
+### Tokenization
+
+If you provide your own tokenizer you must implement the interface:
 
 ```go
 type Tokenizer interface {
@@ -150,7 +91,7 @@ type Tokenizer interface {
 }
 ```
 
-While `Token` is of type:
+`Token` is of type:
 
 ```go
 type Token struct {
@@ -159,7 +100,7 @@ type Token struct {
 }
 ```
 
-So, for example given this text:
+For example, given the text:
 
 ```go
 text := "Punchinello was burning to get me"
@@ -196,26 +137,6 @@ The result from `Tokenize` would be:
 }
 ```
 
-#### Part of speech determination
-
-Interface to implement:
-
-```go
-type PoSDetermer interface {
-	DetermPoS(textTokens []Token, entitiesTokens [][]Token) []Token
-}
-```
-
-We want to preserve the part of speech information. Therefore, we return `Token`
-here instead of `string`. This makes it possible to keep the real distances
-between tokens, e. g.
-
-#### Calculating the average
-
-This step can't be changed. It takes a `Tokenizer`, `PoSDetermer`, text as
-`string` and entities in a form of `[][]string`. The method will call all the
-interface methods and returns a `map` with the tokens and distances.
-
 ## CLI
 
 There is also a terminal version available for either Windows, Mac (Darwin) or
@@ -225,6 +146,7 @@ expects the text as stdin and accepts the following flags:
 | Flag          | Description                                                                               | Type     | Default |
 | ------------- | ----------------------------------------------------------------------------------------- | -------- | ------- |
 | `gog-svc-loc` | Google Clouds NLP JSON service account file, example: `-gog-svc-loc="~/gog-svc-loc.json"` | `string` |         |
+| `op`          | Operation to excute: `-op="mean"`                                                         | `string` | `mean`  |
 | `pos`         | Defines part of speeches to keep, example: `-pos=noun,verb,pron`                          | `string` | `any`   |
 | `entities`    | Define entities to be searched within input, example: `-entities="Max Payne,Payne"`       | `string` |         |
 
@@ -234,7 +156,7 @@ Example:
 echo "Relax, Max. You're a nice guy." | ./bin/assocentity_linux_amd64_v11.0.1-7-gdfeb0f1-dirty -gog-svc-loc=/home/max/.config/assocentity/google-service.json -entities="Max Payne,Payne,Max"
 ```
 
-The application writes the result as CSV formatted `string` to stdout.
+The output is written to stdout in appropoiate formats.
 
 ## Projects using assocentity
 
