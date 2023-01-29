@@ -18,9 +18,10 @@ func MeanN(
 	texts []string,
 	entities []string,
 ) (map[tokenize.Token]float64, error) {
-	mean := make(map[tokenize.Token]float64)
-
-	means := make(map[tokenize.Token][]float64)
+	var (
+		mean  = make(map[tokenize.Token]float64)
+		means = make(map[tokenize.Token][]float64)
+	)
 	for _, text := range texts {
 		dists, err := dist(ctx, tokenizer, poS, text, entities)
 		if err != nil {
