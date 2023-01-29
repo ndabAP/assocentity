@@ -59,28 +59,6 @@ if err != nil {
 }
 ```
 
-### API
-
-#### `Mean`
-
-```go
-ctx := context.TODO()
-mean, err := assocentity.Mean(ctx, nlpTok, tokenize.ANY, text, entities)
-if err != nil {
-	panic(err)
-}
-```
-
-#### `MeanN`
-
-```go
-ctx := context.TODO()
-meanN, err := assocentity.MeanN(ctx, nlpTok, tokenize.ANY, texts, entities)
-if err != nil {
-	panic(err)
-}
-```
-
 ### Tokenization
 
 If you provide your own tokenizer you must implement the interface:
