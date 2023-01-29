@@ -1,7 +1,8 @@
 # assocentity
 
 Package assocentity is a social science tool to analyze the relative distance
-from tokens to entities.
+from tokens to entities. The motiviation is to make conclusions based on the
+distance from interesting tokens to a certain entity and its synonyms.
 
 ## Features
 
