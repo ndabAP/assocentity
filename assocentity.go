@@ -16,7 +16,8 @@ var (
 	ErrEmptyEntities = errors.New("missing entities")
 )
 
-// Mean returns the average distance from entities to a slice of texts
+// Mean returns the average distance from entities to a slice of texts. It
+// ignores empty texts
 func MeanN(
 	ctx context.Context,
 	tokenizer tokenize.Tokenizer,
