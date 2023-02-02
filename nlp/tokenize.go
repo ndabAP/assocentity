@@ -3,10 +3,13 @@ package nlp
 import (
 	"context"
 	"errors"
+	"time"
 
 	language "cloud.google.com/go/language/apiv1"
+	"github.com/googleapis/gax-go/v2/apierror"
 	"github.com/ndabAP/assocentity/v12/tokenize"
 	"google.golang.org/api/option"
+	"google.golang.org/genproto/googleapis/api/error_reason"
 	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
 )
 
@@ -66,12 +69,15 @@ func (nlp NLPTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.T
 	return tokens, nil
 }
 
-// req sends a request to the Google server
+// req sends a request to the Google server. It retries if the API rate limited
+// is reached
 func (nlp NLPTokenizer) req(ctx context.Context, text string) (*languagepb.AnnotateTextResponse, error) {
 	client, err := language.NewClient(ctx, option.WithCredentialsFile(nlp.credsFilename))
 	if err != nil {
 		return &languagepb.AnnotateTextResponse{}, err
 	}
+
+	defer client.Close()
 
 	doc := &languagepb.Document{
 		Source: &languagepb.Document_Content{
@@ -84,11 +90,34 @@ func (nlp NLPTokenizer) req(ctx context.Context, text string) (*languagepb.Annot
 		doc.Language = nlp.lang
 	}
 
-	return client.AnnotateText(ctx, &languagepb.AnnotateTextRequest{
-		Document: doc,
-		Features: &languagepb.AnnotateTextRequest_Features{
-			ExtractSyntax: true,
-		},
-		EncodingType: languagepb.EncodingType_UTF8,
-	})
+	var (
+		apiErr                     *apierror.APIError
+		errReasonRateLimitExceeded = error_reason.ErrorReason_RATE_LIMIT_EXCEEDED.String()
+		delay                      = 1
+		res                        *languagepb.AnnotateTextResponse
+	)
+	r := func() (*languagepb.AnnotateTextResponse, error) {
+		res, err := client.AnnotateText(ctx, &languagepb.AnnotateTextRequest{
+			Document: doc,
+			Features: &languagepb.AnnotateTextRequest_Features{
+				ExtractSyntax: true,
+			},
+			EncodingType: languagepb.EncodingType_UTF8,
+		})
+		return res, err
+	}
+	for {
+		res, err = r()
+		if errors.As(err, &apiErr) {
+			if apiErr.Reason() == errReasonRateLimitExceeded {
+				time.Sleep(time.Minute * time.Duration(delay))
+				delay += 1.0
+				continue
+			}
+		}
+
+		if err != nil {
+			return res, err
+		}
+	}
 }

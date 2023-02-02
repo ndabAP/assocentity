@@ -14,6 +14,7 @@ import (
 var (
 	ErrEmptyText     = errors.New("missing text")
 	ErrEmptyEntities = errors.New("missing entities")
+	ErrNoPoSTokens   = errors.New("no tokens found with given pos")
 )
 
 // Mean returns the average distance from entities to a slice of texts. It
@@ -31,7 +32,7 @@ func MeanN(
 	)
 	for _, text := range texts {
 		dists, err := dist(ctx, tokenizer, poS, text, entities)
-		if errors.Is(err, ErrEmptyText) {
+		if errors.Is(err, ErrEmptyText) || errors.Is(err, ErrNoPoSTokens) {
 			continue
 		}
 		if err != nil {
@@ -113,6 +114,11 @@ func dist(
 	// Determinate part of speech
 	posDetermer := pos.NewPoSDetermer(poS)
 	determTokens := posDetermer.DetermPoS(textTokens, entityTokens)
+
+	// Check if given PoS was found in text tokens
+	if len(determTokens) == 0 {
+		return dist, ErrNoPoSTokens
+	}
 
 	// Creates iterators
 
