@@ -13,6 +13,10 @@ import (
 	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
 )
 
+var (
+	ErrMaxRetriesReached = errors.New("max retries reached")
+)
+
 // Use map to be independent from library
 var poSMap = map[languagepb.PartOfSpeech_Tag]tokenize.PoS{
 	languagepb.PartOfSpeech_ADJ:     tokenize.ADJ,
@@ -93,10 +97,22 @@ func (nlp NLPTokenizer) req(ctx context.Context, text string) (*languagepb.Annot
 	var (
 		apiErr                     *apierror.APIError
 		errReasonRateLimitExceeded = error_reason.ErrorReason_RATE_LIMIT_EXCEEDED.String()
-		delay                      = 1
-		res                        *languagepb.AnnotateTextResponse
+
+		// Retry request up to five times if rate limit exceeded with a
+		// increasing delay
+		delay   = 1.0
+		retries = 0
 	)
-	r := func() (*languagepb.AnnotateTextResponse, error) {
+	const (
+		delayMult  = 1.25
+		maxRetries = 5
+	)
+	for {
+		if retries == maxRetries {
+			return &languagepb.AnnotateTextResponse{}, ErrMaxRetriesReached
+		}
+
+		// Do the actual request
 		res, err := client.AnnotateText(ctx, &languagepb.AnnotateTextRequest{
 			Document: doc,
 			Features: &languagepb.AnnotateTextRequest_Features{
@@ -104,19 +120,17 @@ func (nlp NLPTokenizer) req(ctx context.Context, text string) (*languagepb.Annot
 			},
 			EncodingType: languagepb.EncodingType_UTF8,
 		})
-		return res, err
-	}
-	for {
-		res, err = r()
+		// Check for errors
 		if errors.As(err, &apiErr) {
 			if apiErr.Reason() == errReasonRateLimitExceeded {
 				time.Sleep(time.Minute * time.Duration(delay))
-				delay += 1.0
+
+				retries += 1
+				delay *= delayMult
+
 				continue
 			}
-		}
-
-		if err != nil {
+		} else {
 			return res, err
 		}
 	}

@@ -82,6 +82,7 @@ func TestMeanN(t *testing.T) {
 	}
 }
 
+// concreteTokenizer is a tokenizer with a fixed set of tokens
 type concreteTokenizer int
 
 func (t concreteTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.Token, error) {
