@@ -2,12 +2,18 @@ package assocentity
 
 import (
 	"context"
+	"errors"
 	"math"
 
 	"github.com/ndabAP/assocentity/v12/internal/comp"
 	"github.com/ndabAP/assocentity/v12/internal/iterator"
 	"github.com/ndabAP/assocentity/v12/internal/pos"
 	"github.com/ndabAP/assocentity/v12/tokenize"
+)
+
+var (
+	ErrEmptyText     = errors.New("missing text")
+	ErrEmptyEntities = errors.New("missing entities")
 )
 
 // Mean returns the average distance from entities to a slice of texts
@@ -24,6 +30,9 @@ func MeanN(
 	)
 	for _, text := range texts {
 		dists, err := dist(ctx, tokenizer, poS, text, entities)
+		if errors.Is(err, ErrEmptyText) {
+			continue
+		}
 		if err != nil {
 			return mean, err
 		}
@@ -76,6 +85,13 @@ func dist(
 		dist = make(map[tokenize.Token][]float64)
 		err  error
 	)
+
+	if len(text) == 0 {
+		return dist, ErrEmptyText
+	}
+	if len(entities) == 0 {
+		return dist, ErrEmptyEntities
+	}
 
 	// Tokenize text
 	textTokens, err := tokenizer.Tokenize(ctx, text)
