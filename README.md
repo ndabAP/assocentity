@@ -6,8 +6,8 @@ distance from interesting tokens to a certain entity and its synonyms.
 
 ## Features
 
-- Define aliases for entities
 - Provide your own tokenizer
+- Define aliases for entities
 - Provides a default NLP tokenizer (by Google)
 - Provides a multi-OS, language-agnostic CLI version
 
