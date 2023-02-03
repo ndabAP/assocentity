@@ -132,7 +132,7 @@ expects the text as stdin and accepts the following flags:
 Example:
 
 ```bash
-echo "Relax, Max. You're a nice guy." | ./bin/assocentity_linux_amd64_v11.0.1-7-gdfeb0f1-dirty -gog-svc-loc=/home/max/.config/assocentity/google-service.json -entities="Max Payne,Payne,Max"
+echo "Relax, Max. You're a nice guy." | ./bin/assocentity_linux_amd64_v12.0.1-0-g948274a-dirty -gog-svc-loc=/home/max/.config/assocentity/google-service.json -entities="Max Payne,Payne,Max"
 ```
 
 The output is written to stdout in appropoiate formats.
