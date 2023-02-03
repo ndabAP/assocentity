@@ -17,8 +17,8 @@ var (
 	ErrNoPoSTokens   = errors.New("no tokens found with given pos")
 )
 
-// Mean returns the average distance from entities to a slice of texts. It
-// ignores empty texts
+// MeanN returns the mean distance from entities to a slice of texts. It ignores
+// empty texts and not found pos
 func MeanN(
 	ctx context.Context,
 	tokenizer tokenize.Tokenizer,
@@ -44,14 +44,14 @@ func MeanN(
 		}
 	}
 
-	// Calculate the average distances
+	// Calculate the mean distances
 	for token, dist := range means {
 		mean[token] = meanFloat64(dist)
 	}
 	return mean, nil
 }
 
-// Mean returns the average distance from entities to a text
+// Mean returns the mean distance from entities to a text
 func Mean(
 	ctx context.Context,
 	tokenizer tokenize.Tokenizer,
@@ -65,7 +65,7 @@ func Mean(
 	if err != nil {
 		return mean, err
 	}
-	// Calculate the average distances
+	// Calculate the mean distances
 	for token, dist := range dists {
 		mean[token] = meanFloat64(dist)
 	}
