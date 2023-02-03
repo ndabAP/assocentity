@@ -14,11 +14,11 @@ var (
 
 // Checks if current text token is entity and if, returns entity
 func TextWithEntities(textIter *iterator.Iterator[tokenize.Token], entityTokensIter *iterator.Iterator[[]tokenize.Token], entityIterDir Direction) (bool, []tokenize.Token) {
-	// Reset iterators position after comparing (and before)
-	currTextPos := textIter.CurrPos()
-	defer entityTokensIter.Reset()
-	defer textIter.SetPos(currTextPos)
+	// Reset iterators before and comparing
 	entityTokensIter.Reset()
+	defer entityTokensIter.Reset()
+	currTextPos := textIter.CurrPos()
+	defer textIter.SetPos(currTextPos)
 
 	// By default, we assume an entity
 	var isEntity bool = true
@@ -46,8 +46,8 @@ func TextWithEntities(textIter *iterator.Iterator[tokenize.Token], entityTokensI
 		// <-
 		case DirNeg:
 			// We scan backwards and start from top
-			entityIter.SetPos(entityIter.Len()) // [1, 2, 3, (4)]
-			for entityIter.Prev() {
+			entityIter.SetPos(entityIter.Len()) // [1, 2, 3],(4)
+			for entityIter.Prev() {             // [1, 2, (3)]
 				if !eqItersElems(textIter, entityIter) {
 					isEntity = false
 				}

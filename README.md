@@ -6,10 +6,10 @@ distance from interesting tokens to a certain entity and its synonyms.
 
 ## Features
 
-- Tokenization customization
-- Entity aliases
-- Default NLP tokenizer (by Google)
-- Multi-OS CLI version
+- Define aliases for entities
+- Provide your own tokenizer
+- Provides a default NLP tokenizer (by Google)
+- Provides a multi-OS, language-agnostic CLI version
 
 ## Installation
 
@@ -32,18 +32,23 @@ use a parser depending on your purposes.
 
 We would like to find out which adjectives are how close in average to a certain
 public person. Let's take George W. Bush and 1,000 NBC news articles as an
-example. "George Bush" is the entity and synonyms are "George W. Bush" and
+example. "George Bush" is the entity and synonyms are "George Walker Bush" and
 "Bush" and so on. The text is each of the 1,000 NBC news articles.
 
+Defining a text source and to set the entity would be first step. Next, we need
+to instantiate our tokenizer. In this case, we use the provided Google NLP
+tokenizer. Finally, we can calculate our mean distances. Since we have multiple
+articles we can use `assocentity.MeanN`, which accepts multiple texts. Notice
+how we pass `tokenize.ADJ` to only include adjectives as part of speech.
+
 ```go
-// Declare the texts and entities
+// Define text source and entity
 texts := []string{
 	"Former Presidents Barack Obama, Bill Clinton and ...",
 	"At the pentagon on the afternoon of 9/11, ...",
 	"Tony Blair moved swiftly to place his relationship with ...",
 }
 entities := []string{
-	"Goerge W. Bush",
 	"Goerge Walker Bush",
 	"Goerge Bush",
 	"Bush",
@@ -62,7 +67,8 @@ if err != nil {
 
 ### Tokenization
 
-If you provide your own tokenizer you must implement the interface:
+If you provide your own tokenizer you must implement the interface with the
+method `Tokenize` signature and the following signature:
 
 ```go
 type Tokenizer interface {
@@ -77,6 +83,9 @@ type Token struct {
 	PoS  PoS    // Part of speech
 	Text string // Text
 }
+
+// Part of speech
+type PoS int
 ```
 
 For example, given the text:
@@ -124,10 +133,10 @@ expects the text as stdin and accepts the following flags:
 
 | Flag          | Description                                                                               | Type     | Default |
 | ------------- | ----------------------------------------------------------------------------------------- | -------- | ------- |
+| `entities`    | Define entities to be searched within input, example: `-entities="Max Payne,Payne"`       | `string` |         |
 | `gog-svc-loc` | Google Clouds NLP JSON service account file, example: `-gog-svc-loc="~/gog-svc-loc.json"` | `string` |         |
 | `op`          | Operation to excute: `-op="mean"`                                                         | `string` | `mean`  |
 | `pos`         | Defines part of speeches to keep, example: `-pos=noun,verb,pron`                          | `string` | `any`   |
-| `entities`    | Define entities to be searched within input, example: `-entities="Max Payne,Payne"`       | `string` |         |
 
 Example:
 
