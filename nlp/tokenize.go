@@ -98,17 +98,18 @@ func (nlp NLPTokenizer) req(ctx context.Context, text string) (*languagepb.Annot
 		apiErr                     *apierror.APIError
 		errReasonRateLimitExceeded = error_reason.ErrorReason_RATE_LIMIT_EXCEEDED.String()
 
-		// Retry request up to five times if rate limit exceeded with a
-		// increasing delay
-		delay   = 1.0
-		retries = 0
+		delay     = 1.0  // In minutes
+		delayMult = 1.05 // Delay multiplier
+		retries   = 0
 	)
 	const (
-		delayMult  = 1.25
-		maxRetries = 5
+		delayGrowth = 1.10 // Delay growth rate
+		maxRetries  = 6
 	)
+	// Retry request up to five times if rate limit exceeded with a
+	// increasing delay
 	for {
-		if retries == maxRetries {
+		if retries >= maxRetries {
 			return &languagepb.AnnotateTextResponse{}, ErrMaxRetriesReached
 		}
 
@@ -127,6 +128,7 @@ func (nlp NLPTokenizer) req(ctx context.Context, text string) (*languagepb.Annot
 
 				retries += 1
 				delay *= delayMult
+				delayMult *= delayGrowth
 
 				continue
 			}

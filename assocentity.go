@@ -72,10 +72,6 @@ func Mean(
 	return mean, err
 }
 
-// func CountA
-
-// func TopN
-
 func dist(
 	ctx context.Context,
 	tokenizer tokenize.Tokenizer,
@@ -178,7 +174,7 @@ func appendTokenDist(m map[tokenize.Token][]float64, k *iterator.Iterator[tokeni
 	m[token] = append(m[token], dist)
 }
 
-// Returns the average of a float slice
+// Returns the mean of a 64-bit float slice
 func meanFloat64(xs []float64) float64 {
 	sum := 0.0
 	for _, x := range xs {
