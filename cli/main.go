@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/csv"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -37,7 +38,7 @@ var (
 	posF = flag.String(
 		"pos",
 		"any",
-		"Defines part of speeches to keep, example: -pos=noun,verb,pron",
+		"Defines part of speeches to be included, example: -pos=noun,verb,pron",
 	)
 	entitiesF = flag.String(
 		"entities",
@@ -46,55 +47,74 @@ var (
 	)
 )
 
-// Should we set a timeout?
-var ctx = context.Background()
-
 func main() {
+	if len(*gogSvcLocF) == 0 {
+		printHelpAndFail(errors.New("missing google service account file"))
+	}
+
 	// Read text as stdin
 	textBytes, err := io.ReadAll(os.Stdin)
 	if err != nil {
-		printUsageAndFail(err)
+		printHelpAndFail(err)
+	}
+	if len(textBytes) == 0 {
+		printHelpAndFail(errors.New("empty text"))
 	}
 
-	// assocentity
 	credentialsFilename := *gogSvcLocF
 	nlpTok := nlp.NewNLPTokenizer(credentialsFilename, nlp.AutoLang)
 
 	// Set part of speech
 	posArr := strings.Split(*posF, ",")
+	if len(posArr) == 0 {
+		printHelpAndFail(errors.New("missing pos"))
+	}
 	// Parse part of speech flag and use PoS type
 	poS := parsePoS(posArr)
 
 	// Prepare text and entities
 	text := string(textBytes)
 	entities := strings.Split(*entitiesF, ",")
+	if len(entities) == 0 {
+		printHelpAndFail(errors.New("missing entities"))
+	}
 
 	// Recover to provide an unified API response
 	defer func() {
 		if r := recover(); r != nil {
-			printUsageAndFail(r)
+			printHelpAndFail(r)
 		}
 	}()
+
+	// Should we set a timeout?
+	var ctx = context.Background()
 
 	switch *opF {
 	case "mean":
 		mean, err := assocentity.Mean(ctx, nlpTok, poS, text, entities)
 		if err != nil {
-			printUsageAndFail(err)
+			printHelpAndFail(err)
 		}
 
 		// Write CSV to stdout
-		w := csv.NewWriter(os.Stdout)
-		defer w.Flush()
-		for token, dist := range mean {
+		csvwr := csv.NewWriter(os.Stdout)
+		defer csvwr.Flush()
+		for tok, dist := range mean {
 			record := []string{
-				// Text, part of speech, distance
-				token.Text, tokenize.PoSMapStr[token.PoS], fmt.Sprintf("%v", dist),
+				// Text
+				tok.Text,
+				// Part of speech
+				tokenize.PoSMapStr[tok.PoS],
+				// Distance
+				fmt.Sprintf("%f", dist),
 			}
-			if err := w.Write(record); err != nil {
-				printUsageAndFail(err)
+			if err := csvwr.Write(record); err != nil {
+				printHelpAndFail(err)
 			}
 		}
+
+	default:
+		printHelpAndFail(errors.New("unknown operation"))
 	}
 }
 
@@ -109,12 +129,12 @@ func parsePoS(posArr []string) (pos tokenize.PoS) {
 	return
 }
 
-func printUsageAndFail(reason any) {
+func printHelpAndFail(reason any) {
 	logger.Println(reason)
 	logger.Println()
-
 	logger.Println("Usage:")
 	logger.Println()
 	flag.PrintDefaults()
+
 	os.Exit(1)
 }
