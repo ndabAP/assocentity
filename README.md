@@ -68,7 +68,7 @@ if err != nil {
 ### Tokenization
 
 If you provide your own tokenizer you must implement the interface with the
-method `Tokenize` signature and the following signature:
+method `Tokenize` and the following signature:
 
 ```go
 type Tokenizer interface {
