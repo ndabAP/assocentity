@@ -9,7 +9,7 @@ type Iterator[T any] struct {
 
 func New[T any](elems []T) *Iterator[T] {
 	return &Iterator[T]{
-		elems[0],
+		*new(T),
 		elems,
 		len(elems),
 		-1,
@@ -36,7 +36,7 @@ func (it *Iterator[T]) Prev() bool {
 
 func (it *Iterator[T]) Reset() *Iterator[T] {
 	it.pos = -1
-	it.el = it.elems[0]
+	it.el = *new(T)
 	return it
 }
 

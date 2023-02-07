@@ -2,8 +2,8 @@ package assocentity
 
 import (
 	"context"
-	"errors"
 	"math"
+	"strings"
 
 	"github.com/ndabAP/assocentity/v12/internal/comp"
 	"github.com/ndabAP/assocentity/v12/internal/iterator"
@@ -11,68 +11,41 @@ import (
 	"github.com/ndabAP/assocentity/v12/tokenize"
 )
 
-var (
-	ErrEmptyText     = errors.New("missing text")
-	ErrEmptyEntities = errors.New("missing entities")
-	ErrNoPoSTokens   = errors.New("no tokens found with given pos")
-)
+// Source wraps entities and texts
+type Source struct {
+	Entities []string
+	Texts    []string
+}
 
-// MeanN returns the mean distance from entities to a slice of texts. It ignores
+// Dists returns the distances from entities to a slice of texts. It ignores
 // empty texts and not found pos
-func MeanN(
+func Dists(
 	ctx context.Context,
 	tokenizer tokenize.Tokenizer,
 	poS tokenize.PoS,
-	texts []string,
-	entities []string,
-) (map[tokenize.Token]float64, error) {
+	source Source,
+) (map[[2]string][]float64, error) {
 	var (
-		mean  = make(map[tokenize.Token]float64)
-		means = make(map[tokenize.Token][]float64)
+		dists = make(map[[2]string][]float64)
+		err   error
 	)
-	for _, text := range texts {
-		dists, err := dist(ctx, tokenizer, poS, text, entities)
-		if errors.Is(err, ErrEmptyText) || errors.Is(err, ErrNoPoSTokens) {
-			continue
-		}
+
+	for _, text := range source.Texts {
+		d, err := distances(ctx, tokenizer, poS, text, source.Entities)
 		if err != nil {
-			return mean, err
+			return dists, err
 		}
 
-		for tok, dist := range dists {
-			means[tok] = append(means[tok], dist...)
+		for token, dist := range d {
+			t := [2]string{token.Text, tokenize.PoSMapStr[token.PoS]}
+			dists[t] = append(dists[t], dist...)
 		}
 	}
 
-	// Calculate the mean distances
-	for token, dist := range means {
-		mean[token] = meanFloat64(dist)
-	}
-	return mean, nil
+	return dists, err
 }
 
-// Mean returns the mean distance from entities to a text
-func Mean(
-	ctx context.Context,
-	tokenizer tokenize.Tokenizer,
-	poS tokenize.PoS,
-	text string,
-	entities []string,
-) (map[tokenize.Token]float64, error) {
-	mean := make(map[tokenize.Token]float64)
-
-	dists, err := dist(ctx, tokenizer, poS, text, entities)
-	if err != nil {
-		return mean, err
-	}
-	// Calculate the mean distances
-	for token, dist := range dists {
-		mean[token] = meanFloat64(dist)
-	}
-	return mean, err
-}
-
-func dist(
+func distances(
 	ctx context.Context,
 	tokenizer tokenize.Tokenizer,
 	poS tokenize.PoS,
@@ -80,21 +53,14 @@ func dist(
 	entities []string,
 ) (map[tokenize.Token][]float64, error) {
 	var (
-		dist = make(map[tokenize.Token][]float64)
-		err  error
+		dists = make(map[tokenize.Token][]float64)
+		err   error
 	)
-
-	if len(text) == 0 {
-		return dist, ErrEmptyText
-	}
-	if len(entities) == 0 {
-		return dist, ErrEmptyEntities
-	}
 
 	// Tokenize text
 	textTokens, err := tokenizer.Tokenize(ctx, text)
 	if err != nil {
-		return dist, err
+		return dists, err
 	}
 
 	// Tokenize entities
@@ -102,7 +68,7 @@ func dist(
 	for _, entity := range entities {
 		tokens, err := tokenizer.Tokenize(ctx, entity)
 		if err != nil {
-			return dist, err
+			return dists, err
 		}
 		entityTokens = append(entityTokens, tokens)
 	}
@@ -113,10 +79,10 @@ func dist(
 
 	// Check if given PoS was found in text tokens
 	if len(determTokens) == 0 {
-		return dist, ErrNoPoSTokens
+		return dists, nil
 	}
 
-	// Creates iterators
+	// Create iterators
 
 	determTokensIter := iterator.New(determTokens)
 
@@ -145,7 +111,7 @@ func dist(
 		for posDirIter.Next() {
 			isEntity, entity := comp.TextWithEntities(posDirIter, entityTokensIter, comp.DirPos)
 			if isEntity {
-				appendTokenDist(dist, determTokensIter, posDirIter)
+				appendTokenDist(dists, determTokensIter, posDirIter)
 				// Skip about entity
 				posDirIter.Forward(len(entity) - 1) // Next increments
 			}
@@ -158,13 +124,13 @@ func dist(
 		for negDirIter.Prev() {
 			isEntity, entity := comp.TextWithEntities(negDirIter, entityTokensIter, comp.DirNeg)
 			if isEntity {
-				appendTokenDist(dist, determTokensIter, negDirIter)
+				appendTokenDist(dists, determTokensIter, negDirIter)
 				negDirIter.Rewind(len(entity) - 1)
 			}
 		}
 	}
 
-	return dist, err
+	return dists, err
 }
 
 // Helper to append float to a map
@@ -174,6 +140,19 @@ func appendTokenDist(m map[tokenize.Token][]float64, k *iterator.Iterator[tokeni
 	m[token] = append(m[token], dist)
 }
 
+func Count(dists map[[2]string][]float64) [][2]string {
+	c := make([][2]string, len(dists))
+	return c
+}
+
+func Mean(dists map[[2]string][]float64) map[[2]string]float64 {
+	mean := make(map[[2]string]float64)
+	for token, d := range dists {
+		mean[token] = meanFloat64(d)
+	}
+	return mean
+}
+
 // Returns the mean of a 64-bit float slice
 func meanFloat64(xs []float64) float64 {
 	sum := 0.0
@@ -181,4 +160,21 @@ func meanFloat64(xs []float64) float64 {
 		sum += x
 	}
 	return sum / float64(len(xs))
+}
+
+func Normalize(dists map[[2]string][]float64) {
+	for tok, d := range dists {
+		t := strings.ToLower(tok[1])
+		dists[[2]string{tok[0], t}] = d
+	}
+}
+
+func Threshold(dists map[[2]string][]float64, threshold int) {
+	distsN := len(dists)
+	for tok, tokDist := range dists {
+		tokDistN := len(tokDist)
+		if tokDistN/distsN < threshold {
+			delete(dists, tok)
+		}
+	}
 }

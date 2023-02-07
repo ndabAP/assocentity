@@ -9,6 +9,8 @@ import (
 	"github.com/ndabAP/assocentity/v12/tokenize"
 )
 
+// whiteSpaceTokenizer tokenizes a text by empty space and assigns unknown
+// pos
 type whiteSpaceTokenizer int
 
 func (t whiteSpaceTokenizer) Tokenize(ctx context.Context, text string) ([]tokenize.Token, error) {
@@ -24,7 +26,7 @@ func (t whiteSpaceTokenizer) Tokenize(ctx context.Context, text string) ([]token
 	return tokens, nil
 }
 
-func TestMeanN(t *testing.T) {
+func TestMean(t *testing.T) {
 	type args struct {
 		ctx       context.Context
 		tokenizer tokenize.Tokenizer
@@ -33,9 +35,8 @@ func TestMeanN(t *testing.T) {
 		entities  []string
 	}
 	tests := []struct {
-		args    args
-		want    map[tokenize.Token]float64
-		wantErr bool
+		args args
+		want map[[2]string]float64
 	}{
 		{
 			args: args{
@@ -48,35 +49,46 @@ func TestMeanN(t *testing.T) {
 				},
 				entities: []string{"$", "++"},
 			},
-			want: map[tokenize.Token]float64{
-				{
-					PoS:  tokenize.UNKN,
-					Text: "AA",
-				}: 2.2,
-				{
-					PoS:  tokenize.UNKN,
-					Text: "B",
-				}: 2.6,
-				{
-					PoS:  tokenize.UNKN,
-					Text: "CCC",
-				}: 1,
-				{
-					PoS:  tokenize.UNKN,
-					Text: "E",
-				}: 1.6666666666666667,
+			want: map[[2]string]float64{
+				{"AA", tokenize.PoSMapStr[tokenize.UNKN]}:  2.2,
+				{"B", tokenize.PoSMapStr[tokenize.UNKN]}:   2.6,
+				{"CCC", tokenize.PoSMapStr[tokenize.UNKN]}: 1,
+				{"E", tokenize.PoSMapStr[tokenize.UNKN]}:   1.6666666666666667,
 			},
+		},
+		{
+			args: args{
+				ctx:       context.Background(),
+				tokenizer: new(whiteSpaceTokenizer),
+				poS:       tokenize.ANY,
+				texts: []string{
+					"",
+					"",
+				},
+				entities: []string{},
+			},
+			want: map[[2]string]float64{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			got, err := MeanN(tt.args.ctx, tt.args.tokenizer, tt.args.poS, tt.args.texts, tt.args.entities)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("MeanN() error = %v, wantErr %v", err, tt.wantErr)
-				return
+			s := Source{
+				Entities: tt.args.entities,
+				Texts:    tt.args.texts,
 			}
+			dists, err := Dists(
+				tt.args.ctx,
+				tt.args.tokenizer,
+				tt.args.poS,
+				s,
+			)
+			if err != nil {
+				t.Error(err)
+			}
+
+			got := Mean(dists)
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("MeanN() = %v, want %v", got, tt.want)
+				t.Errorf("Mean() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -118,12 +130,12 @@ func Test_dist(t *testing.T) {
 		ctx       context.Context
 		tokenizer tokenize.Tokenizer
 		poS       tokenize.PoS
-		text      string
+		texts     []string
 		entities  []string
 	}
 	tests := []struct {
 		args    args
-		want    map[tokenize.Token][]float64
+		want    map[[2]string][]float64
 		wantErr bool
 	}{
 		{
@@ -131,27 +143,29 @@ func Test_dist(t *testing.T) {
 				ctx:       context.Background(),
 				tokenizer: new(concreteTokenizer),
 				poS:       tokenize.NOUN | tokenize.PUNCT | tokenize.VERB,
-				text:      "English x . x xx run",
+				texts:     []string{"English x . x xx run"},
 				entities:  []string{"run"},
 			},
-			want: map[tokenize.Token][]float64{
-				{
-					PoS:  tokenize.NOUN,
-					Text: "English",
-				}: {2},
-				{
-					PoS:  tokenize.PUNCT,
-					Text: ".",
-				}: {1},
+			want: map[[2]string][]float64{
+				{"English", tokenize.PoSMapStr[tokenize.NOUN]}: {2},
+				{".", tokenize.PoSMapStr[tokenize.PUNCT]}:      {1},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			got, err := dist(tt.args.ctx, tt.args.tokenizer, tt.args.poS, tt.args.text, tt.args.entities)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("dist() error = %v, wantErr %v", err, tt.wantErr)
-				return
+			s := Source{
+				Entities: tt.args.entities,
+				Texts:    tt.args.texts,
+			}
+			got, err := Dists(
+				tt.args.ctx,
+				tt.args.tokenizer,
+				tt.args.poS,
+				s,
+			)
+			if err != nil {
+				t.Error(err)
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("dist() = %v, want %v", got, tt.want)

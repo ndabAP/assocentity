@@ -25,6 +25,11 @@ func init() {
 }
 
 var (
+	entitiesF = flag.String(
+		"entities",
+		"",
+		"Define entities to be searched within input, example: -entities=\"Max Payne,Payne\"",
+	)
 	gogSvcLocF = flag.String(
 		"gog-svc-loc",
 		"",
@@ -39,11 +44,6 @@ var (
 		"pos",
 		"any",
 		"Defines part of speeches to be included, example: -pos=noun,verb,pron",
-	)
-	entitiesF = flag.String(
-		"entities",
-		"",
-		"Define entities to be searched within input, example: -entities=\"Max Payne,Payne\"",
 	)
 )
 
@@ -91,10 +91,15 @@ func main() {
 
 	switch *opF {
 	case "mean":
-		mean, err := assocentity.Mean(ctx, nlpTok, poS, text, entities)
+		s := assocentity.Source{
+			Entities: entities,
+			Texts:    []string{text},
+		}
+		dists, err := assocentity.Dists(ctx, nlpTok, poS, s)
 		if err != nil {
 			printHelpAndFail(err)
 		}
+		mean := assocentity.Mean(dists)
 
 		// Write CSV to stdout
 		csvwr := csv.NewWriter(os.Stdout)
@@ -102,9 +107,9 @@ func main() {
 		for tok, dist := range mean {
 			record := []string{
 				// Text
-				tok.Text,
+				tok[0],
 				// Part of speech
-				tokenize.PoSMapStr[tok.PoS],
+				tok[1],
 				// Distance
 				fmt.Sprintf("%f", dist),
 			}

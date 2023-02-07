@@ -106,7 +106,7 @@ func (nlp NLPTokenizer) req(ctx context.Context, text string) (*languagepb.Annot
 		delayGrowth = 1.10 // Delay growth rate
 		maxRetries  = 6
 	)
-	// Retry request up to five times if rate limit exceeded with a
+	// Retry request up to five times if rate limit exceeded with an
 	// increasing delay
 	for {
 		if retries >= maxRetries {
