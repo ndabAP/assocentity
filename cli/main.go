@@ -11,9 +11,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ndabAP/assocentity/v12"
-	"github.com/ndabAP/assocentity/v12/nlp"
-	"github.com/ndabAP/assocentity/v12/tokenize"
+	"github.com/ndabAP/assocentity/v13"
+	"github.com/ndabAP/assocentity/v13/nlp"
+	"github.com/ndabAP/assocentity/v13/tokenize"
 )
 
 var logger = log.Default()
@@ -52,7 +52,7 @@ func main() {
 		printHelpAndFail(errors.New("missing google service account file"))
 	}
 
-	// Read text as stdin
+	// Read text from stdin
 	textBytes, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		printHelpAndFail(err)
@@ -123,7 +123,7 @@ func main() {
 	}
 }
 
-// ["1", "3", "2", "5"] -> 11
+// ["noun", "adj", "verb"] -> 11
 func parsePoS(posArr []string) (pos tokenize.PoS) {
 	for _, p := range posArr {
 		if p, ok := tokenize.PoSMap[p]; ok {

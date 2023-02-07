@@ -5,10 +5,10 @@ import (
 	"math"
 	"strings"
 
-	"github.com/ndabAP/assocentity/v12/internal/comp"
-	"github.com/ndabAP/assocentity/v12/internal/iterator"
-	"github.com/ndabAP/assocentity/v12/internal/pos"
-	"github.com/ndabAP/assocentity/v12/tokenize"
+	"github.com/ndabAP/assocentity/v13/internal/comp"
+	"github.com/ndabAP/assocentity/v13/internal/iterator"
+	"github.com/ndabAP/assocentity/v13/internal/pos"
+	"github.com/ndabAP/assocentity/v13/tokenize"
 )
 
 // Source wraps entities and texts
@@ -140,11 +140,6 @@ func appendTokenDist(m map[tokenize.Token][]float64, k *iterator.Iterator[tokeni
 	m[token] = append(m[token], dist)
 }
 
-func Count(dists map[[2]string][]float64) [][2]string {
-	c := make([][2]string, len(dists))
-	return c
-}
-
 func Mean(dists map[[2]string][]float64) map[[2]string]float64 {
 	mean := make(map[[2]string]float64)
 	for token, d := range dists {
@@ -177,4 +172,9 @@ func Threshold(dists map[[2]string][]float64, threshold int) {
 			delete(dists, tok)
 		}
 	}
+}
+
+func count(dists map[[2]string][]float64) [][2]string {
+	c := make([][2]string, len(dists))
+	return c
 }

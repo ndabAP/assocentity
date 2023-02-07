@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/joho/godotenv"
-	"github.com/ndabAP/assocentity/v12/nlp"
-	"github.com/ndabAP/assocentity/v12/tokenize"
+	"github.com/ndabAP/assocentity/v13/nlp"
+	"github.com/ndabAP/assocentity/v13/tokenize"
 )
 
 func TestTokenize(t *testing.T) {
@@ -66,11 +66,11 @@ func TestTokenize(t *testing.T) {
 			)
 			got, err := nlp.Tokenize(context.Background(), tt.text)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("NLP.tokenize() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("nlp.Tokenize() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NLP.TokenitokenizezeText() = %v, want %v", got, tt.want)
+				t.Errorf("nlp.Tokenize() = %v, want %v", got, tt.want)
 			}
 		})
 	}

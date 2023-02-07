@@ -14,7 +14,7 @@ distance from interesting tokens to a certain entity and its synonyms.
 ## Installation
 
 ```bash
-$ go get github.com/ndabAP/assocentity/v12
+$ go get github.com/ndabAP/assocentity/v13
 ```
 
 ## Prerequisites
@@ -127,16 +127,16 @@ The result from `Tokenize` would be:
 
 ## CLI
 
-There is also a terminal version available for either Windows, Mac (Darwin) or
-Linux (only with 64-bit support) if you don't have Go available. The application
-expects the text as stdin and accepts the following flags:
+There is also a language-agnostic terminal version available for either Windows,
+Mac (Darwin) or Linux (only with 64-bit support) if you don't have Go available.
+The application expects the text from "stdin" and accepts the following flags:
 
-| Flag          | Description                                                                               | Type     | Default |
-| ------------- | ----------------------------------------------------------------------------------------- | -------- | ------- |
-| `entities`    | Define entities to be searched within input, example: `-entities="Max Payne,Payne"`       | `string` |         |
-| `gog-svc-loc` | Google Clouds NLP JSON service account file, example: `-gog-svc-loc="~/gog-svc-loc.json"` | `string` |         |
-| `op`          | Operation to excute: `-op="mean"`                                                         | `string` | `mean`  |
-| `pos`         | Defines part of speeches to keep, example: `-pos=noun,verb,pron`                          | `string` | `any`   |
+| Flag          | Description                                                                                       | Type     | Default |
+| ------------- | ------------------------------------------------------------------------------------------------- | -------- | ------- |
+| `entities`    | Define entities to be searched within input, example: `-entities="Max Payne,Payne"`               | `string` |         |
+| `gog-svc-loc` | Google Clouds NLP JSON service account file, example: `-gog-svc-loc="/home/max/gog-svc-loc.json"` | `string` |         |
+| `op`          | Operation to excute: `-op="mean"`                                                                 | `string` | `mean`  |
+| `pos`         | Defines part of speeches to keep, example: `-pos=noun,verb,pron`                                  | `string` | `any`   |
 
 Example:
 
@@ -144,7 +144,7 @@ Example:
 echo "Relax, Max. You're a nice guy." | ./bin/assocentity_linux_amd64_v12.0.1-0-g948274a-dirty -gog-svc-loc=/home/max/.config/assocentity/google-service.json -entities="Max Payne,Payne,Max"
 ```
 
-The output is written to stdout in appropoiate formats.
+The output is written to "stdout" in appropoiate formats.
 
 ## Projects using assocentity
 

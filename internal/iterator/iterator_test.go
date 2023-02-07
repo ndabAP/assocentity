@@ -3,17 +3,13 @@ package iterator_test
 import (
 	"testing"
 
-	"github.com/ndabAP/assocentity/v12/internal/iterator"
+	"github.com/ndabAP/assocentity/v13/internal/iterator"
 )
 
 var testElems = []int{1, 2, 3, 3, 1, 5, 6}
 
-func newTestIterator() *iterator.Iterator[int] {
-	return iterator.New(testElems)
-}
-
-func TestNavigation(t *testing.T) {
-	it := newTestIterator()
+func TestNav(t *testing.T) {
+	it := iterator.New(testElems)
 
 	it.Next()
 	if it.CurrElem() != testElems[0] {
@@ -55,8 +51,8 @@ func TestNavigation(t *testing.T) {
 	}
 }
 
-func TestInterface(t *testing.T) {
-	it := newTestIterator()
+func TestCurrElem(t *testing.T) {
+	it := iterator.New(testElems)
 
 	it.SetPos(1)
 	if it.CurrElem() != testElems[1] {

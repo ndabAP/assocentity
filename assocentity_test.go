@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ndabAP/assocentity/v12/tokenize"
+	"github.com/ndabAP/assocentity/v13/tokenize"
 )
 
 // whiteSpaceTokenizer tokenizes a text by empty space and assigns unknown
