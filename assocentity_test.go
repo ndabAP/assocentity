@@ -72,15 +72,12 @@ func TestMean(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			s := Source{
-				Entities: tt.args.entities,
-				Texts:    tt.args.texts,
-			}
+			source := NewSource(tt.args.entities, tt.args.texts)
 			dists, err := Distances(
 				tt.args.ctx,
 				tt.args.tokenizer,
 				tt.args.poS,
-				s,
+				source,
 			)
 			if err != nil {
 				t.Error(err)
@@ -154,15 +151,12 @@ func Test_dist(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			s := Source{
-				Entities: tt.args.entities,
-				Texts:    tt.args.texts,
-			}
+			source := NewSource(tt.args.entities, tt.args.texts)
 			got, err := Distances(
 				tt.args.ctx,
 				tt.args.tokenizer,
 				tt.args.poS,
-				s,
+				source,
 			)
 			if err != nil {
 				t.Error(err)
