@@ -180,12 +180,12 @@ func meanFloat64(xs []float64) float64 {
 	return sum / float64(len(xs))
 }
 
-// Aggregator aggregates tokens
-type Aggregator func(tokenize.Token) tokenize.Token
+// Normalizer normalizes tokens like lower casing them
+type Normalizer func(tokenize.Token) tokenize.Token
 
-// HumandReadableAggregator aggregates tokens through lower casing them and
+// HumandReadableNormalizer normalizes tokens through lower casing them and
 // replacing them with their synonyms
-var HumandReadableAggregator Aggregator = func(tok tokenize.Token) tokenize.Token {
+var HumandReadableNormalizer Normalizer = func(tok tokenize.Token) tokenize.Token {
 	t := tokenize.Token{
 		PoS:  tok.PoS,
 		Text: strings.ToLower(tok.Text),
@@ -200,10 +200,10 @@ var HumandReadableAggregator Aggregator = func(tok tokenize.Token) tokenize.Toke
 	return t
 }
 
-// Aggregate aggregates tokens with provided normalizer
-func Aggregate(dists map[tokenize.Token][]float64, aggr Aggregator) {
+// Normalize normalizes tokens with provided normalizer
+func Normalize(dists map[tokenize.Token][]float64, norm Normalizer) {
 	for tok, d := range dists {
-		t := aggr(tok)
+		t := norm(tok)
 
 		// Check if text is the same as non-normalized
 		if t == tok {
