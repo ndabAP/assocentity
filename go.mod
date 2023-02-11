@@ -1,4 +1,4 @@
-module github.com/ndabAP/assocentity/v13
+module github.com/ndabAP/assocentity/v12
 
 go 1.18
 

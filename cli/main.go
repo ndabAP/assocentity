@@ -11,9 +11,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ndabAP/assocentity/v13"
-	"github.com/ndabAP/assocentity/v13/nlp"
-	"github.com/ndabAP/assocentity/v13/tokenize"
+	"github.com/ndabAP/assocentity/v12"
+	"github.com/ndabAP/assocentity/v12/nlp"
+	"github.com/ndabAP/assocentity/v12/tokenize"
 )
 
 var logger = log.Default()
@@ -91,11 +91,13 @@ func main() {
 
 	switch *opF {
 	case "mean":
-		s := assocentity.Source{
-			Entities: entities,
-			Texts:    []string{text},
-		}
-		dists, err := assocentity.Dists(ctx, nlpTok, poS, s)
+		source := assocentity.NewSource(entities, []string{text})
+		dists, err := assocentity.Distances(
+			ctx,
+			nlpTok,
+			poS,
+			source,
+		)
 		if err != nil {
 			printHelpAndFail(err)
 		}
@@ -107,9 +109,9 @@ func main() {
 		for tok, dist := range mean {
 			record := []string{
 				// Text
-				tok[0],
+				tok.Text,
 				// Part of speech
-				tok[1],
+				tokenize.PoSMapStr[tok.PoS],
 				// Distance
 				fmt.Sprintf("%f", dist),
 			}

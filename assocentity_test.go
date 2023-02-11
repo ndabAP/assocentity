@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ndabAP/assocentity/v13/tokenize"
+	"github.com/ndabAP/assocentity/v12/tokenize"
 )
 
 // whiteSpaceTokenizer tokenizes a text by empty space and assigns unknown
@@ -76,7 +76,7 @@ func TestMean(t *testing.T) {
 				Entities: tt.args.entities,
 				Texts:    tt.args.texts,
 			}
-			dists, err := Dists(
+			dists, err := Distances(
 				tt.args.ctx,
 				tt.args.tokenizer,
 				tt.args.poS,
@@ -158,7 +158,7 @@ func Test_dist(t *testing.T) {
 				Entities: tt.args.entities,
 				Texts:    tt.args.texts,
 			}
-			got, err := Dists(
+			got, err := Distances(
 				tt.args.ctx,
 				tt.args.tokenizer,
 				tt.args.poS,

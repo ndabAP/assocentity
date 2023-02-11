@@ -7,17 +7,16 @@ import (
 
 	language "cloud.google.com/go/language/apiv1"
 	"github.com/googleapis/gax-go/v2/apierror"
-	"github.com/ndabAP/assocentity/v13/tokenize"
+	"github.com/ndabAP/assocentity/v12/tokenize"
 	"google.golang.org/api/option"
 	"google.golang.org/genproto/googleapis/api/error_reason"
 	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
 )
 
 var (
-	ErrMaxRetriesReached = errors.New("max retries reached")
+	ErrMaxRetries = errors.New("max retries reached")
 )
 
-// Use map to be independent from library
 var poSMap = map[languagepb.PartOfSpeech_Tag]tokenize.PoS{
 	languagepb.PartOfSpeech_ADJ:     tokenize.ADJ,
 	languagepb.PartOfSpeech_ADP:     tokenize.ADP,
@@ -44,7 +43,8 @@ type NLPTokenizer struct {
 	lang          string
 }
 
-// NewNLPTokenizer returns a new NLP tokenizer instance
+// NewNLPTokenizer returns a new NLP tokenizer instance. Note that NLPTokenizer
+// has a built-in retrier
 func NewNLPTokenizer(credentialsFilename string, lang string) tokenize.Tokenizer {
 	return NLPTokenizer{
 		credsFilename: credentialsFilename,
@@ -89,12 +89,13 @@ func (nlp NLPTokenizer) req(ctx context.Context, text string) (*languagepb.Annot
 		},
 		Type: languagepb.Document_PLAIN_TEXT,
 	}
-	// Set desired language if not auto
+	// Set the desired language if not auto
 	if nlp.lang != AutoLang {
 		doc.Language = nlp.lang
 	}
 
 	var (
+		// Google errors
 		apiErr                     *apierror.APIError
 		errReasonRateLimitExceeded = error_reason.ErrorReason_RATE_LIMIT_EXCEEDED.String()
 
@@ -103,14 +104,14 @@ func (nlp NLPTokenizer) req(ctx context.Context, text string) (*languagepb.Annot
 		retries   = 0
 	)
 	const (
-		delayGrowth = 1.10 // Delay growth rate
+		delayGrowth = 1.05 // Delay growth rate
 		maxRetries  = 6
 	)
-	// Retry request up to five times if rate limit exceeded with an
-	// increasing delay
+	// Retry request up to maxRetries times if rate limit exceeded with an
+	// growing delay
 	for {
 		if retries >= maxRetries {
-			return &languagepb.AnnotateTextResponse{}, ErrMaxRetriesReached
+			return &languagepb.AnnotateTextResponse{}, ErrMaxRetries
 		}
 
 		// Do the actual request
@@ -121,11 +122,12 @@ func (nlp NLPTokenizer) req(ctx context.Context, text string) (*languagepb.Annot
 			},
 			EncodingType: languagepb.EncodingType_UTF8,
 		})
-		// Check for errors
+		// Check for rate limit exceeded error to retry
 		if errors.As(err, &apiErr) {
 			if apiErr.Reason() == errReasonRateLimitExceeded {
 				time.Sleep(time.Minute * time.Duration(delay))
 
+				// Retryer logic
 				retries += 1
 				delay *= delayMult
 				delayMult *= delayGrowth

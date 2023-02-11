@@ -14,7 +14,7 @@ distance from interesting tokens to a certain entity and its synonyms.
 ## Installation
 
 ```bash
-$ go get github.com/ndabAP/assocentity/v13
+$ go get github.com/ndabAP/assocentity/v12
 ```
 
 ## Prerequisites
@@ -53,16 +53,19 @@ entities := []string{
 	"Goerge Bush",
 	"Bush",
 }
+source := assocentity.NewSource(entities, texts)
 
 // Instantiate the NLP tokenizer (powered by Google)
 nlpTok := nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
 
-// Get the mean distances to adjectives
+// Get the distances to adjectives
 ctx := context.TODO()
-meanN, err := assocentity.MeanN(ctx, nlpTok, tokenize.ADJ, texts, entities)
+dists, err := assocentity.Distances(ctx, nlpTok, tokenize.ADJ, source)
 if err != nil {
 	panic(err)
 }
+// Get the mean from the distances
+mean := assocentity.Mean(dists)
 ```
 
 ### Tokenization

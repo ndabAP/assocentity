@@ -5,46 +5,51 @@ import (
 	"math"
 	"strings"
 
-	"github.com/ndabAP/assocentity/v13/internal/comp"
-	"github.com/ndabAP/assocentity/v13/internal/iterator"
-	"github.com/ndabAP/assocentity/v13/internal/pos"
-	"github.com/ndabAP/assocentity/v13/tokenize"
+	"github.com/ndabAP/assocentity/v12/internal/comp"
+	"github.com/ndabAP/assocentity/v12/internal/iterator"
+	"github.com/ndabAP/assocentity/v12/internal/pos"
+	"github.com/ndabAP/assocentity/v12/tokenize"
 )
 
-// Source wraps entities and texts
-type Source struct {
+// source wraps entities and texts
+type source struct {
 	Entities []string
 	Texts    []string
 }
 
-// Dists returns the distances from entities to a slice of texts. It ignores
-// empty texts and not found pos
-func Dists(
+func NewSource(entities, texts []string) source {
+	return source{
+		Entities: entities,
+		Texts:    texts,
+	}
+}
+
+// Distances returns the distances from entities to a list of texts
+func Distances(
 	ctx context.Context,
 	tokenizer tokenize.Tokenizer,
 	poS tokenize.PoS,
-	source Source,
-) (map[[2]string][]float64, error) {
+	source source,
+) (map[tokenize.Token][]float64, error) {
 	var (
-		dists = make(map[[2]string][]float64)
+		dists = make(map[tokenize.Token][]float64)
 		err   error
 	)
-
 	for _, text := range source.Texts {
 		d, err := distances(ctx, tokenizer, poS, text, source.Entities)
 		if err != nil {
 			return dists, err
 		}
 
-		for token, dist := range d {
-			t := [2]string{token.Text, tokenize.PoSMapStr[token.PoS]}
-			dists[t] = append(dists[t], dist...)
+		for tok, dist := range d {
+			dists[tok] = append(dists[tok], dist...)
 		}
 	}
 
 	return dists, err
 }
 
+// distances returns the distances to entities for one text
 func distances(
 	ctx context.Context,
 	tokenizer tokenize.Tokenizer,
@@ -106,12 +111,16 @@ func distances(
 
 		// Finds/counts entities in positive direction
 		posDirIter.SetPos(currDetermTokensPos)
-		// [I, was, (with), Max, Payne, here] -> true, Max Payne
-		// [I, was, with, Max, Payne, (here)] -> false, ""
 		for posDirIter.Next() {
-			isEntity, entity := comp.TextWithEntities(posDirIter, entityTokensIter, comp.DirPos)
+			// [I, was, (with), Max, Payne, here] -> true, Max Payne
+			// [I, was, with, Max, Payne, (here)] -> false, ""
+			isEntity, entity := comp.TextWithEntities(
+				posDirIter,
+				entityTokensIter,
+				comp.DirPos,
+			)
 			if isEntity {
-				appendTokenDist(dists, determTokensIter, posDirIter)
+				appendDist(dists, determTokensIter, posDirIter)
 				// Skip about entity
 				posDirIter.Forward(len(entity) - 1) // Next increments
 			}
@@ -119,12 +128,16 @@ func distances(
 
 		// Finds/counts entities in negative direction
 		negDirIter.SetPos(currDetermTokensPos)
-		// [I, was, with, Max, Payne, (here)] -> true, Max Payne
-		// [I, was, (with), Max, Payne, here] -> false, ""
 		for negDirIter.Prev() {
-			isEntity, entity := comp.TextWithEntities(negDirIter, entityTokensIter, comp.DirNeg)
+			// [I, was, (with), Max, Payne, here] -> false, ""
+			// [I, was, with, Max, Payne, (here)] -> true, Max Payne
+			isEntity, entity := comp.TextWithEntities(
+				negDirIter,
+				entityTokensIter,
+				comp.DirNeg,
+			)
 			if isEntity {
-				appendTokenDist(dists, determTokensIter, negDirIter)
+				appendDist(dists, determTokensIter, negDirIter)
 				negDirIter.Rewind(len(entity) - 1)
 			}
 		}
@@ -133,15 +146,20 @@ func distances(
 	return dists, err
 }
 
-// Helper to append float to a map
-func appendTokenDist(m map[tokenize.Token][]float64, k *iterator.Iterator[tokenize.Token], v *iterator.Iterator[tokenize.Token]) {
+// Helper to append a float64 to a map of tokens and distances
+func appendDist(
+	m map[tokenize.Token][]float64,
+	k *iterator.Iterator[tokenize.Token],
+	v *iterator.Iterator[tokenize.Token],
+) {
 	token := k.CurrElem()
 	dist := math.Abs(float64(v.CurrPos() - k.CurrPos()))
 	m[token] = append(m[token], dist)
 }
 
-func Mean(dists map[[2]string][]float64) map[[2]string]float64 {
-	mean := make(map[[2]string]float64)
+// Mean returns the mean of the provided distances
+func Mean(dists map[tokenize.Token][]float64) map[tokenize.Token]float64 {
+	mean := make(map[tokenize.Token]float64)
 	for token, d := range dists {
 		mean[token] = meanFloat64(d)
 	}
@@ -150,6 +168,10 @@ func Mean(dists map[[2]string][]float64) map[[2]string]float64 {
 
 // Returns the mean of a 64-bit float slice
 func meanFloat64(xs []float64) float64 {
+	if len(xs) == 0 {
+		return 0
+	}
+
 	sum := 0.0
 	for _, x := range xs {
 		sum += x
@@ -157,24 +179,50 @@ func meanFloat64(xs []float64) float64 {
 	return sum / float64(len(xs))
 }
 
-func Normalize(dists map[[2]string][]float64) {
+// Normalize aggregates tokens through lower casing them
+func Normalize(dists map[tokenize.Token][]float64) {
 	for tok, d := range dists {
-		t := strings.ToLower(tok[1])
-		dists[[2]string{tok[0], t}] = d
+		t := tokenize.Token{
+			PoS:  tok.PoS,
+			Text: strings.ToLower(tok.Text),
+		}
+
+		// This can increase the data quality (distances)
+		switch tok.Text {
+		case "&":
+			t.Text = "and"
+		case "—":
+			t.Text = "-"
+		case "„", "”":
+			t.Text = "\""
+		}
+
+		// Check if text is the same as non-normalized
+		if t == tok {
+			continue
+		}
+		if _, ok := dists[t]; ok {
+			dists[t] = append(dists[tok], d...)
+		} else {
+			dists[t] = d
+		}
+
+		delete(dists, tok)
 	}
 }
 
-func Threshold(dists map[[2]string][]float64, threshold int) {
+// Threshold exludes results that are below the given threshold. The threshold
+// is described through the amount of distances per token relative to the total
+// amount of tokens
+func Threshold(dists map[tokenize.Token][]float64, threshold float64) {
+	// Length of dists is amount of total tokens
 	distsN := len(dists)
-	for tok, tokDist := range dists {
-		tokDistN := len(tokDist)
-		if tokDistN/distsN < threshold {
+	for tok, d := range dists {
+		dN := len(d)
+		// Amount of distances per token relative to the amount of all tokens
+		t := (float64(dN) / float64(distsN)) * 100
+		if t < threshold {
 			delete(dists, tok)
 		}
 	}
-}
-
-func count(dists map[[2]string][]float64) [][2]string {
-	c := make([][2]string, len(dists))
-	return c
 }
