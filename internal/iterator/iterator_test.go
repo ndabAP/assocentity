@@ -3,7 +3,7 @@ package iterator_test
 import (
 	"testing"
 
-	"github.com/ndabAP/assocentity/v12/internal/iterator"
+	"github.com/ndabAP/assocentity/v13/internal/iterator"
 )
 
 var testElems = []int{1, 2, 3, 3, 1, 5, 6}

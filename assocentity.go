@@ -5,10 +5,10 @@ import (
 	"math"
 	"strings"
 
-	"github.com/ndabAP/assocentity/v12/internal/comp"
-	"github.com/ndabAP/assocentity/v12/internal/iterator"
-	"github.com/ndabAP/assocentity/v12/internal/pos"
-	"github.com/ndabAP/assocentity/v12/tokenize"
+	"github.com/ndabAP/assocentity/v13/internal/comp"
+	"github.com/ndabAP/assocentity/v13/internal/iterator"
+	"github.com/ndabAP/assocentity/v13/internal/pos"
+	"github.com/ndabAP/assocentity/v13/tokenize"
 )
 
 // source wraps entities and texts
