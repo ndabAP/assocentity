@@ -35,8 +35,9 @@ func TestMean(t *testing.T) {
 		entities  []string
 	}
 	tests := []struct {
-		args args
-		want map[[2]string]float64
+		args    args
+		want    map[tokenize.Token]float64
+		wantErr bool
 	}{
 		{
 			args: args{
@@ -49,25 +50,24 @@ func TestMean(t *testing.T) {
 				},
 				entities: []string{"$", "++"},
 			},
-			want: map[[2]string]float64{
-				{"AA", tokenize.PoSMapStr[tokenize.UNKN]}:  2.2,
-				{"B", tokenize.PoSMapStr[tokenize.UNKN]}:   2.6,
-				{"CCC", tokenize.PoSMapStr[tokenize.UNKN]}: 1,
-				{"E", tokenize.PoSMapStr[tokenize.UNKN]}:   1.6666666666666667,
+			want: map[tokenize.Token]float64{
+				{
+					PoS:  tokenize.UNKN,
+					Text: "AA",
+				}: 2.2,
+				{
+					PoS:  tokenize.UNKN,
+					Text: "B",
+				}: 2.6,
+				{
+					PoS:  tokenize.UNKN,
+					Text: "CCC",
+				}: 1,
+				{
+					PoS:  tokenize.UNKN,
+					Text: "E",
+				}: 1.6666666666666667,
 			},
-		},
-		{
-			args: args{
-				ctx:       context.Background(),
-				tokenizer: new(whiteSpaceTokenizer),
-				poS:       tokenize.ANY,
-				texts: []string{
-					"",
-					"",
-				},
-				entities: []string{},
-			},
-			want: map[[2]string]float64{},
 		},
 	}
 	for _, tt := range tests {
@@ -127,12 +127,12 @@ func Test_dist(t *testing.T) {
 		ctx       context.Context
 		tokenizer tokenize.Tokenizer
 		poS       tokenize.PoS
-		texts     []string
+		text      string
 		entities  []string
 	}
 	tests := []struct {
 		args    args
-		want    map[[2]string][]float64
+		want    map[tokenize.Token][]float64
 		wantErr bool
 	}{
 		{
@@ -140,23 +140,29 @@ func Test_dist(t *testing.T) {
 				ctx:       context.Background(),
 				tokenizer: new(concreteTokenizer),
 				poS:       tokenize.NOUN | tokenize.PUNCT | tokenize.VERB,
-				texts:     []string{"English x . x xx run"},
+				text:      "English x . x xx run",
 				entities:  []string{"run"},
 			},
-			want: map[[2]string][]float64{
-				{"English", tokenize.PoSMapStr[tokenize.NOUN]}: {2},
-				{".", tokenize.PoSMapStr[tokenize.PUNCT]}:      {1},
+			want: map[tokenize.Token][]float64{
+				{
+					PoS:  tokenize.NOUN,
+					Text: "English",
+				}: {2},
+				{
+					PoS:  tokenize.PUNCT,
+					Text: ".",
+				}: {1},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			source := NewSource(tt.args.entities, tt.args.texts)
-			got, err := Distances(
+			got, err := distances(
 				tt.args.ctx,
 				tt.args.tokenizer,
 				tt.args.poS,
-				source,
+				tt.args.text,
+				tt.args.entities,
 			)
 			if err != nil {
 				t.Error(err)
