@@ -94,12 +94,14 @@ func (nlp NLPTokenizer) req(ctx context.Context, text string) (*languagepb.Annot
 		doc.Language = nlp.lang
 	}
 
+	// Google rate limit timeout
+	const apiRateTimeout = 1.0 // In Minutes
 	var (
 		// Google errors
 		apiErr                     *apierror.APIError
 		errReasonRateLimitExceeded = error_reason.ErrorReason_RATE_LIMIT_EXCEEDED.String()
 
-		delay     = 1.0  // In minutes
+		delay     = apiRateTimeout
 		delayMult = 1.05 // Delay multiplier
 		retries   = 0
 	)

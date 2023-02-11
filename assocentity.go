@@ -168,6 +168,7 @@ func Mean(dists map[tokenize.Token][]float64) map[tokenize.Token]float64 {
 
 // Returns the mean of a 64-bit float slice
 func meanFloat64(xs []float64) float64 {
+	// Prevent /0
 	if len(xs) == 0 {
 		return 0
 	}
@@ -179,23 +180,30 @@ func meanFloat64(xs []float64) float64 {
 	return sum / float64(len(xs))
 }
 
-// Normalize aggregates tokens through lower casing them
-func Normalize(dists map[tokenize.Token][]float64) {
-	for tok, d := range dists {
-		t := tokenize.Token{
-			PoS:  tok.PoS,
-			Text: strings.ToLower(tok.Text),
-		}
+// Aggregator aggregates tokens
+type Aggregator func(tokenize.Token) tokenize.Token
 
-		// This can increase the data quality (distances)
-		switch tok.Text {
-		case "&":
-			t.Text = "and"
-		case "—":
-			t.Text = "-"
-		case "„", "”":
-			t.Text = "\""
-		}
+// HumandReadableAggregator aggregates tokens through lower casing them and
+// replacing them with their synonyms
+var HumandReadableAggregator Aggregator = func(tok tokenize.Token) tokenize.Token {
+	t := tokenize.Token{
+		PoS:  tok.PoS,
+		Text: strings.ToLower(tok.Text),
+	}
+
+	// This can increase the result data quality and could include more synonyms
+	switch tok.Text {
+	case "&":
+		t.Text = "and"
+	}
+
+	return t
+}
+
+// Aggregate aggregates tokens with provided normalizer
+func Aggregate(dists map[tokenize.Token][]float64, aggr Aggregator) {
+	for tok, d := range dists {
+		t := aggr(tok)
 
 		// Check if text is the same as non-normalized
 		if t == tok {
