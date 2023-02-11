@@ -7,14 +7,14 @@ distance from interesting tokens to a certain entity and its synonyms.
 ## Features
 
 - Provide your own tokenizer
-- Define aliases for entities
 - Provides a default NLP tokenizer (by Google)
+- Define aliases for entities
 - Provides a multi-OS, language-agnostic CLI version
 
 ## Installation
 
 ```bash
-$ go get github.com/ndabAP/assocentity/v12
+$ go get github.com/ndabAP/assocentity/v13
 ```
 
 ## Prerequisites
@@ -37,14 +37,15 @@ example. "George Bush" is the entity and synonyms are "George Walker Bush" and
 
 Defining a text source and to set the entity would be first step. Next, we need
 to instantiate our tokenizer. In this case, we use the provided Google NLP
-tokenizer. Finally, we can calculate our mean distances. Since we have multiple
-articles we can use `assocentity.MeanN`, which accepts multiple texts. Notice
+tokenizer. Finally, we can calculate our mean distances. We can use
+`assocentity.Distances`, which accepts multiple texts. Notice
 how we pass `tokenize.ADJ` to only include adjectives as part of speech.
+Finally, we can take the mean by passing the result to `assocentity.Mean`.
 
 ```go
-// Define text source and entity
+// Define texts source and entity
 texts := []string{
-	"Former Presidents Barack Obama, Bill Clinton and ...",
+	"Former Presidents Barack Obama, Bill Clinton and ...", // Truncated
 	"At the pentagon on the afternoon of 9/11, ...",
 	"Tony Blair moved swiftly to place his relationship with ...",
 }
@@ -62,7 +63,7 @@ nlpTok := nlp.NewNLPTokenizer(credentialsFile, nlp.AutoLang)
 ctx := context.TODO()
 dists, err := assocentity.Distances(ctx, nlpTok, tokenize.ADJ, source)
 if err != nil {
-	panic(err)
+	// Handle error
 }
 // Get the mean from the distances
 mean := assocentity.Mean(dists)
@@ -144,7 +145,7 @@ The application expects the text from "stdin" and accepts the following flags:
 Example:
 
 ```bash
-echo "Relax, Max. You're a nice guy." | ./bin/assocentity_linux_amd64_v12.0.1-0-g948274a-dirty -gog-svc-loc=/home/max/.config/assocentity/google-service.json -entities="Max Payne,Payne,Max"
+echo "Relax, Max. You're a nice guy." | ./bin/assocentity_linux_amd64_v13.0.0-0-g948274a-dirty -gog-svc-loc=/home/max/.config/assocentity/google-service.json -entities="Max Payne,Payne,Max"
 ```
 
 The output is written to "stdout" in appropoiate formats.
