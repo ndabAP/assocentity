@@ -122,7 +122,7 @@ func (t concreteTokenizer) Tokenize(ctx context.Context, text string) ([]tokeniz
 	return tokens, nil
 }
 
-func Test_dist(t *testing.T) {
+func Test_distances(t *testing.T) {
 	type args struct {
 		ctx       context.Context
 		tokenizer tokenize.Tokenizer
