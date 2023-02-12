@@ -32,7 +32,7 @@ func TestNav(t *testing.T) {
 	}
 
 	it.Reset()
-	// We need an independet counter
+	// We need an independent counter
 	i := 0
 	for it.Next() {
 		if testElems[i] != it.CurrElem() {

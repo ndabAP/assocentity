@@ -1,5 +1,7 @@
 # assocentity
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/ndabAP/assocentity/v13)](https://goreportcard.com/report/github.com/ndabAP/assocentity/v13)
+
 Package assocentity is a social science tool to analyze the relative distance
 from tokens to entities. The motiviation is to make conclusions based on the
 distance from interesting tokens to a certain entity and its synonyms.

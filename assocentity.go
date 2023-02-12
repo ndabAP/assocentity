@@ -219,7 +219,7 @@ func Normalize(dists map[tokenize.Token][]float64, norm Normalizer) {
 	}
 }
 
-// Threshold exludes results that are below the given threshold. The threshold
+// Threshold excludes results that are below the given threshold. The threshold
 // is described through the amount of distances per token relative to the total
 // amount of tokens
 func Threshold(dists map[tokenize.Token][]float64, threshold float64) {
