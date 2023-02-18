@@ -107,11 +107,15 @@ func main() {
 		csvwr := csv.NewWriter(os.Stdout)
 		defer csvwr.Flush()
 		for tok, dist := range mean {
+			poS, ok := tokenize.PoSMapStr[tok.PoS]
+			if !ok {
+				printHelpAndFail(errors.New("unassigned part of speech"))
+			}
 			record := []string{
 				// Text
 				tok.Text,
 				// Part of speech
-				tokenize.PoSMapStr[tok.PoS],
+				poS,
 				// Distance
 				fmt.Sprintf("%f", dist),
 			}

@@ -173,3 +173,168 @@ func Test_distances(t *testing.T) {
 		})
 	}
 }
+
+func TestNormalize(t *testing.T) {
+	t.Run("HumandReadableNormalizer", func(t *testing.T) {
+		got := map[tokenize.Token][]float64{
+			{
+				PoS:  tokenize.UNKN,
+				Text: "A",
+			}: {},
+			{
+				PoS:  tokenize.UNKN,
+				Text: "a",
+			}: {},
+			{
+				PoS:  tokenize.UNKN,
+				Text: "b",
+			}: {},
+			{
+				PoS:  tokenize.UNKN,
+				Text: "&",
+			}: {},
+		}
+		want := map[tokenize.Token][]float64{
+			{
+				PoS:  tokenize.UNKN,
+				Text: "a",
+			}: {},
+			{
+				PoS:  tokenize.UNKN,
+				Text: "b",
+			}: {},
+			{
+				PoS:  tokenize.UNKN,
+				Text: "and",
+			}: {},
+		}
+		Normalize(got, HumandReadableNormalizer)
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("Normalize() = %v, want %v", got, want)
+		}
+	})
+}
+
+func TestThreshold(t *testing.T) {
+	type args struct {
+		dists     map[tokenize.Token][]float64
+		threshold float64
+	}
+	tests := []struct {
+		args args
+		want map[tokenize.Token][]float64
+	}{
+		{
+			args: args{
+				dists: map[tokenize.Token][]float64{
+					{
+						PoS:  tokenize.UNKN,
+						Text: "A",
+					}: {1},
+					{
+						PoS:  tokenize.UNKN,
+						Text: "B",
+					}: {1, 1},
+					{
+						PoS:  tokenize.UNKN,
+						Text: "C",
+					}: {1, 1, 1},
+					{
+						PoS:  tokenize.UNKN,
+						Text: "D",
+					}: {1, 1, 1},
+				},
+				threshold: 75,
+			},
+			want: map[tokenize.Token][]float64{
+				{
+					PoS:  tokenize.UNKN,
+					Text: "C",
+				}: {1, 1, 1},
+				{
+					PoS:  tokenize.UNKN,
+					Text: "D",
+				}: {1, 1, 1},
+			},
+		},
+		{
+			args: args{
+				dists: map[tokenize.Token][]float64{
+					{
+						PoS:  tokenize.UNKN,
+						Text: "A",
+					}: {1},
+					{
+						PoS:  tokenize.UNKN,
+						Text: "B",
+					}: {1, 1},
+					{
+						PoS:  tokenize.UNKN,
+						Text: "C",
+					}: {1, 1, 1},
+					{
+						PoS:  tokenize.UNKN,
+						Text: "D",
+					}: {1, 1, 1, 1},
+				},
+				threshold: 76,
+			},
+			want: map[tokenize.Token][]float64{
+				{
+					PoS:  tokenize.UNKN,
+					Text: "D",
+				}: {1, 1, 1, 1},
+			},
+		},
+		{
+			args: args{
+				dists: map[tokenize.Token][]float64{
+					{
+						PoS:  tokenize.UNKN,
+						Text: "A",
+					}: {1},
+					{
+						PoS:  tokenize.UNKN,
+						Text: "B",
+					}: {1, 1},
+					{
+						PoS:  tokenize.UNKN,
+						Text: "C",
+					}: {1, 1, 1},
+					{
+						PoS:  tokenize.UNKN,
+						Text: "D",
+					}: {1, 1, 1, 1},
+				},
+				threshold: 1,
+			},
+			want: map[tokenize.Token][]float64{
+				{
+					PoS:  tokenize.UNKN,
+					Text: "A",
+				}: {1},
+				{
+					PoS:  tokenize.UNKN,
+					Text: "B",
+				}: {1, 1},
+				{
+					PoS:  tokenize.UNKN,
+					Text: "C",
+				}: {1, 1, 1},
+				{
+					PoS:  tokenize.UNKN,
+					Text: "D",
+				}: {1, 1, 1, 1},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run("", func(t *testing.T) {
+			Threshold(tt.args.dists, tt.args.threshold)
+			if !reflect.DeepEqual(tt.args.dists, tt.want) {
+				t.Errorf("Threshold() = %v, want %v", tt.args.dists, tt.want)
+			}
+		})
+	}
+}

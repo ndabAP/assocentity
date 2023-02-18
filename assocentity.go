@@ -17,6 +17,7 @@ type source struct {
 	Texts    []string
 }
 
+// NewSource returns a new source consisting of entities and texts
 func NewSource(entities, texts []string) source {
 	return source{
 		Entities: entities,
@@ -82,7 +83,7 @@ func distances(
 	posDetermer := pos.NewPoSDetermer(poS)
 	determTokens := posDetermer.DetermPoS(textTokens, entityTokens)
 
-	// Check if given PoS was found in text tokens
+	// Check if any given PoS was found in text tokens
 	if len(determTokens) == 0 {
 		return dists, nil
 	}
@@ -91,7 +92,7 @@ func distances(
 
 	determTokensIter := iterator.New(determTokens)
 
-	// Search for entities in positive and negative direction
+	// Use iterators to search for entities in positive and negative direction
 	posDirIter := iterator.New(determTokens)
 	negDirIter := iterator.New(determTokens)
 
@@ -101,7 +102,11 @@ func distances(
 	for determTokensIter.Next() {
 		// If the current text token is an entity, we skip about the entity
 		currDetermTokensPos := determTokensIter.CurrPos()
-		isEntity, entity := comp.TextWithEntities(determTokensIter, entityTokensIter, comp.DirPos)
+		isEntity, entity := comp.TextWithEntities(
+			determTokensIter,
+			entityTokensIter,
+			comp.DirPos,
+		)
 		if isEntity {
 			determTokensIter.Forward(len(entity) - 1)
 			continue
