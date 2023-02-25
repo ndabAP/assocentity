@@ -60,22 +60,3 @@ func Threshold(dists map[tokenize.Token][]float64, threshold float64) {
 		}
 	}
 }
-
-var EnglishDictonary = map[tokenize.PoS]func(tokenize.Token) bool{}
-
-func Dictonary(dists map[tokenize.Token][]float64, dict map[tokenize.PoS]func(tokenize.Token) bool) {
-	for tok := range dists {
-		f, ok := dict[tok.PoS]
-		if !ok {
-			continue
-		}
-
-		if !f(tok) {
-			delete(dists, tok)
-		}
-	}
-}
-
-func LoadDict() error {
-	return nil
-}
