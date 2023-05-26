@@ -4,9 +4,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ndabAP/assocentity/v13/internal/comp"
-	"github.com/ndabAP/assocentity/v13/internal/iterator"
-	"github.com/ndabAP/assocentity/v13/tokenize"
+	"github.com/ndabAP/assocentity/v14/internal/comp"
+	"github.com/ndabAP/assocentity/v14/internal/iterator"
+	"github.com/ndabAP/assocentity/v14/tokenize"
 )
 
 func TestTextWithEntity(t *testing.T) {

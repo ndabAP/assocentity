@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ndabAP/assocentity/v13/tokenize"
+	"github.com/ndabAP/assocentity/v14/tokenize"
 )
 
 // whiteSpaceTokenizer tokenizes a text by empty space and assigns unknown
@@ -175,7 +175,7 @@ func Test_distances(t *testing.T) {
 }
 
 func TestNormalize(t *testing.T) {
-	t.Run("HumandReadableNormalizer", func(t *testing.T) {
+	t.Run("HumanReadableNormalizer", func(t *testing.T) {
 		got := map[tokenize.Token][]float64{
 			{
 				PoS:  tokenize.UNKN,
@@ -208,7 +208,7 @@ func TestNormalize(t *testing.T) {
 				Text: "and",
 			}: {},
 		}
-		Normalize(got, HumandReadableNormalizer)
+		Normalize(got, HumanReadableNormalizer)
 
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("Normalize() = %v, want %v", got, want)

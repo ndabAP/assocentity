@@ -11,9 +11,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ndabAP/assocentity/v13"
-	"github.com/ndabAP/assocentity/v13/nlp"
-	"github.com/ndabAP/assocentity/v13/tokenize"
+	"github.com/ndabAP/assocentity/v14"
+	"github.com/ndabAP/assocentity/v14/nlp"
+	"github.com/ndabAP/assocentity/v14/tokenize"
 )
 
 var logger = log.Default()
@@ -28,22 +28,22 @@ var (
 	entitiesF = flag.String(
 		"entities",
 		"",
-		"Define entities to be searched within input, example: -entities=\"Max Payne,Payne\"",
+		"List of comma separated entities, example: -entities=\"Max Payne,Payne\"",
 	)
 	gogSvcLocF = flag.String(
-		"gog-svc-loc",
+		"google-svc-acc-key",
 		"",
-		"Google Clouds NLP JSON service account file, example: -gog-svc-loc=\"~/gog-svc-loc.json\"",
+		"Google Clouds NLP JSON service account file, example: -google-svc-acc-key=\"~/google-svc-acc-key.json\"",
 	)
 	opF = flag.String(
 		"op",
 		"mean",
-		"Operation to execute",
+		"Operation to execute, default is \"mean\"",
 	)
 	posF = flag.String(
 		"pos",
 		"any",
-		"Defines part of speeches to be included, example: -pos=noun,verb,pron",
+		"List of comma separated part of speeches, example: -pos=noun,verb,pron",
 	)
 )
 

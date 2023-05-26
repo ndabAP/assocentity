@@ -3,15 +3,17 @@ package assocentity
 import (
 	"strings"
 
-	"github.com/ndabAP/assocentity/v13/tokenize"
+	"github.com/ndabAP/assocentity/v14/tokenize"
 )
 
-// Normalizer normalizes tokens like lower casing them
+// Normalizer normalizes tokens like lower casing them to increase the overall
+// token quality
 type Normalizer func(tokenize.Token) tokenize.Token
 
-// HumandReadableNormalizer normalizes tokens through lower casing them and
-// replacing them with their synonyms
-var HumandReadableNormalizer Normalizer = func(tok tokenize.Token) tokenize.Token {
+// HumanReadableNormalizer normalizes tokens through lower casing them and
+// replacing them with their synonyms. Note: It assumes English as input
+// language
+var HumanReadableNormalizer Normalizer = func(tok tokenize.Token) tokenize.Token {
 	t := tokenize.Token{
 		PoS:  tok.PoS,
 		Text: strings.ToLower(tok.Text),
