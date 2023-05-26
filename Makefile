@@ -11,6 +11,9 @@ all: test clean build
 test:
 	go test ./... -short
 
+test_full:
+	go test ./...
+
 build: windows linux darwin
 	@echo version: $(VERSION)
 

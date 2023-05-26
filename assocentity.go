@@ -4,10 +4,10 @@ import (
 	"context"
 	"math"
 
-	"github.com/ndabAP/assocentity/v13/internal/comp"
-	"github.com/ndabAP/assocentity/v13/internal/iterator"
-	"github.com/ndabAP/assocentity/v13/internal/pos"
-	"github.com/ndabAP/assocentity/v13/tokenize"
+	"github.com/ndabAP/assocentity/v14/internal/comp"
+	"github.com/ndabAP/assocentity/v14/internal/iterator"
+	"github.com/ndabAP/assocentity/v14/internal/pos"
+	"github.com/ndabAP/assocentity/v14/tokenize"
 )
 
 // source wraps entities and texts
@@ -116,8 +116,6 @@ func distances(
 		// Finds/counts entities in positive direction
 		posDirIter.SetPos(currDetermTokensPos)
 		for posDirIter.Next() {
-			// [I, was, (with), Max, Payne, here] -> true, Max Payne
-			// [I, was, with, Max, Payne, (here)] -> false, ""
 			isEntity, entity := comp.TextWithEntities(
 				posDirIter,
 				entityTokensIter,
@@ -133,8 +131,6 @@ func distances(
 		// Finds/counts entities in negative direction
 		negDirIter.SetPos(currDetermTokensPos)
 		for negDirIter.Prev() {
-			// [I, was, (with), Max, Payne, here] -> false, ""
-			// [I, was, with, Max, Payne, (here)] -> true, Max Payne
 			isEntity, entity := comp.TextWithEntities(
 				negDirIter,
 				entityTokensIter,

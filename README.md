@@ -1,10 +1,12 @@
 # assocentity
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/ndabAP/assocentity/v13)](https://goreportcard.com/report/github.com/ndabAP/assocentity/v13)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ndabAP/assocentity/v14)](https://goreportcard.com/report/github.com/ndabAP/assocentity/v14)
 
 Package assocentity is a social science tool to analyze the relative distance
 from tokens to entities. The motiviation is to make conclusions based on the
-distance from interesting tokens to a certain entity and its synonyms.
+distance from interesting tokens to a certain entity and its synonyms. Visit
+[this](https://ndabap.github.io/entityscrape/index.html) website to see an
+usage example.
 
 ## Features
 
@@ -16,7 +18,7 @@ distance from interesting tokens to a certain entity and its synonyms.
 ## Installation
 
 ```bash
-$ go get github.com/ndabAP/assocentity/v13
+$ go get github.com/ndabAP/assocentity/v14
 ```
 
 ## Prerequisites
@@ -71,10 +73,14 @@ if err != nil {
 mean := assocentity.Mean(dists)
 ```
 
+The `NLPTokenizer` has a built-in retryer with a strategy that went well with
+the Google Language API limitations. It can't be disabled or configured.
+
 ### Tokenization
 
-If you provide your own tokenizer you must implement the interface with the
-method `Tokenize` and the following signature:
+A `Tokenizer` is something that produces tokens with a given text. While a
+`Token` is the smallest possible unit of a text. The interface with the
+method `Tokenize` has the following signature:
 
 ```go
 type Tokenizer interface {
@@ -82,7 +88,7 @@ type Tokenizer interface {
 }
 ```
 
-`Token` is of type:
+A `Token` has the following properties:
 
 ```go
 type Token struct {
@@ -100,7 +106,7 @@ For example, given the text:
 text := "Punchinello was burning to get me"
 ```
 
-The result from `Tokenize` would be:
+The result from `Tokenize` would be a slice of tokens:
 
 ```go
 []Token{
@@ -147,7 +153,7 @@ The application expects the text from "stdin" and accepts the following flags:
 Example:
 
 ```bash
-echo "Relax, Max. You're a nice guy." | ./bin/assocentity_linux_amd64_v13.0.0-0-g948274a-dirty -gog-svc-loc=/home/max/.config/assocentity/google-service.json -entities="Max Payne,Payne,Max"
+echo "Relax, Max. You're a nice guy." | ./bin/assocentity_linux_amd64_v14.0.0-0-g948274a-dirty -gog-svc-loc=/home/max/.config/assocentity/google-service.json -entities="Max Payne,Payne,Max"
 ```
 
 The output is written to "stdout" in appropoiate formats.

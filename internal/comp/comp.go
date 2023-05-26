@@ -1,8 +1,8 @@
 package comp
 
 import (
-	"github.com/ndabAP/assocentity/v13/internal/iterator"
-	"github.com/ndabAP/assocentity/v13/tokenize"
+	"github.com/ndabAP/assocentity/v14/internal/iterator"
+	"github.com/ndabAP/assocentity/v14/tokenize"
 )
 
 type Direction int

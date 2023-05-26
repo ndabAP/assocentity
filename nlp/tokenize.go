@@ -7,7 +7,7 @@ import (
 
 	language "cloud.google.com/go/language/apiv1"
 	"github.com/googleapis/gax-go/v2/apierror"
-	"github.com/ndabAP/assocentity/v13/tokenize"
+	"github.com/ndabAP/assocentity/v14/tokenize"
 	"google.golang.org/api/option"
 	"google.golang.org/genproto/googleapis/api/error_reason"
 	languagepb "google.golang.org/genproto/googleapis/cloud/language/v1"
