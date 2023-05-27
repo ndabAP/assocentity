@@ -143,12 +143,12 @@ There is also a language-agnostic terminal version available for either Windows,
 Mac (Darwin) or Linux (only with 64-bit support) if you don't have Go available.
 The application expects the text from "stdin" and accepts the following flags:
 
-| Flag          | Description                                                                                       | Type     | Default |
-| ------------- | ------------------------------------------------------------------------------------------------- | -------- | ------- |
-| `entities`    | Define entities to be searched within input, example: `-entities="Max Payne,Payne"`               | `string` |         |
-| `gog-svc-loc` | Google Clouds NLP JSON service account file, example: `-gog-svc-loc="/home/max/gog-svc-loc.json"` | `string` |         |
-| `op`          | Operation to excute: `-op="mean"`                                                                 | `string` | `mean`  |
-| `pos`         | Defines part of speeches to keep, example: `-pos=noun,verb,pron`                                  | `string` | `any`   |
+| Flag                 | Description                                                                                           | Type     | Default |
+| -------------------- | ----------------------------------------------------------------------------------------------------- | -------- | ------- |
+| `entities`           | List of comma separated entities, example: `-entities="Max Payne,Payne"`                              | `string` |         |
+| `google-svc-acc-key` | Google Clouds NLP JSON service account file, example: `-google-svc-acc-key=~/google-svc-acc-key.json` | `string` |         |
+| `op`                 | Operation to execute, default is `mean`                                                               | `string` | `mean`  |
+| `pos`                | List of comma separated part of speeches, example: `-pos=noun,verb,pron`                              | `string` | `any`   |
 
 Example:
 
